@@ -20,7 +20,11 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        return $user->team->id === $invoice->user->team_id;
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
     }
 
     /**
@@ -36,7 +40,11 @@ class InvoicePolicy
      */
     public function update(User $user, Invoice $invoice): bool
     {
-        return $user->team->id === $invoice->user->team_id;
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
     }
 
     /**
@@ -44,7 +52,11 @@ class InvoicePolicy
      */
     public function delete(User $user, Invoice $invoice): bool
     {
-        return $user->team->id === $invoice->user->team_id;
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
     }
 
     /**
@@ -52,7 +64,11 @@ class InvoicePolicy
      */
     public function restore(User $user, Invoice $invoice): bool
     {
-        return $user->team->id === $invoice->user->team_id;
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
     }
 
     /**
@@ -60,6 +76,10 @@ class InvoicePolicy
      */
     public function forceDelete(User $user, Invoice $invoice): bool
     {
-        return $user->team->id === $invoice->user->team_id;
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
     }
 }
