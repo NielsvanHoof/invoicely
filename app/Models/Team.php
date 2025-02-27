@@ -3,15 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
 {
-    use HasUlids;
+    use HasFactory, HasUlids;
 
     protected $fillable = [
         'name',
+        'owner_id',
     ];
 
     /**
@@ -31,10 +34,10 @@ class Team extends Model
     }
 
     /**
-     * Get the imports for the team.
+     * Get the owner of the team.
      */
-    public function imports(): HasMany
+    public function owner(): BelongsTo
     {
-        return $this->hasMany(Import::class);
+        return $this->belongsTo(User::class, 'owner_id');
     }
 }

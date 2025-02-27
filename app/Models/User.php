@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -58,10 +59,30 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the team for the user.
+     * Get the team the user belongs to.
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get the team owned by the user.
+     */
+    public function ownedTeam(): HasOne
+    {
+        return $this->hasOne(Team::class, 'owner_id');
+    }
+
+    /**
+     * Check if user is the owner of their team.
+     */
+    public function isTeamOwner(): bool
+    {
+        if (! $this->team) {
+            return false;
+        }
+
+        return $this->id === $this->team->owner_id;
     }
 }

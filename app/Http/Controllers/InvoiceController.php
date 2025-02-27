@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Invoices\StoreInvoiceRequest;
+use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
+use App\Services\Invoices\InvoiceFileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Laravel\Scout\Builder;
 
 class InvoiceController extends Controller
 {
-    public function __construct()
+    public function __construct(protected InvoiceFileService $fileService)
     {
         $this->authorizeResource(Invoice::class, 'invoice');
     }
@@ -22,7 +24,6 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search', '');
-
         $user = Auth::user();
 
         $invoices = Invoice::search($search)
@@ -52,49 +53,22 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreInvoiceRequest $request)
     {
-        $validated = $request->validate([
-            'invoice_number' => 'required|string|unique:invoices,invoice_number',
-            'client_name' => 'required|string|max:255',
-            'client_email' => 'nullable|email|max:255',
-            'client_address' => 'nullable|string',
-            'amount' => 'required|numeric|min:0',
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:issue_date',
-            'status' => 'required|in:draft,sent,paid,overdue',
-            'notes' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
-        ]);
-
+        $validated = $request->except('file');
+        $user = Auth::user();
         $filePath = null;
 
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = time().'_'.$file->getClientOriginalName();
-
-            // Store the file in the 'invoices' directory using the s3 disk (Minio)
-            $filePath = Storage::disk('s3')->putFileAs(
-                'invoices/'.auth()->id(),
-                $file,
-                $fileName
+            $filePath = $this->fileService->storeFile(
+                $request->file('file'),
+                $user->id
             );
         }
 
-        $user = Auth::user();
-
         $invoice = Invoice::create([
+            ...$validated,
             'user_id' => $user->id,
-            'invoice_number' => $validated['invoice_number'],
-            'client_name' => $validated['client_name'],
-            'client_email' => $validated['client_email'],
-            'client_address' => $validated['client_address'],
-            'amount' => $validated['amount'],
-            'issue_date' => $validated['issue_date'],
-            'due_date' => $validated['due_date'],
-            'status' => $validated['status'],
-            'notes' => $validated['notes'],
-            'file_path' => $filePath,
             'team_id' => $user->team_id ?? null,
         ]);
 
@@ -125,63 +99,19 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Invoice $invoice)
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        // Check if the invoice belongs to the authenticated user
-        if ($invoice->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $validated = $request->except('file');
 
-        $validated = $request->validate([
-            'invoice_number' => 'required|string|unique:invoices,invoice_number,'.$invoice->id,
-            'client_name' => 'required|string|max:255',
-            'client_email' => 'nullable|email|max:255',
-            'client_address' => 'nullable|string',
-            'amount' => 'required|numeric|min:0',
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:issue_date',
-            'status' => 'required|in:draft,sent,paid,overdue',
-            'notes' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
-            'remove_file' => 'nullable|boolean',
-        ]);
-
-        $filePath = $invoice->file_path;
-
-        // Handle file removal if requested
-        if ($request->input('remove_file') && $filePath) {
-            Storage::disk('s3')->delete($filePath);
-            $filePath = null;
-        }
-
-        // Handle new file upload
-        if ($request->hasFile('file')) {
-            // Delete old file if exists
-            if ($filePath) {
-                Storage::disk('s3')->delete($filePath);
-            }
-
-            $file = $request->file('file');
-            $fileName = time().'_'.$file->getClientOriginalName();
-
-            // Store the file in the 'invoices' directory using the s3 disk (Minio)
-            $filePath = Storage::disk('s3')->putFileAs(
-                'invoices/'.auth()->id(),
-                $file,
-                $fileName
-            );
-        }
+        $filePath = $this->fileService->handleFileUpdate(
+            $invoice->file_path,
+            $request->file('file'),
+            $request->input('remove_file', false),
+            Auth::id()
+        );
 
         $invoice->update([
-            'invoice_number' => $validated['invoice_number'],
-            'client_name' => $validated['client_name'],
-            'client_email' => $validated['client_email'],
-            'client_address' => $validated['client_address'],
-            'amount' => $validated['amount'],
-            'issue_date' => $validated['issue_date'],
-            'due_date' => $validated['due_date'],
-            'status' => $validated['status'],
-            'notes' => $validated['notes'],
+            ...$validated,
             'file_path' => $filePath,
         ]);
 
@@ -194,14 +124,8 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        // Check if the invoice belongs to the authenticated user
-        if ($invoice->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        // Delete the associated file if it exists
         if ($invoice->file_path) {
-            Storage::disk('s3')->delete($invoice->file_path);
+            $this->fileService->deleteFile($invoice->file_path);
         }
 
         $invoice->delete();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Teams;
 
 use App\Models\Team;
 use App\Models\User;
@@ -21,7 +21,7 @@ class TeamInviteMail extends Mailable
         public User $sender,
         public User $recipient,
         public Team $team,
-        public string $password,
+        public ?string $password = null,
     ) {
         //
     }

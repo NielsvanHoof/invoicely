@@ -2,19 +2,39 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Data\Team\TeamData;
+use App\Data\Team\TeamInvitationData;
+use App\Data\Team\TeamMemberRemovalData;
 use App\Http\Controllers\Controller;
-use App\Mail\TeamInviteMail;
+use App\Http\Requests\Team\CreateTeamRequest;
+use App\Http\Requests\Team\InviteTeamMemberRequest;
+use App\Http\Requests\Team\RemoveTeamMemberRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Models\Team;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\Team\TeamInvitationService;
+use App\Services\Team\TeamService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class TeamController extends Controller
 {
+    public function resourceAbilityMap(): array
+    {
+        return [
+            ...parent::resourceAbilityMap(),
+            'leave' => 'leave',
+            'removeUser' => 'removeUser',
+        ];
+    }
+
+    public function __construct(
+        protected TeamService $teamService,
+        protected TeamInvitationService $invitationService
+    ) {
+        $this->authorizeResource(Team::class, 'team');
+    }
+
     /**
      * Display the team management page.
      */
@@ -28,8 +48,8 @@ class TeamController extends Controller
         $isTeamOwner = false;
 
         if ($team) {
-            $teamMembers = User::where('team_id', $team->id)->get();
-            $isTeamOwner = $user->id === $teamMembers->first()->id;
+            $teamMembers = $this->teamService->getTeamMembers($team);
+            $isTeamOwner = $user->isTeamOwner();
         }
 
         return Inertia::render('settings/teams', [
@@ -37,60 +57,38 @@ class TeamController extends Controller
             'teamMembers' => $teamMembers,
             'isTeamOwner' => $isTeamOwner,
             'hasTeam' => ! is_null($team),
+            'can' => [
+                'leave' => $user->can('leave', $team),
+                'removeUser' => $user->can('removeUser', $team),
+                'delete' => $user->can('delete', $team),
+                'invite' => $user->can('invite', $team),
+                'update' => $user->can('update', $team),
+            ],
         ]);
     }
 
     /**
      * Create a new team.
      */
-    public function store(Request $request)
+    public function store(CreateTeamRequest $request)
     {
-        $user = Auth::user();
+        try {
+            $teamData = TeamData::from($request);
+            $this->teamService->createTeam(Auth::user(), $teamData);
 
-        // Check if user already has a team
-        if ($user->team) {
-            return back()->with('error', 'You already have a team.');
+            return back()->with('success', 'Team created successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Validate request
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        // Create new team
-        $team = Team::create([
-            'name' => $validated['name'],
-        ]);
-
-        // Associate user with team
-        $user->team()->associate($team);
-        $user->save();
-
-        return back()->with('success', 'Team created successfully.');
     }
 
     /**
      * Update the team name.
      */
-    public function update(Request $request)
+    public function update(UpdateTeamRequest $request, Team $team)
     {
-        $user = Auth::user();
-        $team = $user->team;
-
-        // Check if user has a team
-        if (! $team) {
-            return back()->with('error', 'You do not have a team.');
-        }
-
-        // Validate request
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        // Update team name
-        $team->update([
-            'name' => $validated['name'],
-        ]);
+        $teamData = TeamData::from($request);
+        $this->teamService->updateTeam($team, $teamData);
 
         return back()->with('success', 'Team updated successfully.');
     }
@@ -98,48 +96,17 @@ class TeamController extends Controller
     /**
      * Invite a user to the team.
      */
-    public function invite(Request $request)
+    public function invite(InviteTeamMemberRequest $request)
     {
         $user = Auth::user();
         $team = $user->team;
 
-        // Check if user has a team
-        if (! $team) {
-            return back()->with('error', 'You do not have a team.');
-        }
+        // Use the policy to check if user can invite
+        $this->authorize('invite', $team);
 
-        // Validate request
-        $validated = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
-            'name' => ['required', 'string', 'max:255'],
-        ]);
+        $invitationData = TeamInvitationData::from($request);
 
-        // Check if user already exists
-        $invitedUser = User::where('email', $validated['email'])->first();
-
-        if ($invitedUser) {
-            // If user exists, add them to the team
-            $invitedUser->team()->associate($team);
-            $invitedUser->save();
-
-            // Send email without password
-            Mail::to($validated['email'])->send(new TeamInviteMail($user, $invitedUser, $team, null));
-        } else {
-            // Create a new user with a random password
-            $password = Str::random(12);
-
-            $createdUser = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($password),
-            ]);
-
-            $createdUser->team()->associate($team);
-            $createdUser->save();
-
-            // Send email with password
-            Mail::to($validated['email'])->send(new TeamInviteMail($user, $createdUser, $team, $password));
-        }
+        $this->invitationService->inviteUser($user, $team, $invitationData);
 
         return back()->with('success', 'User invited successfully.');
     }
@@ -147,30 +114,25 @@ class TeamController extends Controller
     /**
      * Remove a user from the team.
      */
-    public function removeUser(Request $request)
+    public function removeUser(RemoveTeamMemberRequest $request)
     {
         $user = Auth::user();
         $team = $user->team;
 
-        // Check if user has a team
-        if (! $team) {
-            return back()->with('error', 'You do not have a team.');
+        // Only team owners can remove users
+        if (! $user->isTeamOwner()) {
+            return back()->with('error', 'Only team owners can remove users from the team.');
         }
 
-        // Validate request
-        $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-        ]);
+        $removalData = TeamMemberRemovalData::from($request);
+        $userToRemove = User::findOrFail($removalData->user_id);
 
-        // Prevent removing yourself
-        if ($validated['user_id'] === $user->id) {
-            return back()->with('error', 'You cannot remove yourself from the team.');
+        // Owner cannot remove themselves
+        if ($userToRemove->id === $team->owner_id) {
+            return back()->with('error', 'Team owners cannot be removed from their own team.');
         }
 
-        // Remove user from team
-        $userToRemove = User::find($validated['user_id']);
-        $userToRemove->team()->dissociate();
-        $userToRemove->save();
+        $this->teamService->removeUserFromTeam($userToRemove);
 
         return back()->with('success', 'User removed from team.');
     }
@@ -182,15 +144,31 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user has a team
-        if (! $user->team) {
-            return back()->with('error', 'You are not a member of any team.');
+        // Team owners cannot leave their own team
+        if ($user->isTeamOwner()) {
+            return back()->with('error', 'Team owners cannot leave their own team. Transfer ownership first or delete the team.');
         }
 
-        // Remove user from team
-        $user->team()->dissociate();
-        $user->save();
+        $this->teamService->removeUserFromTeam($user);
 
-        return redirect()->route('dashboard')->with('success', 'You have left the team.');
+        return redirect()->route('teams.index')->with('success', 'You have left the team.');
+    }
+
+    /**
+     * Delete the team.
+     */
+    public function destroy(Team $team)
+    {
+        $user = Auth::user();
+
+        // Only team owner can delete the team
+        if ($user->id !== $team->owner_id) {
+            return back()->with('error', 'Only team owners can delete teams.');
+        }
+
+        // Use the service to delete the team
+        $this->teamService->deleteTeam($team);
+
+        return redirect()->route('teams.index')->with('success', 'Team deleted successfully.');
     }
 }

@@ -75,3 +75,11 @@ export interface PaginatedData<T> {
     to: number;
     total: number;
 }
+
+export interface Team {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+    owner_id: number;
+}
