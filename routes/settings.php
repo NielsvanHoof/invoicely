@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/teams', [TeamController::class, 'store'])->name('teams.store');
     Route::put('/settings/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
     Route::post('/settings/teams/invite', [TeamController::class, 'invite'])->name('teams.invite');
-    Route::delete('/settings/teams/users/{user}', [TeamController::class, 'removeUser'])->name('teams.remove-user');
+    Route::delete('/settings/teams/users', [TeamController::class, 'removeUser'])->name('teams.remove-user');
     Route::post('/settings/teams/leave', [TeamController::class, 'leave'])->name('teams.leave');
     Route::delete('/settings/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
 

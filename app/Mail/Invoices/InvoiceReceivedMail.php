@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Invoices;
 
-use App\Models\User;
+use App\Helpers\Formatters;
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TeamRemovedMail extends Mailable implements ShouldQueue
+class InvoiceReceivedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -19,7 +19,7 @@ class TeamRemovedMail extends Mailable implements ShouldQueue
      * Create a new message instance.
      */
     public function __construct(
-        public User $user,
+        public Invoice $invoice,
     ) {
         //
     }
@@ -30,10 +30,9 @@ class TeamRemovedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'You have been removed from a team',
-            tags: ['team', 'removal'],
+            subject: 'Invoice Received',
             metadata: [
-                'user_id' => $this->user->id,
+                'invoice_id' => $this->invoice->id,
             ],
         );
     }
@@ -44,10 +43,10 @@ class TeamRemovedMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.team-removed-mail',
+            markdown: 'mail.invoice-received-mail',
             with: [
-                'user' => $this->user,
-                'teamUrl' => route('teams.index'),
+                'invoice' => $this->invoice,
+                'formatted_amount' => Formatters::formatAmount($this->invoice->amount),
             ],
         );
     }

@@ -4,15 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Invoices\StoreInvoiceRequest;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
+use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Laravel\Scout\Builder;
 
 class InvoiceController extends Controller
 {
+    public function resourceAbilityMap(): array
+    {
+        return [
+            ...parent::resourceAbilityMap(),
+            'downloadFile' => 'downloadFile',
+        ];
+    }
+
     public function __construct(protected InvoiceFileService $fileService)
     {
         $this->authorizeResource(Invoice::class, 'invoice');
@@ -70,7 +81,12 @@ class InvoiceController extends Controller
             ...$validated,
             'user_id' => $user->id,
             'team_id' => $user->team_id ?? null,
+            'file_path' => $filePath ?? null,
         ]);
+
+        if ($validated['email'] && App::isLocal()) {
+            Mail::to($validated['email'])->send(new InvoiceReceivedMail($invoice));
+        }
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice created successfully.');
@@ -132,5 +148,23 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
+    }
+
+    /**
+     * Generate a secure download URL for the invoice file.
+     */
+    public function downloadFile(Invoice $invoice)
+    {
+        if (! $invoice->file_path) {
+            return response()->json(['error' => 'No file attached to this invoice'], 404);
+        }
+
+        $temporaryUrl = $this->fileService->getTemporaryUrl($invoice->file_path);
+
+        if (! $temporaryUrl) {
+            return response()->json(['error' => 'Could not generate download link'], 500);
+        }
+
+        return response()->json(['url' => $temporaryUrl]);
     }
 }

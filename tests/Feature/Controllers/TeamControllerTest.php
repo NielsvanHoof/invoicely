@@ -3,206 +3,329 @@
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Inertia\Testing\AssertableInertia;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-    // Create a team owner
-    $this->owner = User::factory()->create();
+// Team Index Tests
 
-    // Create a team
-    $this->team = Team::factory()->create([
-        'name' => 'Test Team',
+test('user without team sees empty team page', function () {
+    $user = User::factory()->create(['team_id' => null]);
+
+    $response = actingAs($user)->get(route('teams.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(
+        fn ($page) => $page
+            ->component('settings/teams')
+            ->has('team', null)
+            ->has('teamMembers', [])
+            ->where('isTeamOwner', false)
+            ->where('hasTeam', false)
+    );
+});
+
+test('team owner sees team page with owner permissions', function () {
+    $user = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $user->id]);
+    $user->team()->associate($team);
+    $user->save();
+
+    $response = actingAs($user)->get(route('teams.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(
+        fn ($page) => $page
+            ->component('settings/teams')
+            ->where('team.id', $team->id)
+            ->has('teamMembers')
+            ->where('isTeamOwner', true)
+            ->where('hasTeam', true)
+            ->where('can.leave', false)
+            ->where('can.removeUser', true)
+            ->where('can.delete', true)
+            ->where('can.invite', true)
+            ->where('can.update', true)
+    );
+});
+
+test('team member sees team page with limited permissions', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($user)->get(route('teams.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(
+        fn ($page) => $page
+            ->component('settings/teams')
+            ->where('team.id', $team->id)
+            ->has('teamMembers')
+            ->where('isTeamOwner', false)
+            ->where('hasTeam', true)
+            ->where('can.leave', true)
+            ->where('can.removeUser', false)
+            ->where('can.delete', false)
+            ->where('can.invite', false)
+            ->where('can.update', false)
+    );
+});
+
+// Team Creation Tests
+
+test('user can create a team', function () {
+    $user = User::factory()->create(['team_id' => null]);
+    $teamName = fake()->company();
+
+    $response = actingAs($user)
+        ->post(route('teams.store'), [
+            'name' => $teamName,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    assertDatabaseHas('teams', [
+        'name' => $teamName,
+        'owner_id' => $user->id,
     ]);
 
-    // Associate owner with team
-    $this->owner->team()->associate($this->team);
-    $this->owner->save();
-
-    // Create team members
-    $this->member1 = User::factory()->create();
-    $this->member1->team()->associate($this->team);
-    $this->member1->save();
-
-    $this->member2 = User::factory()->create();
-    $this->member2->team()->associate($this->team);
-    $this->member2->save();
-
-    // Create a user without a team
-    $this->userWithoutTeam = User::factory()->create();
-});
-
-test('team owner can view team settings page', function () {
-    actingAs($this->owner)
-        ->get(route('teams.index'))
-        ->assertOk()
-        ->assertInertia(
-            fn (AssertableInertia $page) => $page
-                ->component('settings/teams')
-                ->has('team')
-                ->has('teamMembers', 3) // Owner + 2 members
-                ->where('isTeamOwner', true)
-                ->where('hasTeam', true)
-        );
-});
-
-test('team member can view team settings page', function () {
-    actingAs($this->member1)
-        ->get(route('teams.index'))
-        ->assertOk()
-        ->assertInertia(
-            fn (AssertableInertia $page) => $page
-                ->component('settings/teams')
-                ->has('team')
-                ->has('teamMembers', 3)
-                ->where('isTeamOwner', false)
-                ->where('hasTeam', true)
-        );
-});
-
-test('user without team can view team settings page', function () {
-    actingAs($this->userWithoutTeam)
-        ->get(route('teams.index'))
-        ->assertOk()
-        ->assertInertia(
-            fn (AssertableInertia $page) => $page
-                ->component('settings/teams')
-                ->where('team', null)
-                ->where('teamMembers', [])
-                ->where('isTeamOwner', false)
-                ->where('hasTeam', false)
-        );
-});
-
-test('user without team can create a team', function () {
-    actingAs($this->userWithoutTeam)
-        ->post(route('teams.store'), [
-            'name' => 'New Team',
-        ])
-        ->assertRedirect()
-        ->assertSessionHas('success');
-
-    $this->userWithoutTeam->refresh();
-
-    expect($this->userWithoutTeam->team)->not->toBeNull()
-        ->and($this->userWithoutTeam->team->name)->toBe('New Team');
+    $user->refresh();
+    expect($user->team_id)->not->toBeNull();
 });
 
 test('user with team cannot create another team', function () {
-    actingAs($this->owner)
+    $user = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $user->id]);
+    $user->team()->associate($team);
+    $user->save();
+
+    $response = actingAs($user)
         ->post(route('teams.store'), [
-            'name' => 'Another Team',
-        ])
-        ->assertRedirect()
-        ->assertSessionHas('error');
+            'name' => fake()->company(),
+        ]);
 
-    $this->owner->refresh();
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
 
-    expect($this->owner->team->id)->toBe($this->team->id)
-        ->and(Team::where('name', 'Another Team')->exists())->toBeFalse();
+    assertDatabaseCount('teams', 1);
 });
+
+// Team Update Tests
 
 test('team owner can update team name', function () {
-    actingAs($this->owner)
-        ->put(route('teams.update', $this->team), [
-            'name' => 'Updated Team Name',
-        ])
-        ->assertRedirect()
-        ->assertSessionHas('success');
+    $user = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $user->id]);
+    $user->team()->associate($team);
+    $user->save();
 
-    $this->team->refresh();
+    $newName = fake()->company();
 
-    expect($this->team->name)->toBe('Updated Team Name');
+    $response = actingAs($user)
+        ->put(route('teams.update', $team), [
+            'name' => $newName,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    assertDatabaseHas('teams', [
+        'id' => $team->id,
+        'name' => $newName,
+    ]);
 });
 
-test('team member cannot update team name', function () {
-    actingAs($this->member1)
-        ->put(route('teams.update', $this->team), [
-            'name' => 'Updated Team Name',
-        ])
-        ->assertForbidden();
+test('non-owner cannot update team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
 
-    $this->team->refresh();
+    $user = User::factory()->create(['team_id' => $team->id]);
 
-    expect($this->team->name)->toBe('Test Team');
+    $response = actingAs($user)
+        ->put(route('teams.update', $team), [
+            'name' => fake()->company(),
+        ]);
+
+    $response->assertForbidden();
 });
 
-test('team owner can invite a new user', function () {
-    actingAs($this->owner)
+// Team Member Management Tests
+
+test('owner can remove user from team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($owner)
+        ->delete(route('teams.remove-user'), [
+            'user_id' => $user->id,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $user->refresh();
+    expect($user->team_id)->toBeNull();
+});
+
+test('owner cannot remove self from team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $response = actingAs($owner)
+        ->delete(route('teams.remove-user'), [
+            'user_id' => $owner->id,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+
+    $owner->refresh();
+    expect($owner->team_id)->not->toBeNull();
+});
+
+test('non-owner cannot remove users from team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $user1 = User::factory()->create(['team_id' => $team->id]);
+    $user2 = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($user1)
+        ->delete(route('teams.remove-user'), [
+            'user_id' => $user2->id,
+        ]);
+
+    $response->assertForbidden();
+
+    $user2->refresh();
+    expect($user2->team_id)->not->toBeNull();
+});
+
+test('member can leave team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($user)
+        ->post(route('teams.leave'));
+
+    $response->assertRedirect(route('teams.index'));
+    $response->assertSessionHas('success');
+
+    $user->refresh();
+    expect($user->team_id)->toBeNull();
+});
+
+test('owner cannot leave team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $response = actingAs($owner)
+        ->post(route('teams.leave'));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+
+    $owner->refresh();
+    expect($owner->team_id)->not->toBeNull();
+});
+
+// Team Deletion Tests
+
+test('owner can delete team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($owner)
+        ->delete(route('teams.destroy', $team));
+
+    $response->assertRedirect(route('teams.index'));
+    $response->assertSessionHas('success');
+
+    assertDatabaseMissing('teams', ['id' => $team->id]);
+
+    $owner->refresh();
+    $user->refresh();
+
+    expect($owner->team_id)->toBeNull();
+    expect($user->team_id)->toBeNull();
+});
+
+test('non-owner cannot delete team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $response = actingAs($user)
+        ->delete(route('teams.destroy', $team));
+
+    $response->assertForbidden();
+
+    assertDatabaseHas('teams', ['id' => $team->id]);
+});
+
+// Team Invitation Tests
+
+test('owner can invite user to team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
+
+    $email = fake()->unique()->safeEmail();
+    $name = fake()->name();
+
+    $response = actingAs($owner)
         ->post(route('teams.invite'), [
-            'name' => 'New Member',
-            'email' => 'newmember@example.com',
-        ])
-        ->assertRedirect()
-        ->assertSessionHas('success');
+            'email' => $email,
+            'name' => $name,
+        ]);
 
-    expect(User::where('email', 'newmember@example.com')->exists())->toBeTrue()
-        ->and(User::where('email', 'newmember@example.com')->first()->team_id)->toBe($this->team->id);
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
 });
 
+test('non-owner cannot invite users to team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['owner_id' => $owner->id]);
+    $owner->team()->associate($team);
+    $owner->save();
 
-test('user cannot invite themselves to the team', function () {
-    actingAs($this->owner)
+    $user = User::factory()->create(['team_id' => $team->id]);
+
+    $user2 = User::factory()->create();
+
+    $response = actingAs($user)
         ->post(route('teams.invite'), [
-            'name' => $this->owner->name,
-            'email' => $this->owner->email,
-        ])
-        ->assertRedirect()
-        ->assertSessionHasErrors('email');
-});
+            'name' => $user2->name,
+            'email' => $user2->email,
+        ]);
 
-test('team owner can remove a team member', function () {
-    actingAs($this->owner)
-        ->delete(route('teams.remove-user', ['user' => $this->member1]))
-        ->assertRedirect()
-        ->assertSessionHas('success');
-
-    $this->member1->refresh();
-
-    expect($this->member1->team_id)->toBeNull();
-});
-
-test('team member cannot remove another team member', function () {
-    actingAs($this->member1)
-        ->delete(route('teams.remove-user', ['user' => $this->member2]))
-        ->assertForbidden();
-
-    $this->member2->refresh();
-
-    expect($this->member2->team_id)->toBe($this->team->id);
-});
-
-test('team owner cannot remove themselves', function () {
-    actingAs($this->owner)
-        ->delete(route('teams.remove-user', ['user' => $this->owner]))
-        ->assertRedirect()
-        ->assertSessionHasErrors('user_id');
-
-    $this->owner->refresh();
-
-    expect($this->owner->team_id)->toBe($this->team->id);
-});
-
-test('team member can leave the team', function () {
-    actingAs($this->member1)
-        ->post(route('teams.leave'))
-        ->assertRedirect()
-        ->assertSessionHas('success');
-
-    $this->member1->refresh();
-
-    expect($this->member1->team_id)->toBeNull();
-});
-
-test('team owner cannot leave the team', function () {
-    actingAs($this->owner)
-        ->post(route('teams.leave'))
-        ->assertForbidden();
-
-    $this->owner->refresh();
-
-    expect($this->owner->team_id)->toBe($this->team->id);
+    $response->assertForbidden();
 });

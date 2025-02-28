@@ -82,4 +82,16 @@ class InvoicePolicy
 
         return $user->id === $invoice->user_id;
     }
+
+    /**
+     * Determine whether the user can download the file.
+     */
+    public function downloadFile(User $user, Invoice $invoice): bool
+    {
+        if ($user->team_id) {
+            return $user->team->id === $invoice->user->team_id;
+        }
+
+        return $user->id === $invoice->user_id;
+    }
 }

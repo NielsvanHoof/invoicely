@@ -3,13 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
-use Storage;
 
 class Invoice extends Model
 {
@@ -45,18 +43,6 @@ class Invoice extends Model
         'due_date' => 'date',
         'amount' => 'decimal:2',
     ];
-
-    /**
-     * Get the file path attribute.
-     *
-     * @return Attribute<string|null,never>
-     */
-    public function filePath(): Attribute
-    {
-        return new Attribute(
-            get: fn ($value) => $value ? Storage::disk('s3')->url($value) : null,
-        );
-    }
 
     /**
      * Get the searchable array for the invoice.
