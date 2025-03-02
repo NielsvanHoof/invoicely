@@ -149,16 +149,6 @@ class TeamController extends Controller
 
             $userToRemove = User::findOrFail($removalData->user_id);
 
-            // Owner cannot remove themselves
-            if ($userToRemove->id === $team->owner_id) {
-                return back()->with('error', 'Team owners cannot be removed from their own team.');
-            }
-
-            // Check if user is actually in this team
-            if ($userToRemove->team_id !== $team->id) {
-                return back()->with('error', 'This user is not a member of your team.');
-            }
-
             $this->teamService->removeUserFromTeam($userToRemove);
 
             return back()->with('success', 'User removed from team.');
