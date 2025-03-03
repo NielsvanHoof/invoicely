@@ -77,9 +77,6 @@ class TeamService
         // Get all team members
         $teamMembers = $this->getTeamMembers($team);
 
-        // Store team name for emails
-        $teamName = $team->name;
-
         // First, remove the owner_id reference to avoid constraint issues
         $team->owner_id = null;
         $team->save();
