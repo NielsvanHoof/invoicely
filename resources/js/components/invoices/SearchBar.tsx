@@ -12,7 +12,7 @@ interface SearchBarProps {
     routeName?: string;
 }
 
-export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invoices.index' }: SearchBarProps) {
+export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invo   ices.index' }: SearchBarProps) {
     const [searchTerm, setSearchTerm] = useState(initialValue);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -72,25 +72,33 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
 
     return (
         <div className="relative w-full md:max-w-sm">
-            <Input
-                type="search"
-                inputMode="search"
-                placeholder={placeholder}
-                value={searchTerm}
-                onChange={handleSearch}
-                className="pr-10"
-                aria-label={placeholder}
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                {isSearching ? (
-                    <LoaderIcon className="text-muted-foreground h-4 w-4 animate-spin" />
-                ) : searchTerm ? (
-                    <Button onClick={clearSearch} className="text-muted-foreground hover:text-foreground" aria-label="Clear search">
-                        <XIcon className="h-4 w-4" />
-                    </Button>
-                ) : (
-                    <SearchIcon className="text-muted-foreground h-4 w-4" />
-                )}
+            <div className="relative">
+                <Input
+                    type="search"
+                    inputMode="search"
+                    placeholder={placeholder}
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="pr-10"
+                    aria-label={placeholder}
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    {isSearching ? (
+                        <LoaderIcon className="text-muted-foreground h-4 w-4 animate-spin" />
+                    ) : searchTerm ? (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={clearSearch}
+                            className="text-muted-foreground hover:text-foreground h-8 w-8"
+                            aria-label="Clear search"
+                        >
+                            <XIcon className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <SearchIcon className="text-muted-foreground h-4 w-4" />
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -61,6 +61,8 @@ class Invoice extends Model
 
     /**
      * Get the user that owns the invoice.
+     *
+     * @return BelongsTo<User>
      */
     public function user(): BelongsTo
     {
@@ -69,6 +71,8 @@ class Invoice extends Model
 
     /**
      * Get the team that owns the invoice.
+     *
+     * @return BelongsTo<Team>
      */
     public function team(): BelongsTo
     {

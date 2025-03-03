@@ -38,6 +38,14 @@ class InvoiceController extends Controller
         $search = $request->input('search', '');
         $user = Auth::user();
 
+        $filters = [
+            'status' => $request->input('status', ''),
+            'date_from' => $request->input('date_from', ''),
+            'date_to' => $request->input('date_to', ''),
+            'amount_from' => $request->input('amount_from', ''),
+            'amount_to' => $request->input('amount_to', ''),
+        ];
+
         $invoices = Invoice::search($search)
             ->when($user->team_id, function (Builder $query) use ($user) {
                 $query->where('team_id', $user->team_id);
@@ -45,12 +53,28 @@ class InvoiceController extends Controller
             ->when(! $user->team_id, function (Builder $query) use ($user) {
                 $query->where('user_id', $user->id);
             })
+            ->when($filters['status'], function (Builder $query) use ($filters) {
+                $query->where('status', $filters['status']);
+            })
+            ->when($filters['date_from'], function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '>=', $filters['date_from']);
+            })
+            ->when($filters['date_to'], function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '<=', $filters['date_to']);
+            })
+            ->when($filters['amount_from'], function (Builder $query) use ($filters) {
+                $query->where('amount', '>=', $filters['amount_from']);
+            })
+            ->when($filters['amount_to'], function (Builder $query) use ($filters) {
+                $query->where('amount', '<=', $filters['amount_to']);
+            })
             ->latest()
             ->paginate(10);
 
         return Inertia::render('invoices/index', [
             'invoices' => Inertia::merge($invoices),
             'search' => $search,
+            'filters' => $filters,
         ]);
     }
 
