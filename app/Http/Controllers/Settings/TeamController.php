@@ -115,6 +115,11 @@ class TeamController extends Controller
             $user = Auth::user()->load('team');
             $team = $user->team;
 
+            // Check if user is team owner
+            if (! $user->isTeamOwner()) {
+                return back()->with('error', 'Only team owners can invite users.');
+            }
+
             // Use the policy to check if user can invite
             $this->authorize('invite', $team);
 
@@ -142,6 +147,11 @@ class TeamController extends Controller
         try {
             $user = Auth::user()->load('team');
             $team = $user->team;
+
+            // Check if user is team owner
+            if (! $user->isTeamOwner()) {
+                return back()->with('error', 'Only team owners can remove users.');
+            }
 
             $this->authorize('removeUser', $team);
 
