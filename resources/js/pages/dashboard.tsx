@@ -1,20 +1,25 @@
 import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
 import { StatCard } from '@/components/stat-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils';
 import { type BreadcrumbItem, type Invoice } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Activity, CheckCircle, Clock, CreditCard, DollarSign, FileText, PlusCircle, RefreshCw, TrendingUp } from 'lucide-react';
+import { Deferred, Head, Link } from '@inertiajs/react';
+import { Activity, BellIcon, CheckCircle, Clock, CreditCard, DollarSign, FileText, PlusCircle, RefreshCw, TrendingUp } from 'lucide-react';
 
 interface ActivityItem {
     id: string;
-    type: 'created' | 'updated';
+    type: 'created' | 'updated' | 'reminder';
     invoice_number: string;
     client_name: string;
     amount: number;
     status: string;
     date: string;
+    reminder_type?: string;
+    reminder_id?: string;
+    sent_at?: string;
+    scheduled_date?: string;
 }
 
 interface DashboardProps {
@@ -40,13 +45,20 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
     // Function to get the appropriate icon for activity type
     const getActivityIcon = (type: string, status: string) => {
         if (type === 'created') return PlusCircle;
+        if (type === 'reminder') return BellIcon;
         if (status === 'paid') return CheckCircle;
         return RefreshCw;
     };
 
     // Function to get the activity description
-    const getActivityDescription = (type: string, status: string) => {
+    const getActivityDescription = (type: string, status: string, reminderType?: string) => {
         if (type === 'created') return 'Created new invoice';
+        if (type === 'reminder') {
+            if (reminderType === 'upcoming') return 'Created upcoming payment reminder';
+            if (reminderType === 'overdue') return 'Created overdue payment reminder';
+            if (reminderType === 'thank_you') return 'Created thank you reminder';
+            return 'Created reminder';
+        }
         if (status === 'paid') return 'Marked as paid';
         if (status === 'sent') return 'Sent to client';
         if (status === 'overdue') return 'Marked as overdue';
@@ -232,37 +244,59 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                     </div>
 
                     <div className="p-4">
-                        {recentActivity.length === 0 ? (
-                            <div className="py-6 text-center text-sm text-neutral-500">No recent activity found.</div>
-                        ) : (
+                        <Deferred data="recentActivity" fallback={<Skeleton className="h-20 w-full" />}>
                             <div className="space-y-4">
-                                {recentActivity.map((activity) => {
+                                {recentActivity?.map((activity) => {
                                     const ActivityIcon = getActivityIcon(activity.type, activity.status);
                                     return (
-                                        <div key={`${activity.id}-${activity.type}`} className="flex items-start gap-3">
-                                            <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-500">
+                                        <div
+                                            key={`${activity.id}-${activity.type}${activity.reminder_id ? `-${activity.reminder_id}` : ''}`}
+                                            className="flex items-start gap-3"
+                                        >
+                                            <div
+                                                className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
+                                                    activity.type === 'reminder'
+                                                        ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-500'
+                                                        : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-500'
+                                                }`}
+                                            >
                                                 <ActivityIcon className="h-3.5 w-3.5" />
                                             </div>
                                             <div className="flex-1 space-y-1">
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-medium">{getActivityDescription(activity.type, activity.status)}</p>
+                                                    <p className="text-sm font-medium">
+                                                        {getActivityDescription(activity.type, activity.status, activity.reminder_type)}
+                                                    </p>
                                                     <span className="text-xs text-neutral-500">{formatRelativeTime(new Date(activity.date))}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <Link
-                                                        href={`/invoices/${activity.id}`}
+                                                        href={
+                                                            activity.type === 'reminder'
+                                                                ? route('reminders.index', activity.id)
+                                                                : route('invoices.show', activity.id)
+                                                        }
                                                         className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"
                                                     >
                                                         {activity.invoice_number} - {activity.client_name}
                                                     </Link>
                                                     <span className="text-xs font-medium">{formatCurrency(activity.amount)}</span>
                                                 </div>
+                                                {activity.type === 'reminder' && activity.scheduled_date && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs text-neutral-500">
+                                                            {activity.sent_at
+                                                                ? `Sent: ${formatDate(activity.sent_at)}`
+                                                                : `Scheduled: ${formatDate(activity.scheduled_date)}`}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        )}
+                        </Deferred>
                     </div>
                 </div>
             </div>

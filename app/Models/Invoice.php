@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
 
 class Invoice extends Model
@@ -42,6 +44,7 @@ class Invoice extends Model
         'issue_date' => 'date',
         'due_date' => 'date',
         'amount' => 'decimal:2',
+        'status' => InvoiceStatus::class,
     ];
 
     /**
@@ -62,7 +65,7 @@ class Invoice extends Model
     /**
      * Get the user that owns the invoice.
      *
-     * @return BelongsTo<User>
+     * @return BelongsTo<User, Invoice>
      */
     public function user(): BelongsTo
     {
@@ -72,7 +75,7 @@ class Invoice extends Model
     /**
      * Get the team that owns the invoice.
      *
-     * @return BelongsTo<Team>
+     * @return BelongsTo<Team, Invoice>
      */
     public function team(): BelongsTo
     {
@@ -118,5 +121,15 @@ class Invoice extends Model
         }
 
         return $query->byUser($user->id);
+    }
+
+    /**
+     * Get the reminders for the invoice.
+     *
+     * @return HasMany<Reminder, Invoice>
+     */
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(Reminder::class);
     }
 }

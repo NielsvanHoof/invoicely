@@ -8,12 +8,13 @@ use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
+use App\Services\Reminders\ReminderService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
-use Laravel\Scout\Builder;
 
 class InvoiceController extends Controller
 {
@@ -25,8 +26,10 @@ class InvoiceController extends Controller
         ];
     }
 
-    public function __construct(protected InvoiceFileService $fileService)
-    {
+    public function __construct(
+        protected InvoiceFileService $fileService,
+        protected ReminderService $reminderService
+    ) {
         $this->authorizeResource(Invoice::class, 'invoice');
     }
 
@@ -35,8 +38,9 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search', '');
         $user = Auth::user();
+
+        $search = $request->input('search', '');
 
         $filters = [
             'status' => $request->input('status', ''),
@@ -47,26 +51,30 @@ class InvoiceController extends Controller
         ];
 
         $invoices = Invoice::search($search)
-            ->when($user->team_id, function (Builder $query) use ($user) {
-                $query->where('team_id', $user->team_id);
-            })
-            ->when(! $user->team_id, function (Builder $query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->when($filters['status'], function (Builder $query) use ($filters) {
-                $query->where('status', $filters['status']);
-            })
-            ->when($filters['date_from'], function (Builder $query) use ($filters) {
-                $query->whereDate('created_at', '>=', $filters['date_from']);
-            })
-            ->when($filters['date_to'], function (Builder $query) use ($filters) {
-                $query->whereDate('created_at', '<=', $filters['date_to']);
-            })
-            ->when($filters['amount_from'], function (Builder $query) use ($filters) {
-                $query->where('amount', '>=', $filters['amount_from']);
-            })
-            ->when($filters['amount_to'], function (Builder $query) use ($filters) {
-                $query->where('amount', '<=', $filters['amount_to']);
+            ->query(function (Builder $query) use ($user, $filters) {
+                return $query
+                    ->withCount('reminders')
+                    ->when($user->team_id, function ($query) use ($user) {
+                        $query->where('team_id', $user->team_id);
+                    })
+                    ->when(! $user->team_id, function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })
+                    ->when($filters['status'], function ($query) use ($filters) {
+                        $query->where('status', $filters['status']);
+                    })
+                    ->when($filters['date_from'], function ($query) use ($filters) {
+                        $query->whereDate('created_at', '>=', $filters['date_from']);
+                    })
+                    ->when($filters['date_to'], function ($query) use ($filters) {
+                        $query->whereDate('created_at', '<=', $filters['date_to']);
+                    })
+                    ->when($filters['amount_from'], function ($query) use ($filters) {
+                        $query->where('amount', '>=', $filters['amount_from']);
+                    })
+                    ->when($filters['amount_to'], function ($query) use ($filters) {
+                        $query->where('amount', '<=', $filters['amount_to']);
+                    });
             })
             ->latest()
             ->paginate(10);
@@ -109,6 +117,9 @@ class InvoiceController extends Controller
             'file_path' => $filePath ?? null,
         ]);
 
+        // Schedule reminders for the new invoice
+        $this->reminderService->scheduleReminders($invoice);
+
         if ($validated['client_email'] && App::isLocal()) {
             Mail::to($validated['email'])->send(new InvoiceReceivedMail($invoice));
         }
@@ -124,6 +135,8 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
+        $invoice->load('reminders');
+
         return Inertia::render('invoices/show', [
             'invoice' => $invoice,
         ]);
@@ -134,6 +147,8 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
+        $invoice->load('reminders');
+
         return Inertia::render('invoices/edit', [
             'invoice' => $invoice,
         ]);
@@ -157,6 +172,9 @@ class InvoiceController extends Controller
             ...$validated,
             'file_path' => $filePath,
         ]);
+
+        // Schedule reminders for the updated invoice
+        $this->reminderService->scheduleReminders($invoice);
 
         InvalidateDashBoardCacheEvent::dispatch($user);
 

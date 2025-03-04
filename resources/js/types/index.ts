@@ -53,6 +53,7 @@ export interface Invoice {
     file_path: string | null;
     created_at: string;
     updated_at: string;
+    reminders_count?: number;
 }
 
 export interface PaginatedData<T> {
@@ -81,4 +82,20 @@ export interface Team {
     created_at: string;
     updated_at: string;
     owner_id: number;
+}
+
+export interface Reminder {
+    id: number;
+    invoice_id: string;
+    type: 'upcoming' | 'overdue' | 'thank_you';
+    scheduled_date: string;
+    sent_at: string | null;
+    message: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ReminderType {
+    value: string;
+    label: string;
 }

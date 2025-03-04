@@ -26,7 +26,7 @@ class DashboardController extends Controller
             'stats' => $stats,
             'latestInvoices' => $latestInvoices,
             'upcomingInvoices' => $upcomingInvoices,
-            'recentActivity' => $recentActivity,
+            'recentActivity' => Inertia::defer(fn () => $recentActivity),
         ]);
     }
 }

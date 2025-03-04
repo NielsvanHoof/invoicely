@@ -12,7 +12,7 @@ interface SearchBarProps {
     routeName?: string;
 }
 
-export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invo   ices.index' }: SearchBarProps) {
+export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invoices.index' }: SearchBarProps) {
     const [searchTerm, setSearchTerm] = useState(initialValue);
     const [isSearching, setIsSearching] = useState(false);
 

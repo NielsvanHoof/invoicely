@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { type Invoice } from '@/types';
 import { Link } from '@inertiajs/react';
-import { EyeIcon, FileEditIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
+import { BellIcon, EyeIcon, FileEditIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 
 interface InvoiceCardProps {
     invoice: Invoice;
@@ -16,10 +16,29 @@ export function InvoiceCard({ invoice }: InvoiceCardProps) {
             <CardContent className="p-0">
                 <div className="flex flex-col gap-2 p-4">
                     <div className="flex items-center justify-between">
-                        <Link href={`/invoices/${invoice.id}`} className="font-medium hover:underline">
-                            {invoice.invoice_number}
-                            {invoice.file_path && <PaperclipIcon className="ml-1 inline-block h-3 w-3 text-neutral-400" />}
-                        </Link>
+                        <div className="flex items-center gap-1.5">
+                            <Link href={`/invoices/${invoice.id}`} className="font-medium hover:underline">
+                                {invoice.invoice_number}
+                            </Link>
+                            <div className="flex items-center gap-1">
+                                {invoice.file_path && <PaperclipIcon className="h-3.5 w-3.5 text-neutral-400" />}
+                                {invoice.reminders_count !== undefined && (
+                                    <div
+                                        className="flex items-center"
+                                        title={
+                                            invoice.reminders_count > 0
+                                                ? `${invoice.reminders_count} reminder${invoice.reminders_count !== 1 ? 's' : ''}`
+                                                : 'No reminders'
+                                        }
+                                    >
+                                        <BellIcon className={`h-3.5 w-3.5 ${invoice.reminders_count > 0 ? 'text-amber-500' : 'text-neutral-300'}`} />
+                                        {invoice.reminders_count > 0 && (
+                                            <span className="ml-0.5 text-xs font-medium text-amber-600">{invoice.reminders_count}</span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         <InvoiceStatusBadge status={invoice.status} />
                     </div>
 
@@ -41,6 +60,11 @@ export function InvoiceCard({ invoice }: InvoiceCardProps) {
                     <Button variant="outline" size="sm" asChild>
                         <Link href={route('invoices.edit', invoice.id)}>
                             <FileEditIcon className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href={route('reminders.index', invoice.id)}>
+                            <BellIcon className={`h-4 w-4 ${invoice.reminders_count && invoice.reminders_count > 0 ? 'text-amber-500' : ''}`} />
                         </Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>

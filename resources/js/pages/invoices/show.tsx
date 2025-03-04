@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { type BreadcrumbItem, type Invoice } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
-import { ArrowLeftIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
+import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface ShowInvoiceProps {
@@ -83,6 +83,22 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                     >
                         <TrashIcon className="mr-2 h-4 w-4" />
                         Delete
+                    </Link>
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                    <Link href={route('invoices.index')}>
+                        <Button variant="outline">
+                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                            Back to Invoices
+                        </Button>
+                    </Link>
+
+                    <Link href={route('reminders.index', invoice.id)}>
+                        <Button variant="outline">
+                            <BellIcon className="mr-2 h-4 w-4" />
+                            Manage Reminders
+                        </Button>
                     </Link>
                 </div>
 
@@ -169,12 +185,10 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                         </CardContent>
                         {invoice.file_path && (
                             <CardFooter>
-                                <button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                                    <Button variant="outline" className="w-full" disabled={isDownloading}>
-                                        <DownloadIcon className="mr-2 h-4 w-4" />
-                                        {isDownloading ? 'Generating link...' : 'Download'}
-                                    </Button>
-                                </button>
+                                <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
+                                    <DownloadIcon className="mr-2 h-4 w-4" />
+                                    {isDownloading ? 'Generating link...' : 'Download'}
+                                </Button>
                             </CardFooter>
                         )}
                     </Card>
@@ -182,12 +196,10 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
 
                 <div className="mt-2 flex flex-col gap-2 md:hidden">
                     {invoice.file_path && (
-                        <button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                            <Button variant="outline" className="w-full" disabled={isDownloading}>
-                                <DownloadIcon className="mr-2 h-4 w-4" />
-                                {isDownloading ? 'Generating link...' : 'Download Attachment'}
-                            </Button>
-                        </button>
+                        <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
+                            <DownloadIcon className="mr-2 h-4 w-4" />
+                            {isDownloading ? 'Generating link...' : 'Download Attachment'}
+                        </Button>
                     )}
                 </div>
             </div>

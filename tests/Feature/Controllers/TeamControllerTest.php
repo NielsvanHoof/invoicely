@@ -15,7 +15,7 @@ test('user without team sees empty team page', function () {
     $user = User::factory()->create();
 
     actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->component('settings/teams')
             ->has('team', null)
             ->has('teamMembers', [])
@@ -31,7 +31,7 @@ test('team owner sees team page with owner permissions', function () {
     $user->save();
 
     actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->component('settings/teams')
             ->where('team.id', $team->id)
             ->has('teamMembers')
@@ -52,7 +52,7 @@ test('team member sees team page with limited permissions', function () {
     $user = User::factory()->create(['team_id' => $team->id]);
 
     actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->component('settings/teams')
             ->where('team.id', $team->id)
             ->has('teamMembers')

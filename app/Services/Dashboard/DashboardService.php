@@ -4,6 +4,7 @@ namespace App\Services\Dashboard;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
+use App\Models\Reminder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -102,12 +103,41 @@ class DashboardService
                 })
                 ->toArray();
 
-            // Sort by timestamp (most recent first)
-            usort($recentInvoices, function ($a, $b) {
+            // Get recent reminders
+            $recentReminders = Reminder::query()
+                ->whereHas('invoice', function ($query) use ($user) {
+                    $query->forUser($user);
+                })
+                ->with('invoice')
+                ->latest('created_at')
+                ->take($limit)
+                ->get()
+                ->map(function (Reminder $reminder) {
+                    return [
+                        'id' => $reminder->invoice->id,
+                        'reminder_id' => $reminder->id,
+                        'type' => 'reminder',
+                        'reminder_type' => $reminder->type,
+                        'invoice_number' => $reminder->invoice->invoice_number,
+                        'client_name' => $reminder->invoice->client_name,
+                        'amount' => $reminder->invoice->amount,
+                        'status' => $reminder->invoice->status,
+                        'sent_at' => $reminder->sent_at ? $reminder->sent_at->toIso8601String() : null,
+                        'scheduled_date' => $reminder->scheduled_date->toIso8601String(),
+                        // Store dates as ISO 8601 formatted strings
+                        'date' => $reminder->created_at->toIso8601String(),
+                        // Add a timestamp for sorting
+                        'timestamp' => $reminder->created_at->timestamp,
+                    ];
+                })
+                ->toArray();
+
+            $allActivity = array_merge($recentInvoices, $recentReminders);
+            usort($allActivity, function ($a, $b) {
                 return $b['timestamp'] - $a['timestamp'];
             });
 
-            return array_slice($recentInvoices, 0, $limit);
+            return array_slice($allActivity, 0, $limit);
         });
     }
 
