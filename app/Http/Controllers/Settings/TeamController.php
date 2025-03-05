@@ -36,26 +36,36 @@ class TeamController extends Controller
     {
         $user = Auth::user()->load('team');
         $team = $user->team;
-
         $teamMembers = [];
+        $isTeamOwner = false;
+        $permissions = [
+            'leave' => false,
+            'removeUser' => false,
+            'delete' => false,
+            'invite' => false,
+            'update' => false,
+        ];
 
         if ($team) {
             $team->load('owner');
             $teamMembers = $this->teamService->getTeamMembers($team);
-        }
+            $isTeamOwner = $user->id === $team->owner_id;
 
-        return Inertia::render('settings/teams', [
-            'team' => $team,
-            'teamMembers' => $teamMembers,
-            'hasTeam' => !is_null($team),
-            'isTeamOwner' => $team ? $user->id === $team->owner_id : false,
-            'can' => [
+            // Only check permissions if the user has a team
+            $permissions = [
                 'leave' => $user->can('leave', $team),
                 'removeUser' => $user->can('removeUser', $team),
                 'delete' => $user->can('delete', $team),
                 'invite' => $user->can('invite', $team),
                 'update' => $user->can('update', $team),
-            ],
+            ];
+        }
+
+        return Inertia::render('settings/teams', [
+            'team' => $team,
+            'teamMembers' => $teamMembers,
+            'isTeamOwner' => $isTeamOwner,
+            'can' => $permissions,
         ]);
     }
 

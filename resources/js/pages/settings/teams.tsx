@@ -16,7 +16,7 @@ import { FormEventHandler, useState } from 'react';
 interface TeamsProps {
     team: Team | null;
     teamMembers: User[];
-    hasTeam: boolean;
+    isTeamOwner: boolean;
     can: {
         leave: boolean;
         removeUser: boolean;
@@ -33,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Teams({ team, teamMembers, hasTeam, can }: TeamsProps) {
+export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showInviteDialog, setShowInviteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -150,6 +150,7 @@ export default function Teams({ team, teamMembers, hasTeam, can }: TeamsProps) {
     };
 
     const handleLeaveTeam = () => {
+        if (isTeamOwner) return;
         setShowLeaveDialog(true);
     };
 
@@ -196,7 +197,7 @@ export default function Teams({ team, teamMembers, hasTeam, can }: TeamsProps) {
     };
 
     const handleDeleteTeam = () => {
-        if (!team || !can.delete) return;
+        if (!team || !isTeamOwner) return;
         setShowDeleteDialog(true);
     };
 
@@ -221,7 +222,7 @@ export default function Teams({ team, teamMembers, hasTeam, can }: TeamsProps) {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    {!hasTeam ? (
+                    {team === null ? (
                         // No Team View
                         <Card>
                             <CardHeader>
