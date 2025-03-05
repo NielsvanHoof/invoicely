@@ -4,6 +4,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Inertia\Testing\AssertableInertia;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -18,8 +19,8 @@ test('team owner sees team page with owner permissions', function () {
     $user->save();
 
     actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn ($page) => $page
-            ->component('settings/teams')
+        fn(AssertableInertia $page) => $page
+            ->component('Settings/Teams')
             ->where('team.id', $team->id)
             ->has('teamMembers')
             ->where('isTeamOwner', true)
@@ -39,8 +40,8 @@ test('team member sees team page with limited permissions', function () {
     $user = User::factory()->create(['team_id' => $team->id]);
 
     actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn ($page) => $page
-            ->component('settings/teams')
+        fn(AssertableInertia $page) => $page
+            ->component('Settings/Teams')
             ->where('team.id', $team->id)
             ->has('teamMembers')
             ->where('isTeamOwner', false)
