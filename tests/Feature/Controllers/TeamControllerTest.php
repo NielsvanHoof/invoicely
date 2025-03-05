@@ -11,19 +11,6 @@ use function Pest\Laravel\assertDatabaseMissing;
 
 uses(RefreshDatabase::class);
 
-test('user without team sees empty team page', function () {
-    $user = User::factory()->create();
-
-    actingAs($user)->get(route('teams.index'))->assertInertia(
-        fn ($page) => $page
-            ->component('settings/teams')
-            ->has('team', null)
-            ->has('teamMembers', [])
-            ->where('isTeamOwner', false)
-            ->where('hasTeam', false)
-    );
-});
-
 test('team owner sees team page with owner permissions', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $user->id]);

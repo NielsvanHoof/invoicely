@@ -47,7 +47,8 @@ class TeamController extends Controller
         return Inertia::render('settings/teams', [
             'team' => $team,
             'teamMembers' => $teamMembers,
-            'hasTeam' => ! is_null($team),
+            'hasTeam' => !is_null($team),
+            'isTeamOwner' => $team ? $user->id === $team->owner_id : false,
             'can' => [
                 'leave' => $user->can('leave', $team),
                 'removeUser' => $user->can('removeUser', $team),
@@ -97,7 +98,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to update team: '.$e->getMessage());
+            return back()->with('error', 'Failed to update team: ' . $e->getMessage());
         }
     }
 
@@ -124,7 +125,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to invite user: '.$e->getMessage());
+            return back()->with('error', 'Failed to invite user: ' . $e->getMessage());
         }
     }
 
@@ -153,7 +154,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to remove user: '.$e->getMessage());
+            return back()->with('error', 'Failed to remove user: ' . $e->getMessage());
         }
     }
 
@@ -166,7 +167,7 @@ class TeamController extends Controller
             $user = Auth::user()->load('team');
             $team = $user->team;
 
-            if (! $team) {
+            if (!$team) {
                 return redirect()->route('teams.index')->with('error', 'You are not a member of any team.');
             }
 
@@ -182,7 +183,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to leave team: '.$e->getMessage());
+            return redirect()->route('teams.index')->with('error', 'Failed to leave team: ' . $e->getMessage());
         }
     }
 
@@ -202,7 +203,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to delete team: '.$e->getMessage());
+            return back()->with('error', 'Failed to delete team: ' . $e->getMessage());
         }
     }
 }
