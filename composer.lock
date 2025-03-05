@@ -870,16 +870,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.340.4",
+            "version": "3.341.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "2896cfb3f6b2bd06757b16e99e1cab93c9598af3"
+                "reference": "8b82bdb43b202fd8c596a096ddcc9915f59f780a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2896cfb3f6b2bd06757b16e99e1cab93c9598af3",
-                "reference": "2896cfb3f6b2bd06757b16e99e1cab93c9598af3",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8b82bdb43b202fd8c596a096ddcc9915f59f780a",
+                "reference": "8b82bdb43b202fd8c596a096ddcc9915f59f780a",
                 "shasum": ""
             },
             "require": {
@@ -961,9 +961,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.340.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.341.0"
             },
-            "time": "2025-02-28T19:13:38+00:00"
+            "time": "2025-03-04T19:13:46+00:00"
         },
         {
             "name": "brick/math",
@@ -2294,16 +2294,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v12.0.1",
+            "version": "v12.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "d99e2385a6d4324782d52f4423891966425641be"
+                "reference": "09f4a014c3fea7726c6824f5e04fca6ee165e328"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/d99e2385a6d4324782d52f4423891966425641be",
-                "reference": "d99e2385a6d4324782d52f4423891966425641be",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/09f4a014c3fea7726c6824f5e04fca6ee165e328",
+                "reference": "09f4a014c3fea7726c6824f5e04fca6ee165e328",
                 "shasum": ""
             },
             "require": {
@@ -2411,7 +2411,7 @@
                 "league/flysystem-read-only": "^3.25.1",
                 "league/flysystem-sftp-v3": "^3.25.1",
                 "mockery/mockery": "^1.6.10",
-                "orchestra/testbench-core": "^10.0",
+                "orchestra/testbench-core": "^10.0.0",
                 "pda/pheanstalk": "^5.0.6",
                 "php-http/discovery": "^1.15",
                 "phpstan/phpstan": "^2.0",
@@ -2505,7 +2505,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-02-24T13:31:23+00:00"
+            "time": "2025-03-04T16:10:42+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -5556,16 +5556,16 @@
         },
         {
             "name": "spatie/laravel-health",
-            "version": "1.32.3",
+            "version": "1.32.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-health.git",
-                "reference": "3a3665f36902201c2dd9617e0b85659ef6595f91"
+                "reference": "6510025255c04fa2bd37c2a6611095c5129b53c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-health/zipball/3a3665f36902201c2dd9617e0b85659ef6595f91",
-                "reference": "3a3665f36902201c2dd9617e0b85659ef6595f91",
+                "url": "https://api.github.com/repos/spatie/laravel-health/zipball/6510025255c04fa2bd37c2a6611095c5129b53c2",
+                "reference": "6510025255c04fa2bd37c2a6611095c5129b53c2",
                 "shasum": ""
             },
             "require": {
@@ -5637,7 +5637,7 @@
                 "spatie"
             ],
             "support": {
-                "source": "https://github.com/spatie/laravel-health/tree/1.32.3"
+                "source": "https://github.com/spatie/laravel-health/tree/1.32.4"
             },
             "funding": [
                 {
@@ -5645,7 +5645,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-24T07:32:22+00:00"
+            "time": "2025-03-03T08:40:12+00:00"
         },
         {
             "name": "spatie/laravel-package-tools",

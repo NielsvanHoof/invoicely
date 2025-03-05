@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\InvalidateDashBoardCacheEvent;
 use App\Http\Requests\Invoices\StoreInvoiceRequest;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
-use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
-use App\Services\Reminders\ReminderService;
+use App\Services\Invoices\InvoiceService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class InvoiceController extends Controller
@@ -28,7 +24,7 @@ class InvoiceController extends Controller
 
     public function __construct(
         protected InvoiceFileService $fileService,
-        protected ReminderService $reminderService
+        protected InvoiceService $invoiceService
     ) {
         $this->authorizeResource(Invoice::class, 'invoice');
     }
@@ -38,9 +34,8 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-
         $search = $request->input('search', '');
+        $user = Auth::user();
 
         $filters = [
             'status' => $request->input('status', ''),
@@ -101,30 +96,13 @@ class InvoiceController extends Controller
     {
         $validated = $request->except('file');
         $user = Auth::user();
-        $filePath = null;
 
-        if ($request->hasFile('file')) {
-            $filePath = $this->fileService->storeFile(
-                $request->file('file'),
-                $user->id
-            );
-        }
-
-        $invoice = Invoice::create([
-            ...$validated,
-            'user_id' => $user->id,
-            'team_id' => $user->team_id ?? null,
-            'file_path' => $filePath ?? null,
-        ]);
-
-        // Schedule reminders for the new invoice
-        $this->reminderService->scheduleReminders($invoice);
-
-        if ($validated['client_email'] && App::isLocal()) {
-            Mail::to($validated['email'])->send(new InvoiceReceivedMail($invoice));
-        }
-
-        InvalidateDashBoardCacheEvent::dispatch($user);
+        $invoice = $this->invoiceService->createInvoice(
+            $validated,
+            $request->file('file'),
+            $user->id,
+            $user->team_id
+        );
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice created successfully.');
@@ -160,23 +138,14 @@ class InvoiceController extends Controller
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
         $validated = $request->except('file');
-        $user = Auth::user();
-        $filePath = $this->fileService->handleFileUpdate(
-            $invoice->file_path,
+
+        $this->invoiceService->updateInvoice(
+            $invoice,
+            $validated,
             $request->file('file'),
             $request->input('remove_file', false),
             Auth::id()
         );
-
-        $invoice->update([
-            ...$validated,
-            'file_path' => $filePath,
-        ]);
-
-        // Schedule reminders for the updated invoice
-        $this->reminderService->scheduleReminders($invoice);
-
-        InvalidateDashBoardCacheEvent::dispatch($user);
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice updated successfully.');
@@ -187,15 +156,7 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        $user = Auth::user();
-
-        if ($invoice->file_path) {
-            $this->fileService->deleteFile($invoice->file_path);
-        }
-
-        $invoice->delete();
-
-        InvalidateDashBoardCacheEvent::dispatch($user);
+        $this->invoiceService->deleteInvoice($invoice);
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');

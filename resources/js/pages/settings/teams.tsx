@@ -13,19 +13,9 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2, PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
-// Mock useToast hook if it doesn't exist
-const useToast = () => {
-    return {
-        toast: ({ title, description }: { title: string; description: string; duration?: number }) => {
-            console.log(`Toast: ${title} - ${description}`);
-        },
-    };
-};
-
 interface TeamsProps {
     team: Team | null;
     teamMembers: User[];
-    isTeamOwner: boolean;
     hasTeam: boolean;
     can: {
         leave: boolean;
@@ -43,8 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsProps, 'isTeamOwner'>) {
-    const { toast } = useToast();
+export default function Teams({ team, teamMembers, hasTeam, can }: TeamsProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showInviteDialog, setShowInviteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -55,7 +44,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
     const [userToRemove, setUserToRemove] = useState<number | null>(null);
     const [userToRemoveName, setUserToRemoveName] = useState<string>('');
 
-    // Team update form
     const {
         data: teamData,
         setData: setTeamData,
@@ -68,7 +56,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
         name: team?.name || '',
     });
 
-    // Team create form
     const {
         data: createTeamData,
         setData: setCreateTeamData,
@@ -81,7 +68,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
         name: '',
     });
 
-    // Invite form
     const {
         data: inviteData,
         setData: setInviteData,
@@ -111,10 +97,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                 setShowEditDialog(false);
                 resetTeamForm();
                 setIsSubmitting(false);
-                toast({
-                    title: 'Team updated',
-                    description: 'Your team has been updated successfully.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);
@@ -137,10 +119,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                 setShowCreateDialog(false);
                 resetCreateTeamForm();
                 setIsSubmitting(false);
-                toast({
-                    title: 'Team created',
-                    description: 'Your team has been created successfully.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);
@@ -164,10 +142,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                 setShowInviteDialog(false);
                 resetInviteForm();
                 setIsSubmitting(false);
-                toast({
-                    title: 'Invitation sent',
-                    description: 'The user has been invited to your team.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);
@@ -185,10 +159,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
             onSuccess: () => {
                 setShowLeaveDialog(false);
                 setIsSubmitting(false);
-                toast({
-                    title: 'Team left',
-                    description: 'You have left the team successfully.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);
@@ -218,10 +188,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                 setUserToRemove(null);
                 setUserToRemoveName('');
                 setIsSubmitting(false);
-                toast({
-                    title: 'User removed',
-                    description: 'The user has been removed from your team.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);
@@ -242,10 +208,6 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
             onSuccess: () => {
                 setShowDeleteDialog(false);
                 setIsSubmitting(false);
-                toast({
-                    title: 'Team deleted',
-                    description: 'Your team has been deleted successfully.',
-                });
             },
             onError: () => {
                 setIsSubmitting(false);

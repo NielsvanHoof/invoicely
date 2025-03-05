@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 class AnalyticsService
 {
     /**
+     * Cache TTL in minutes
+     */
+    protected int $cacheTtl = 60;
+
+    /**
      * Get key financial metrics.
      *
      * @return array<string, float|int>
@@ -20,7 +25,7 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'financial-metrics');
 
-        return Cache::remember($cacheKey, 60, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
             $invoices = Invoice::query()
                 ->forUser($user)
                 ->get();
@@ -71,7 +76,7 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'status-distribution');
 
-        return Cache::remember($cacheKey, 60, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
             $statusCounts = Invoice::query()
                 ->forUser($user)
                 ->select('status', DB::raw('count(*) as count'))
@@ -100,7 +105,7 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'monthly-revenue');
 
-        return Cache::remember($cacheKey, 60, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
             $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
 
             $monthlyRevenue = Invoice::query()
@@ -151,7 +156,7 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'top-clients');
 
-        return Cache::remember($cacheKey, 60, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
             return Invoice::query()
                 ->forUser($user)
                 ->where('status', InvoiceStatus::PAID->value)
@@ -192,7 +197,8 @@ class AnalyticsService
      */
     protected function getCacheKey(User $user, string $type): string
     {
-        $userKey = $user->team_id ?? 'user-' . $user->id;
+        $userKey = $user->team_id ?? 'user-'.$user->id;
+
         return "analytics.{$userKey}.{$type}";
     }
 }

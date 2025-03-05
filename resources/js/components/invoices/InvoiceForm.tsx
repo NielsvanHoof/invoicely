@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
+import { SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, CalendarIcon, CreditCardIcon, FileTextIcon, MailIcon, MapPinIcon, UserIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -48,6 +49,8 @@ interface InvoiceFormProps {
 
 export function InvoiceForm({ data, errors, processing, isEditing = false, onDataChange, onSubmit }: InvoiceFormProps) {
     const [previewAmount, setPreviewAmount] = useState<string>(data.amount || '0.00');
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth?.user?.currency || 'USD';
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -84,7 +87,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                 <h3 className="text-sm font-medium">{data.invoice_number || 'INV-0001'}</h3>
                                 <InvoiceStatusBadge status={data.status as 'draft' | 'sent' | 'paid' | 'overdue'} />
                             </div>
-                            <div className="mt-2 text-xl font-bold">{formatCurrency(parseFloat(previewAmount))}</div>
+                            <div className="mt-2 text-xl font-bold">{formatCurrency(parseFloat(previewAmount), userCurrency)}</div>
                             <div className="mt-2 text-xs text-neutral-500">{data.client_name ? data.client_name : 'Client Name'}</div>
                         </div>
                     </CardContent>
@@ -297,7 +300,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                 <div className="space-y-4">
                                     <div className="rounded-lg bg-neutral-50 p-4 dark:bg-neutral-900">
                                         <h3 className="font-medium">{data.invoice_number || 'INV-0001'}</h3>
-                                        <div className="mt-2 text-2xl font-bold">{formatCurrency(parseFloat(previewAmount))}</div>
+                                        <div className="mt-2 text-2xl font-bold">{formatCurrency(parseFloat(previewAmount), userCurrency)}</div>
 
                                         <div className="mt-4 space-y-2 text-sm">
                                             <div className="flex justify-between">

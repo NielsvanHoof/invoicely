@@ -23,8 +23,11 @@ export interface NavItem {
 
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
     auth: Auth;
+    flash: {
+        success: string | null;
+        error: string | null;
+    };
     [key: string]: unknown;
 }
 
@@ -34,6 +37,7 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    currency: string;
     created_at: string;
     updated_at: string;
 }
@@ -96,6 +100,11 @@ export interface Reminder {
 }
 
 export interface ReminderType {
+    value: string;
+    label: string;
+}
+
+export interface Currency {
     value: string;
     label: string;
 }

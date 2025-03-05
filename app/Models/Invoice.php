@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Builders\Invoice\InvoiceBuilder;
 use App\Enums\InvoiceStatus;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +47,11 @@ class Invoice extends Model
         'status' => InvoiceStatus::class,
     ];
 
+    public function newEloquentBuilder($query): InvoiceBuilder
+    {
+        return new InvoiceBuilder($query);
+    }
+
     /**
      * Get the searchable array for the invoice.
      *
@@ -80,47 +85,6 @@ class Invoice extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
-    }
-
-    /**
-     * Scope a query to filter invoices by team.
-     *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
-     */
-    public function scopeByTeam(Builder $query, ?string $teamId): Builder
-    {
-        if ($teamId) {
-            return $query->where('team_id', $teamId);
-        }
-
-        return $query;
-    }
-
-    /**
-     * Scope a query to filter invoices by user.
-     *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
-     */
-    public function scopeByUser(Builder $query, int $userId): Builder
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Scope a query to filter invoices by user context (team or individual).
-     *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
-     */
-    public function scopeForUser(Builder $query, User $user): Builder
-    {
-        if ($user->team_id) {
-            return $query->byTeam($user->team_id);
-        }
-
-        return $query->byUser($user->id);
     }
 
     /**
