@@ -3,15 +3,42 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type BreadcrumbItem, type Invoice } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
+import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import axios from 'axios';
+import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
+import { useState } from 'react';
 
 interface ShowInvoiceProps {
     invoice: Invoice;
 }
 
 export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
+    const [isDownloading, setIsDownloading] = useState(false);
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth.user.currency || 'USD';
+
+    const handleDownload = async () => {
+        if (!invoice.file_path || isDownloading) return;
+
+        setIsDownloading(true);
+        try {
+            const response = await axios.get(route('invoices.download', invoice.id));
+
+            if (response.data.url) {
+                // Open the temporary URL in a new tab
+                window.open(response.data.url, '_blank');
+            } else {
+                throw new Error('No download URL returned');
+            }
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            alert('Failed to generate download link. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
@@ -61,6 +88,22 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                     </Link>
                 </div>
 
+                <div className="mt-4 flex gap-2">
+                    <Link href={route('invoices.index')}>
+                        <Button variant="outline">
+                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                            Back to Invoices
+                        </Button>
+                    </Link>
+
+                    <Link href={route('reminders.index', invoice.id)}>
+                        <Button variant="outline">
+                            <BellIcon className="mr-2 h-4 w-4" />
+                            Manage Reminders
+                        </Button>
+                    </Link>
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card className="md:col-span-2">
                         <CardHeader>
@@ -76,7 +119,7 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Amount</h3>
-                                    <p className="mt-1 text-lg font-semibold">{formatCurrency(invoice.amount)}</p>
+                                    <p className="mt-1 text-lg font-semibold">{formatCurrency(invoice.amount, userCurrency)}</p>
                                 </div>
                             </div>
 
@@ -144,17 +187,10 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                         </CardContent>
                         {invoice.file_path && (
                             <CardFooter>
-                                <a
-                                    href={invoice.file_path}
-                                    className="flex w-full items-center justify-center"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Button variant="outline" className="w-full">
-                                        <DownloadIcon className="mr-2 h-4 w-4" />
-                                        Download
-                                    </Button>
-                                </a>
+                                <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
+                                    <DownloadIcon className="mr-2 h-4 w-4" />
+                                    {isDownloading ? 'Generating link...' : 'Download'}
+                                </Button>
                             </CardFooter>
                         )}
                     </Card>
@@ -162,12 +198,10 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
 
                 <div className="mt-2 flex flex-col gap-2 md:hidden">
                     {invoice.file_path && (
-                        <a href={invoice.file_path} className="flex w-full items-center justify-center" target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" className="w-full">
-                                <DownloadIcon className="mr-2 h-4 w-4" />
-                                Download Attachment
-                            </Button>
-                        </a>
+                        <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
+                            <DownloadIcon className="mr-2 h-4 w-4" />
+                            {isDownloading ? 'Generating link...' : 'Download Attachment'}
+                        </Button>
                     )}
                 </div>
             </div>

@@ -19,10 +19,14 @@ class DashboardController extends Controller
 
         $stats = $this->dashboardService->getStats($user);
         $latestInvoices = $this->dashboardService->getLatestInvoices($user);
+        $upcomingInvoices = $this->dashboardService->getUpcomingInvoices($user);
+        $recentActivity = $this->dashboardService->getRecentActivity($user);
 
         return Inertia::render('dashboard', [
             'stats' => $stats,
             'latestInvoices' => $latestInvoices,
+            'upcomingInvoices' => $upcomingInvoices,
+            'recentActivity' => Inertia::defer(fn () => $recentActivity),
         ]);
     }
 }

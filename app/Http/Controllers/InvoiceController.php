@@ -6,15 +6,26 @@ use App\Http\Requests\Invoices\StoreInvoiceRequest;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
+use App\Services\Invoices\InvoiceService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Laravel\Scout\Builder;
 
 class InvoiceController extends Controller
 {
-    public function __construct(protected InvoiceFileService $fileService)
+    public function resourceAbilityMap(): array
     {
+        return [
+            ...parent::resourceAbilityMap(),
+            'downloadFile' => 'downloadFile',
+        ];
+    }
+
+    public function __construct(
+        protected InvoiceFileService $fileService,
+        protected InvoiceService $invoiceService
+    ) {
         $this->authorizeResource(Invoice::class, 'invoice');
     }
 
@@ -26,12 +37,39 @@ class InvoiceController extends Controller
         $search = $request->input('search', '');
         $user = Auth::user();
 
+        $filters = [
+            'status' => $request->input('status', ''),
+            'date_from' => $request->input('date_from', ''),
+            'date_to' => $request->input('date_to', ''),
+            'amount_from' => $request->input('amount_from', ''),
+            'amount_to' => $request->input('amount_to', ''),
+        ];
+
         $invoices = Invoice::search($search)
-            ->when($user->team_id, function (Builder $query) use ($user) {
-                $query->where('team_id', $user->team_id);
-            })
-            ->when(! $user->team_id, function (Builder $query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->query(function (Builder $query) use ($user, $filters) {
+                return $query
+                    ->withCount('reminders')
+                    ->when($user->team_id, function ($query) use ($user) {
+                        $query->where('team_id', $user->team_id);
+                    })
+                    ->when(! $user->team_id, function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })
+                    ->when($filters['status'], function ($query) use ($filters) {
+                        $query->where('status', $filters['status']);
+                    })
+                    ->when($filters['date_from'], function ($query) use ($filters) {
+                        $query->whereDate('created_at', '>=', $filters['date_from']);
+                    })
+                    ->when($filters['date_to'], function ($query) use ($filters) {
+                        $query->whereDate('created_at', '<=', $filters['date_to']);
+                    })
+                    ->when($filters['amount_from'], function ($query) use ($filters) {
+                        $query->where('amount', '>=', $filters['amount_from']);
+                    })
+                    ->when($filters['amount_to'], function ($query) use ($filters) {
+                        $query->where('amount', '<=', $filters['amount_to']);
+                    });
             })
             ->latest()
             ->paginate(10);
@@ -39,6 +77,7 @@ class InvoiceController extends Controller
         return Inertia::render('invoices/index', [
             'invoices' => Inertia::merge($invoices),
             'search' => $search,
+            'filters' => $filters,
         ]);
     }
 
@@ -57,20 +96,13 @@ class InvoiceController extends Controller
     {
         $validated = $request->except('file');
         $user = Auth::user();
-        $filePath = null;
 
-        if ($request->hasFile('file')) {
-            $filePath = $this->fileService->storeFile(
-                $request->file('file'),
-                $user->id
-            );
-        }
-
-        $invoice = Invoice::create([
-            ...$validated,
-            'user_id' => $user->id,
-            'team_id' => $user->team_id ?? null,
-        ]);
+        $invoice = $this->invoiceService->createInvoice(
+            $validated,
+            $request->file('file'),
+            $user->id,
+            $user->team_id
+        );
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice created successfully.');
@@ -81,6 +113,8 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
+        $invoice->load('reminders');
+
         return Inertia::render('invoices/show', [
             'invoice' => $invoice,
         ]);
@@ -91,6 +125,8 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
+        $invoice->load('reminders');
+
         return Inertia::render('invoices/edit', [
             'invoice' => $invoice,
         ]);
@@ -103,17 +139,13 @@ class InvoiceController extends Controller
     {
         $validated = $request->except('file');
 
-        $filePath = $this->fileService->handleFileUpdate(
-            $invoice->file_path,
+        $this->invoiceService->updateInvoice(
+            $invoice,
+            $validated,
             $request->file('file'),
             $request->input('remove_file', false),
             Auth::id()
         );
-
-        $invoice->update([
-            ...$validated,
-            'file_path' => $filePath,
-        ]);
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice updated successfully.');
@@ -124,13 +156,27 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        if ($invoice->file_path) {
-            $this->fileService->deleteFile($invoice->file_path);
-        }
-
-        $invoice->delete();
+        $this->invoiceService->deleteInvoice($invoice);
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
+    }
+
+    /**
+     * Generate a secure download URL for the invoice file.
+     */
+    public function downloadFile(Invoice $invoice)
+    {
+        if (! $invoice->file_path) {
+            return response()->json(['error' => 'No file attached to this invoice'], 404);
+        }
+
+        $temporaryUrl = $this->fileService->getTemporaryUrl($invoice->file_path);
+
+        if (! $temporaryUrl) {
+            return response()->json(['error' => 'Could not generate download link'], 500);
+        }
+
+        return response()->json(['url' => $temporaryUrl]);
     }
 }

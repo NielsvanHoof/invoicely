@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'team_id',
+        'currency',
     ];
 
     /**
@@ -47,11 +48,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'currency' => 'string',
         ];
     }
 
     /**
      * Get the invoices for the user.
+     *
+     * @return HasMany<Invoice, User>
      */
     public function invoices(): HasMany
     {
@@ -60,6 +64,8 @@ class User extends Authenticatable
 
     /**
      * Get the team the user belongs to.
+     *
+     * @return BelongsTo<Team, User>
      */
     public function team(): BelongsTo
     {
@@ -68,6 +74,8 @@ class User extends Authenticatable
 
     /**
      * Get the team owned by the user.
+     *
+     * @return HasOne<Team, User>
      */
     public function ownedTeam(): HasOne
     {

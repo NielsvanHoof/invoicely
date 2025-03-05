@@ -23,8 +23,11 @@ export interface NavItem {
 
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
     auth: Auth;
+    flash: {
+        success: string | null;
+        error: string | null;
+    };
     [key: string]: unknown;
 }
 
@@ -34,9 +37,9 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    currency: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
 }
 
 export interface Invoice {
@@ -54,6 +57,7 @@ export interface Invoice {
     file_path: string | null;
     created_at: string;
     updated_at: string;
+    reminders_count?: number;
 }
 
 export interface PaginatedData<T> {
@@ -82,4 +86,25 @@ export interface Team {
     created_at: string;
     updated_at: string;
     owner_id: number;
+}
+
+export interface Reminder {
+    id: number;
+    invoice_id: string;
+    type: 'upcoming' | 'overdue' | 'thank_you';
+    scheduled_date: string;
+    sent_at: string | null;
+    message: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ReminderType {
+    value: string;
+    label: string;
+}
+
+export interface Currency {
+    value: string;
+    label: string;
 }

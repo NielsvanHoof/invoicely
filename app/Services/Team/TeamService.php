@@ -3,12 +3,10 @@
 namespace App\Services\Team;
 
 use App\Data\Team\TeamData;
-use App\Mail\TeamRemovedMail;
 use App\Models\Team;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Mail;
 
 class TeamService
 {
@@ -69,8 +67,6 @@ class TeamService
 
         $userToRemove->team()->dissociate();
         $userToRemove->save();
-
-        Mail::to($userToRemove->email)->send(new TeamRemovedMail($userToRemove));
     }
 
     /**
@@ -80,9 +76,6 @@ class TeamService
     {
         // Get all team members
         $teamMembers = $this->getTeamMembers($team);
-
-        // Store team name for emails
-        $teamName = $team->name;
 
         // First, remove the owner_id reference to avoid constraint issues
         $team->owner_id = null;

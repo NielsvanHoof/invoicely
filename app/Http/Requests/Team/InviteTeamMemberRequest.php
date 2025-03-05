@@ -20,7 +20,7 @@ class InviteTeamMemberRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                'unique:users,email',
+                Rule::exists('users', 'email'),
                 Rule::notIn([$this->user()->email]),
             ],
             'name' => ['required', 'string', 'max:255'],

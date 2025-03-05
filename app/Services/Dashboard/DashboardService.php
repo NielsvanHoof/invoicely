@@ -4,12 +4,18 @@ namespace App\Services\Dashboard;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
+use App\Models\Reminder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
+    /**
+     * Cache TTL in minutes
+     */
+    protected int $cacheTtl = 60;
+
     /**
      * Get dashboard statistics for a user.
      *
@@ -19,7 +25,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'stats');
 
-        return Cache::remember($cacheKey, 60, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
             return [
                 'totalInvoices' => $this->getTotalInvoices($user),
                 'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
@@ -38,13 +44,117 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'latest-invoices');
 
-        return Cache::remember($cacheKey, 60, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
             return Invoice::query()
                 ->forUser($user)
                 ->latest()
                 ->take($limit)
                 ->get();
         });
+    }
+
+    /**
+     * Get upcoming invoices for a user (due in the future and not paid).
+     *
+     * @return Collection<int, Invoice>
+     */
+    public function getUpcomingInvoices(User $user, int $limit = 5): Collection
+    {
+        $cacheKey = $this->getCacheKey($user, 'upcoming-invoices');
+
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+            return Invoice::query()
+                ->forUser($user)
+                ->whereDate('due_date', '>=', now())
+                ->whereNotIn('status', [InvoiceStatus::PAID])
+                ->orderBy('due_date')
+                ->take($limit)
+                ->get();
+        });
+    }
+
+    /**
+     * Get recent activity for a user.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getRecentActivity(User $user, int $limit = 10): array
+    {
+        $cacheKey = $this->getCacheKey($user, 'recent-activity');
+
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+            // Get recent invoices (created or updated)
+            $recentInvoices = Invoice::query()
+                ->forUser($user)
+                ->latest('updated_at')
+                ->take($limit)
+                ->get()
+                ->map(function (Invoice $invoice) {
+                    $isNew = $invoice->created_at->diffInHours($invoice->updated_at) < 1;
+                    $date = $isNew ? $invoice->created_at : $invoice->updated_at;
+
+                    return [
+                        'id' => $invoice->id,
+                        'type' => $isNew ? 'created' : 'updated',
+                        'invoice_number' => $invoice->invoice_number,
+                        'client_name' => $invoice->client_name,
+                        'amount' => $invoice->amount,
+                        'status' => $invoice->status,
+                        // Store dates as ISO 8601 formatted strings
+                        'date' => $date->toIso8601String(),
+                        // Add a timestamp for sorting
+                        'timestamp' => $date->timestamp,
+                    ];
+                })
+                ->toArray();
+
+            // Get recent reminders
+            $recentReminders = Reminder::query()
+                ->whereHas('invoice', function ($query) use ($user) {
+                    $query->forUser($user);
+                })
+                ->with('invoice')
+                ->latest('created_at')
+                ->take($limit)
+                ->get()
+                ->map(function (Reminder $reminder) {
+                    return [
+                        'id' => $reminder->invoice->id,
+                        'reminder_id' => $reminder->id,
+                        'type' => 'reminder',
+                        'reminder_type' => $reminder->type,
+                        'invoice_number' => $reminder->invoice->invoice_number,
+                        'client_name' => $reminder->invoice->client_name,
+                        'amount' => $reminder->invoice->amount,
+                        'status' => $reminder->invoice->status,
+                        'sent_at' => $reminder->sent_at ? $reminder->sent_at->toIso8601String() : null,
+                        'scheduled_date' => $reminder->scheduled_date->toIso8601String(),
+                        // Store dates as ISO 8601 formatted strings
+                        'date' => $reminder->created_at->toIso8601String(),
+                        // Add a timestamp for sorting
+                        'timestamp' => $reminder->created_at->timestamp,
+                    ];
+                })
+                ->toArray();
+
+            $allActivity = array_merge($recentInvoices, $recentReminders);
+            usort($allActivity, function ($a, $b) {
+                return $b['timestamp'] - $a['timestamp'];
+            });
+
+            return array_slice($allActivity, 0, $limit);
+        });
+    }
+
+    /**
+     * Invalidate the cache for a user.
+     */
+    public function invalidateCache(User $user): void
+    {
+        Cache::forget($this->getCacheKey($user, 'stats'));
+        Cache::forget($this->getCacheKey($user, 'latest-invoices'));
+        Cache::forget($this->getCacheKey($user, 'upcoming-invoices'));
+        Cache::forget($this->getCacheKey($user, 'recent-activity'));
     }
 
     /**

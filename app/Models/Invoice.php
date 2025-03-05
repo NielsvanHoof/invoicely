@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Builders\Invoice\InvoiceBuilder;
+use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
-use Storage;
 
 class Invoice extends Model
 {
@@ -44,18 +44,12 @@ class Invoice extends Model
         'issue_date' => 'date',
         'due_date' => 'date',
         'amount' => 'decimal:2',
+        'status' => InvoiceStatus::class,
     ];
 
-    /**
-     * Get the file path attribute.
-     *
-     * @return Attribute<string|null,never>
-     */
-    public function filePath(): Attribute
+    public function newEloquentBuilder($query): InvoiceBuilder
     {
-        return new Attribute(
-            get: fn ($value) => $value ? Storage::disk('s3')->url($value) : null,
-        );
+        return new InvoiceBuilder($query);
     }
 
     /**
@@ -75,6 +69,8 @@ class Invoice extends Model
 
     /**
      * Get the user that owns the invoice.
+     *
+     * @return BelongsTo<User, Invoice>
      */
     public function user(): BelongsTo
     {
@@ -83,6 +79,8 @@ class Invoice extends Model
 
     /**
      * Get the team that owns the invoice.
+     *
+     * @return BelongsTo<Team, Invoice>
      */
     public function team(): BelongsTo
     {
@@ -90,43 +88,12 @@ class Invoice extends Model
     }
 
     /**
-     * Scope a query to filter invoices by team.
+     * Get the reminders for the invoice.
      *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
+     * @return HasMany<Reminder, Invoice>
      */
-    public function scopeByTeam(Builder $query, ?string $teamId): Builder
+    public function reminders(): HasMany
     {
-        if ($teamId) {
-            return $query->where('team_id', $teamId);
-        }
-
-        return $query;
-    }
-
-    /**
-     * Scope a query to filter invoices by user.
-     *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
-     */
-    public function scopeByUser(Builder $query, int $userId): Builder
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Scope a query to filter invoices by user context (team or individual).
-     *
-     * @param  Builder<Invoice>  $query
-     * @return Builder<Invoice>
-     */
-    public function scopeForUser(Builder $query, User $user): Builder
-    {
-        if ($user->team_id) {
-            return $query->byTeam($user->team_id);
-        }
-
-        return $query->byUser($user->id);
+        return $this->hasMany(Reminder::class);
     }
 }

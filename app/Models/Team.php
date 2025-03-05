@@ -19,6 +19,8 @@ class Team extends Model
 
     /**
      * Get the users for the team.
+     *
+     * @return HasMany<User, Team>
      */
     public function users(): HasMany
     {
@@ -27,6 +29,8 @@ class Team extends Model
 
     /**
      * Get the invoices for the team.
+     *
+     * @return HasMany<Invoice, Team>
      */
     public function invoices(): HasMany
     {
@@ -35,6 +39,8 @@ class Team extends Model
 
     /**
      * Get the owner of the team.
+     *
+     * @return BelongsTo<User, Team>
      */
     public function owner(): BelongsTo
     {

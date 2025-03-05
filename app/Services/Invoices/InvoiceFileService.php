@@ -15,6 +15,8 @@ class InvoiceFileService
     /**
      * Store an invoice file.
      *
+     * @param  UploadedFile  $file  The file to store
+     * @param  int  $userId  The user ID
      * @return string|null The file path
      */
     public function storeFile(UploadedFile $file, int $userId): ?string
@@ -30,6 +32,9 @@ class InvoiceFileService
 
     /**
      * Delete an invoice file.
+     *
+     * @param  string|null  $filePath  The file path
+     * @return bool True if the file was deleted, false otherwise
      */
     public function deleteFile(?string $filePath): bool
     {
@@ -67,5 +72,33 @@ class InvoiceFileService
         }
 
         return $currentFilePath;
+    }
+
+    /**
+     * Generate a temporary signed URL for a file.
+     *
+     * @param  string|null  $filePath  The file path
+     * @param  int  $expirationMinutes  Number of minutes until the URL expires
+     * @return string|null The signed URL or null if file path is null
+     */
+    public function getTemporaryUrl(?string $filePath, int $expirationMinutes = 60): ?string
+    {
+        if (! $filePath) {
+            return null;
+        }
+
+        try {
+            return Storage::disk($this->disk)->temporaryUrl(
+                $filePath,
+                now()->addMinutes($expirationMinutes)
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate temporary URL: '.$e->getMessage(), [
+                'file_path' => $filePath,
+                'exception' => $e,
+            ]);
+
+            return null;
+        }
     }
 }

@@ -56,10 +56,18 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],
-
+        'backup' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backup'),
+            'url' => env('APP_URL').'/storage/backup',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
     ],
 
     /*

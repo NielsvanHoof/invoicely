@@ -3,11 +3,11 @@ name: tests
 on:
   push:
     branches:
-      - develop
+      - dev
       - main
   pull_request:
     branches:
-      - develop
+      - dev
       - main
 
 jobs:
@@ -50,4 +50,4 @@ jobs:
         run: php artisan key:generate
 
       - name: Tests
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/pest

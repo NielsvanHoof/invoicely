@@ -1,4 +1,4 @@
-import { EmptyState, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
+import { EmptyState, FilterBar, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
 import { Pagination } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Invoice, type PaginatedData } from '@/types';
@@ -8,6 +8,13 @@ import { PlusIcon } from 'lucide-react';
 interface InvoicesIndexProps {
     invoices: PaginatedData<Invoice>;
     search?: string;
+    filters?: {
+        status?: string;
+        date_from?: string;
+        date_to?: string;
+        amount_from?: string;
+        amount_to?: string;
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function InvoicesIndex({ invoices, search }: InvoicesIndexProps) {
+export default function InvoicesIndex({ invoices, search, filters = {} }: InvoicesIndexProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Invoices" />
@@ -39,27 +46,28 @@ export default function InvoicesIndex({ invoices, search }: InvoicesIndexProps) 
                 </div>
 
                 {/* Search and filters section - Always show if we have invoices or if we're searching */}
-                {(invoices.total > 0 || search) && (
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                {(invoices.total > 0 || search || Object.values(filters).some(Boolean)) && (
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <SearchBar initialValue={search} placeholder="Search invoices..." />
+                        <FilterBar filters={filters} />
                     </div>
                 )}
 
                 {/* Search results info */}
-                {search && (
+                {(search || Object.values(filters).some(Boolean)) && (
                     <div className="text-muted-foreground text-sm">
                         {invoices.total === 0 ? (
-                            <p>No results found for "{search}"</p>
+                            <p>No results found</p>
                         ) : (
                             <p>
-                                Found {invoices.total} result{invoices.total !== 1 ? 's' : ''} for "{search}"
+                                Found {invoices.total} result{invoices.total !== 1 ? 's' : ''}
                             </p>
                         )}
                     </div>
                 )}
 
                 {invoices.total === 0 ? (
-                    <EmptyState isSearchResult={!!search} searchTerm={search} />
+                    <EmptyState isSearchResult={!!search} searchTerm={search} hasFilters={Object.values(filters).some(Boolean)} />
                 ) : (
                     <>
                         {/* Desktop view - Table */}

@@ -1,21 +1,22 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Team, User, type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { AlertCircle, Loader2, PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 interface TeamsProps {
     team: Team | null;
     teamMembers: User[];
     isTeamOwner: boolean;
-    hasTeam: boolean;
     can: {
         leave: boolean;
         removeUser: boolean;
@@ -32,15 +33,17 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsProps, 'isTeamOwner'>) {
+export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showInviteDialog, setShowInviteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showRemoveUserDialog, setShowRemoveUserDialog] = useState(false);
+    const [showLeaveDialog, setShowLeaveDialog] = useState(false);
     const [userToRemove, setUserToRemove] = useState<number | null>(null);
+    const [userToRemoveName, setUserToRemoveName] = useState<string>('');
 
-    // Team update form
     const {
         data: teamData,
         setData: setTeamData,
@@ -48,11 +51,11 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
         processing: updatingTeam,
         errors: teamErrors,
         reset: resetTeamForm,
+        clearErrors: clearTeamErrors,
     } = useForm({
         name: team?.name || '',
     });
 
-    // Team create form
     const {
         data: createTeamData,
         setData: setCreateTeamData,
@@ -60,11 +63,11 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
         processing: creatingTeam,
         errors: createTeamErrors,
         reset: resetCreateTeamForm,
+        clearErrors: clearCreateTeamErrors,
     } = useForm({
         name: '',
     });
 
-    // Invite form
     const {
         data: inviteData,
         setData: setInviteData,
@@ -72,85 +75,143 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
         processing: inviting,
         errors: inviteErrors,
         reset: resetInviteForm,
+        clearErrors: clearInviteErrors,
     } = useForm({
         name: '',
         email: '',
     });
 
-    // Leave team form
-    const { post: leaveTeam, processing: leaving } = useForm();
-
-    // Remove user form
-    const { delete: removeUser, processing: removing } = useForm();
-
-    // Delete team form
-    const { delete: deleteTeam, processing: deleting } = useForm();
-
     const submitTeamUpdate: FormEventHandler = (e) => {
         e.preventDefault();
+        clearTeamErrors();
 
         if (!team) return;
+        if (!teamData.name.trim()) {
+            setTeamData('name', '');
+            return;
+        }
 
+        setIsSubmitting(true);
         updateTeam(route('teams.update', { team: team }), {
             onSuccess: () => {
                 setShowEditDialog(false);
                 resetTeamForm();
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
             },
         });
     };
 
     const submitCreateTeam: FormEventHandler = (e) => {
         e.preventDefault();
+        clearCreateTeamErrors();
 
+        if (!createTeamData.name.trim()) {
+            setCreateTeamData('name', '');
+            return;
+        }
+
+        setIsSubmitting(true);
         createTeam(route('teams.store'), {
             onSuccess: () => {
                 setShowCreateDialog(false);
                 resetCreateTeamForm();
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
             },
         });
     };
 
     const submitInvite: FormEventHandler = (e) => {
         e.preventDefault();
+        clearInviteErrors();
 
+        if (!inviteData.email.trim() || !inviteData.name.trim()) {
+            if (!inviteData.email.trim()) setInviteData('email', '');
+            if (!inviteData.name.trim()) setInviteData('name', '');
+            return;
+        }
+
+        setIsSubmitting(true);
         sendInvite(route('teams.invite'), {
             onSuccess: () => {
                 setShowInviteDialog(false);
                 resetInviteForm();
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
             },
         });
     };
 
     const handleLeaveTeam = () => {
-        if (confirm('Are you sure you want to leave this team?')) {
-            leaveTeam(route('teams.leave'));
-        }
+        if (isTeamOwner) return;
+        setShowLeaveDialog(true);
     };
 
-    const handleRemoveUser = (userId: number) => {
+    const confirmLeaveTeam = () => {
+        setIsSubmitting(true);
+        router.delete(route('teams.leave'), {
+            onSuccess: () => {
+                setShowLeaveDialog(false);
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
+                setShowLeaveDialog(false);
+            },
+        });
+    };
+
+    const handleRemoveUser = (userId: number, userName: string) => {
         if (!can.removeUser) return;
 
         setUserToRemove(userId);
+        setUserToRemoveName(userName);
         setShowRemoveUserDialog(true);
     };
 
     const confirmRemoveUser = () => {
         if (!userToRemove) return;
 
-        removeUser(route('teams.remove-user', { user: userToRemove }), {
+        setIsSubmitting(true);
+        router.delete(route('teams.remove-user'), {
+            data: {
+                user_id: userToRemove,
+            },
             onSuccess: () => {
                 setShowRemoveUserDialog(false);
                 setUserToRemove(null);
+                setUserToRemoveName('');
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
             },
         });
     };
 
     const handleDeleteTeam = () => {
+        if (!team || !isTeamOwner) return;
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDeleteTeam = () => {
         if (!team || !can.delete) return;
 
-        deleteTeam(route('teams.destroy', { team: team.id }), {
+        setIsSubmitting(true);
+        router.delete(route('teams.destroy', { team: team.id }), {
             onSuccess: () => {
                 setShowDeleteDialog(false);
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false);
             },
         });
     };
@@ -161,7 +222,7 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    {!hasTeam ? (
+                    {team === null ? (
                         // No Team View
                         <Card>
                             <CardHeader>
@@ -190,7 +251,7 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                         <CardDescription>Manage your team settings and invite new members.</CardDescription>
                                     </div>
                                     {can.delete && (
-                                        <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full sm:w-auto">
+                                        <Button variant="destructive" onClick={handleDeleteTeam} className="w-full sm:w-auto">
                                             <TrashIcon className="mr-2 h-4 w-4" />
                                             Delete Team
                                         </Button>
@@ -228,76 +289,101 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                     )}
                                 </CardHeader>
                                 <CardContent>
-                                    {/* Desktop view - Table */}
-                                    <div className="hidden md:block">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Name</TableHead>
-                                                    <TableHead>Email</TableHead>
-                                                    <TableHead>Role</TableHead>
-                                                    {can.removeUser && <TableHead className="text-right">Actions</TableHead>}
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {teamMembers.map((member) => (
-                                                    <TableRow key={member.id}>
-                                                        <TableCell className="font-medium">{member.name}</TableCell>
-                                                        <TableCell>{member.email}</TableCell>
-                                                        <TableCell>{member.id === team?.owner_id ? 'Owner' : 'Member'}</TableCell>
-                                                        {can.removeUser && (
-                                                            <TableCell className="text-right">
-                                                                {member.id !== team?.owner_id && (
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => handleRemoveUser(member.id)}
-                                                                        disabled={removing}
-                                                                    >
-                                                                        <UserMinusIcon className="h-4 w-4" />
-                                                                        <span className="sr-only">Remove</span>
-                                                                    </Button>
+                                    {teamMembers.length === 0 ? (
+                                        <Alert className="bg-muted/50">
+                                            <AlertCircle className="h-4 w-4" />
+                                            <AlertTitle>No team members</AlertTitle>
+                                            <AlertDescription>
+                                                Your team doesn't have any members yet. Invite someone to get started.
+                                            </AlertDescription>
+                                        </Alert>
+                                    ) : (
+                                        <>
+                                            {/* Desktop view - Table */}
+                                            <div className="hidden md:block">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Name</TableHead>
+                                                            <TableHead>Email</TableHead>
+                                                            <TableHead>Role</TableHead>
+                                                            {can.removeUser && <TableHead className="text-right">Actions</TableHead>}
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {teamMembers.map((member) => (
+                                                            <TableRow key={member.id}>
+                                                                <TableCell className="font-medium">{member.name}</TableCell>
+                                                                <TableCell>{member.email}</TableCell>
+                                                                <TableCell>
+                                                                    <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                                                        {member.id === team?.owner_id ? 'Owner' : 'Member'}
+                                                                    </span>
+                                                                </TableCell>
+                                                                {can.removeUser && (
+                                                                    <TableCell className="text-right">
+                                                                        {member.id !== team?.owner_id && (
+                                                                            <TooltipProvider>
+                                                                                <Tooltip>
+                                                                                    <TooltipTrigger asChild>
+                                                                                        <Button
+                                                                                            variant="ghost"
+                                                                                            size="sm"
+                                                                                            onClick={() => handleRemoveUser(member.id, member.name)}
+                                                                                            className="hover:text-destructive"
+                                                                                        >
+                                                                                            <UserMinusIcon className="h-4 w-4" />
+                                                                                            <span className="sr-only">Remove</span>
+                                                                                        </Button>
+                                                                                    </TooltipTrigger>
+                                                                                    <TooltipContent>
+                                                                                        <p>Remove from team</p>
+                                                                                    </TooltipContent>
+                                                                                </Tooltip>
+                                                                            </TooltipProvider>
+                                                                        )}
+                                                                    </TableCell>
                                                                 )}
-                                                            </TableCell>
-                                                        )}
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-
-                                    {/* Mobile view - Cards */}
-                                    <div className="space-y-4 md:hidden">
-                                        {teamMembers.map((member) => (
-                                            <div key={member.id} className="flex flex-col gap-2 rounded-lg border p-4">
-                                                <div className="flex items-center justify-between">
-                                                    <h3 className="font-medium">{member.name}</h3>
-                                                    <span className="bg-muted rounded-full px-2 py-1 text-xs">
-                                                        {member.id === team?.owner_id ? 'Owner' : 'Member'}
-                                                    </span>
-                                                </div>
-                                                <p className="text-muted-foreground text-sm">{member.email}</p>
-
-                                                {can.removeUser && member.id !== team?.owner_id && (
-                                                    <div className="mt-2 flex justify-end">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleRemoveUser(member.id)}
-                                                            disabled={removing}
-                                                        >
-                                                            <UserMinusIcon className="mr-2 h-4 w-4" />
-                                                            Remove
-                                                        </Button>
-                                                    </div>
-                                                )}
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
                                             </div>
-                                        ))}
-                                    </div>
+
+                                            {/* Mobile view - Cards */}
+                                            <div className="space-y-4 md:hidden">
+                                                {teamMembers.map((member) => (
+                                                    <div key={member.id} className="flex flex-col gap-2 rounded-lg border p-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <h3 className="font-medium">{member.name}</h3>
+                                                            <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                                                {member.id === team?.owner_id ? 'Owner' : 'Member'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-muted-foreground text-sm">{member.email}</p>
+
+                                                        {can.removeUser && member.id !== team?.owner_id && (
+                                                            <div className="mt-2 flex justify-end">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleRemoveUser(member.id, member.name)}
+                                                                    className="hover:text-destructive hover:border-destructive"
+                                                                >
+                                                                    <UserMinusIcon className="mr-2 h-4 w-4" />
+                                                                    Remove
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
                                 </CardContent>
                                 {can.leave && (
                                     <CardFooter>
-                                        <Button variant="destructive" onClick={handleLeaveTeam} disabled={leaving} className="w-full sm:w-auto">
+                                        <Button variant="destructive" onClick={handleLeaveTeam} className="w-full sm:w-auto">
                                             Leave Team
                                         </Button>
                                     </CardFooter>
@@ -307,7 +393,16 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                     )}
 
                     {/* Create Team Dialog */}
-                    <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                    <Dialog
+                        open={showCreateDialog}
+                        onOpenChange={(open) => {
+                            setShowCreateDialog(open);
+                            if (!open) {
+                                resetCreateTeamForm();
+                                clearCreateTeamErrors();
+                            }
+                        }}
+                    >
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Create Team</DialogTitle>
@@ -323,16 +418,25 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                             value={createTeamData.name}
                                             onChange={(e) => setCreateTeamData('name', e.target.value)}
                                             placeholder="Enter team name"
+                                            disabled={creatingTeam || isSubmitting}
+                                            className={createTeamErrors.name ? 'border-destructive' : ''}
                                         />
                                         {createTeamErrors.name && <p className="text-destructive text-sm">{createTeamErrors.name}</p>}
                                     </div>
                                 </div>
 
                                 <DialogFooter className="flex flex-col gap-2 sm:flex-row">
-                                    <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)} className="w-full sm:w-auto">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setShowCreateDialog(false)}
+                                        className="w-full sm:w-auto"
+                                        disabled={creatingTeam || isSubmitting}
+                                    >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={creatingTeam} className="w-full sm:w-auto">
+                                    <Button type="submit" disabled={creatingTeam || isSubmitting} className="w-full sm:w-auto">
+                                        {(creatingTeam || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Create Team
                                     </Button>
                                 </DialogFooter>
@@ -341,7 +445,18 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                     </Dialog>
 
                     {/* Edit Team Dialog */}
-                    <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                    <Dialog
+                        open={showEditDialog}
+                        onOpenChange={(open) => {
+                            setShowEditDialog(open);
+                            if (!open) {
+                                resetTeamForm();
+                                clearTeamErrors();
+                            } else {
+                                setTeamData('name', team?.name || '');
+                            }
+                        }}
+                    >
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Edit Team</DialogTitle>
@@ -357,16 +472,25 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                             value={teamData.name}
                                             onChange={(e) => setTeamData('name', e.target.value)}
                                             placeholder="Enter team name"
+                                            disabled={updatingTeam || isSubmitting}
+                                            className={teamErrors.name ? 'border-destructive' : ''}
                                         />
                                         {teamErrors.name && <p className="text-destructive text-sm">{teamErrors.name}</p>}
                                     </div>
                                 </div>
 
                                 <DialogFooter className="flex flex-col gap-2 sm:flex-row">
-                                    <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)} className="w-full sm:w-auto">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setShowEditDialog(false)}
+                                        className="w-full sm:w-auto"
+                                        disabled={updatingTeam || isSubmitting}
+                                    >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={updatingTeam} className="w-full sm:w-auto">
+                                    <Button type="submit" disabled={updatingTeam || isSubmitting} className="w-full sm:w-auto">
+                                        {(updatingTeam || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Save Changes
                                     </Button>
                                 </DialogFooter>
@@ -375,7 +499,16 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                     </Dialog>
 
                     {/* Invite User Dialog */}
-                    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+                    <Dialog
+                        open={showInviteDialog}
+                        onOpenChange={(open) => {
+                            setShowInviteDialog(open);
+                            if (!open) {
+                                resetInviteForm();
+                                clearInviteErrors();
+                            }
+                        }}
+                    >
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Invite Team Member</DialogTitle>
@@ -391,6 +524,8 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                             value={inviteData.name}
                                             onChange={(e) => setInviteData('name', e.target.value)}
                                             placeholder="Enter user's name"
+                                            disabled={inviting || isSubmitting}
+                                            className={inviteErrors.name ? 'border-destructive' : ''}
                                         />
                                         {inviteErrors.name && <p className="text-destructive text-sm">{inviteErrors.name}</p>}
                                     </div>
@@ -403,16 +538,25 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                             value={inviteData.email}
                                             onChange={(e) => setInviteData('email', e.target.value)}
                                             placeholder="Enter user's email"
+                                            disabled={inviting || isSubmitting}
+                                            className={inviteErrors.email ? 'border-destructive' : ''}
                                         />
                                         {inviteErrors.email && <p className="text-destructive text-sm">{inviteErrors.email}</p>}
                                     </div>
                                 </div>
 
                                 <DialogFooter className="flex flex-col gap-2 sm:flex-row">
-                                    <Button type="button" variant="outline" onClick={() => setShowInviteDialog(false)} className="w-full sm:w-auto">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setShowInviteDialog(false)}
+                                        className="w-full sm:w-auto"
+                                        disabled={inviting || isSubmitting}
+                                    >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={inviting} className="w-full sm:w-auto">
+                                    <Button type="submit" disabled={inviting || isSubmitting} className="w-full sm:w-auto">
+                                        {(inviting || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Send Invitation
                                     </Button>
                                 </DialogFooter>
@@ -421,17 +565,32 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                     </Dialog>
 
                     {/* Remove User Dialog */}
-                    <Dialog open={showRemoveUserDialog} onOpenChange={setShowRemoveUserDialog}>
+                    <Dialog
+                        open={showRemoveUserDialog}
+                        onOpenChange={(open) => {
+                            setShowRemoveUserDialog(open);
+                            if (!open) {
+                                setUserToRemove(null);
+                                setUserToRemoveName('');
+                            }
+                        }}
+                    >
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Remove Team Member</DialogTitle>
-                                <DialogDescription>Are you sure you want to remove this user from your team?</DialogDescription>
+                                <DialogDescription>
+                                    Are you sure you want to remove <span className="font-medium">{userToRemoveName}</span> from your team?
+                                </DialogDescription>
                             </DialogHeader>
 
                             <div className="py-4">
-                                <p className="text-muted-foreground">
-                                    This action will remove the user from your team. They will no longer have access to your team's data.
-                                </p>
+                                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Warning</AlertTitle>
+                                    <AlertDescription>
+                                        This action will remove the user from your team. They will no longer have access to your team's data.
+                                    </AlertDescription>
+                                </Alert>
                             </div>
 
                             <DialogFooter className="flex flex-col gap-2 sm:flex-row">
@@ -441,26 +600,69 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                                     onClick={() => {
                                         setShowRemoveUserDialog(false);
                                         setUserToRemove(null);
+                                        setUserToRemoveName('');
                                     }}
                                     className="w-full sm:w-auto"
+                                    disabled={isSubmitting}
                                 >
                                     Cancel
                                 </Button>
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    onClick={confirmRemoveUser}
-                                    disabled={removing}
-                                    className="w-full sm:w-auto"
-                                >
+                                <Button variant="destructive" onClick={confirmRemoveUser} disabled={isSubmitting}>
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Remove User
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
 
+                    {/* Leave Team Dialog */}
+                    <Dialog
+                        open={showLeaveDialog}
+                        onOpenChange={(open) => {
+                            setShowLeaveDialog(open);
+                        }}
+                    >
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Leave Team</DialogTitle>
+                                <DialogDescription>Are you sure you want to leave this team?</DialogDescription>
+                            </DialogHeader>
+
+                            <div className="py-4">
+                                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Warning</AlertTitle>
+                                    <AlertDescription>
+                                        You will lose access to all team resources and will need to be invited back to rejoin.
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+
+                            <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowLeaveDialog(false)}
+                                    className="w-full sm:w-auto"
+                                    disabled={isSubmitting}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button variant="destructive" onClick={confirmLeaveTeam} disabled={isSubmitting}>
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Leave Team
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
                     {/* Delete Team Dialog */}
-                    <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <Dialog
+                        open={showDeleteDialog}
+                        onOpenChange={(open) => {
+                            setShowDeleteDialog(open);
+                        }}
+                    >
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Delete Team</DialogTitle>
@@ -470,21 +672,25 @@ export default function Teams({ team, teamMembers, hasTeam, can }: Omit<TeamsPro
                             </DialogHeader>
 
                             <div className="py-4">
-                                <p className="text-destructive font-medium">Warning: This action is permanent!</p>
-                                <p className="text-muted-foreground mt-2">Deleting your team will remove all team members and any associated data.</p>
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Warning: This action is permanent!</AlertTitle>
+                                    <AlertDescription>Deleting your team will remove all team members and any associated data.</AlertDescription>
+                                </Alert>
                             </div>
 
                             <DialogFooter className="flex flex-col gap-2 sm:flex-row">
-                                <Button type="button" variant="outline" onClick={() => setShowDeleteDialog(false)} className="w-full sm:w-auto">
-                                    Cancel
-                                </Button>
                                 <Button
                                     type="button"
-                                    variant="destructive"
-                                    onClick={handleDeleteTeam}
-                                    disabled={deleting}
+                                    variant="outline"
+                                    onClick={() => setShowDeleteDialog(false)}
                                     className="w-full sm:w-auto"
+                                    disabled={isSubmitting}
                                 >
+                                    Cancel
+                                </Button>
+                                <Button variant="destructive" onClick={confirmDeleteTeam} disabled={isSubmitting}>
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Delete Team
                                 </Button>
                             </DialogFooter>
