@@ -192,7 +192,8 @@ class AnalyticsService
      */
     protected function getCacheKey(User $user, string $type): string
     {
-        $userKey = $user->team_id ?? 'user-' . $user->id;
+        $userKey = $user->team_id ?? 'user-'.$user->id;
+
         return "analytics.{$userKey}.{$type}";
     }
 }
