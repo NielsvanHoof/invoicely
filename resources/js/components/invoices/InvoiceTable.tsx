@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type Invoice } from '@/types';
-import { Link } from '@inertiajs/react';
+import { SharedData, type Invoice } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { BellIcon, EyeIcon, FileEditIcon, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 
 interface InvoiceTableProps {
@@ -12,6 +12,9 @@ interface InvoiceTableProps {
 }
 
 export function InvoiceTable({ invoices }: InvoiceTableProps) {
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth?.user?.currency || 'USD';
+
     return (
         <div className="border-sidebar-border/70 dark:border-sidebar-border hidden rounded-xl border md:block">
             <Table>
@@ -57,7 +60,7 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
                                 </div>
                             </TableCell>
                             <TableCell>{invoice.client_name}</TableCell>
-                            <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+                            <TableCell>{formatCurrency(invoice.amount, userCurrency)}</TableCell>
                             <TableCell className="hidden lg:table-cell">{formatDate(invoice.issue_date)}</TableCell>
                             <TableCell className="hidden lg:table-cell">{formatDate(invoice.due_date)}</TableCell>
                             <TableCell>

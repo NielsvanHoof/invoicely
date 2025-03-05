@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Builders\Reminder\ReminderBuilder;
 use App\Enums\ReminderType;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,6 +36,11 @@ class Reminder extends Model
         'type' => ReminderType::class,
     ];
 
+    public function newEloquentBuilder($query): ReminderBuilder
+    {
+        return new ReminderBuilder($query);
+    }
+
     /**
      * Get the invoice that owns the reminder.
      *
@@ -44,17 +49,5 @@ class Reminder extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
-    }
-
-    /**
-     * Scope a query to only include reminders that are due to be sent.
-     *
-     * @param  Builder<Reminder>  $query
-     * @return Builder<Reminder>
-     */
-    public function scopeDue(Builder $query): Builder
-    {
-        return $query->whereNull('sent_at')
-            ->where('scheduled_date', '<=', now());
     }
 }

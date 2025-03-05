@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type BreadcrumbItem, type Invoice } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -15,6 +15,8 @@ interface ShowInvoiceProps {
 
 export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
     const [isDownloading, setIsDownloading] = useState(false);
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth.user.currency || 'USD';
 
     const handleDownload = async () => {
         if (!invoice.file_path || isDownloading) return;
@@ -117,7 +119,7 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Amount</h3>
-                                    <p className="mt-1 text-lg font-semibold">{formatCurrency(invoice.amount)}</p>
+                                    <p className="mt-1 text-lg font-semibold">{formatCurrency(invoice.amount, userCurrency)}</p>
                                 </div>
                             </div>
 

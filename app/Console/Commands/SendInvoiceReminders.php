@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\Reminders\InvoiceReminderMail;
+use App\Models\Reminder;
 use App\Services\Reminders\ReminderService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -30,7 +31,7 @@ class SendInvoiceReminders extends Command
     {
         $this->info('Sending invoice reminders...');
 
-        $dueReminders = $reminderService->getDueReminders();
+        $dueReminders = Reminder::query()->due()->with('invoice')->get();
 
         if ($dueReminders->isEmpty()) {
             $this->info('No reminders due to be sent.');

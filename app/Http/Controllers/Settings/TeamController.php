@@ -36,30 +36,36 @@ class TeamController extends Controller
     {
         $user = Auth::user()->load('team');
         $team = $user->team;
-
-        // Get all team members if user has a team
         $teamMembers = [];
         $isTeamOwner = false;
+        $permissions = [
+            'leave' => false,
+            'removeUser' => false,
+            'delete' => false,
+            'invite' => false,
+            'update' => false,
+        ];
 
         if ($team) {
-            // Eager load team with owner for better performance
             $team->load('owner');
             $teamMembers = $this->teamService->getTeamMembers($team);
-            $isTeamOwner = $user->isTeamOwner();
+            $isTeamOwner = $user->id === $team->owner_id;
+
+            // Only check permissions if the user has a team
+            $permissions = [
+                'leave' => $user->can('leave', $team),
+                'removeUser' => $user->can('removeUser', $team),
+                'delete' => $user->can('delete', $team),
+                'invite' => $user->can('invite', $team),
+                'update' => $user->can('update', $team),
+            ];
         }
 
         return Inertia::render('settings/teams', [
             'team' => $team,
             'teamMembers' => $teamMembers,
             'isTeamOwner' => $isTeamOwner,
-            'hasTeam' => ! is_null($team),
-            'can' => [
-                'leave' => $user->can('leave', $team),
-                'removeUser' => $user->can('removeUser', $team),
-                'delete' => $user->can('delete', $team),
-                'invite' => $user->can('invite', $team),
-                'update' => $user->can('update', $team),
-            ],
+            'can' => $permissions,
         ]);
     }
 
@@ -115,12 +121,6 @@ class TeamController extends Controller
             $user = Auth::user()->load('team');
             $team = $user->team;
 
-            // Check if user is team owner
-            if (! $user->isTeamOwner()) {
-                return back()->with('error', 'Only team owners can invite users.');
-            }
-
-            // Use the policy to check if user can invite
             $this->authorize('invite', $team);
 
             $invitationData = TeamInvitationData::from($request);
@@ -147,11 +147,6 @@ class TeamController extends Controller
         try {
             $user = Auth::user()->load('team');
             $team = $user->team;
-
-            // Check if user is team owner
-            if (! $user->isTeamOwner()) {
-                return back()->with('error', 'Only team owners can remove users.');
-            }
 
             $this->authorize('removeUser', $team);
 
@@ -188,11 +183,6 @@ class TeamController extends Controller
 
             $this->authorize('leave', $team);
 
-            // Team owners cannot leave their own team
-            if ($user->isTeamOwner()) {
-                return back()->with('error', 'Team owners cannot leave their own team. Transfer ownership first or delete the team.');
-            }
-
             $this->teamService->removeUserFromTeam($user);
 
             return redirect()->route('teams.index')->with('success', 'You have left the team.');
@@ -203,7 +193,7 @@ class TeamController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to leave team: '.$e->getMessage());
+            return redirect()->route('teams.index')->with('error', 'Failed to leave team: '.$e->getMessage());
         }
     }
 
@@ -213,14 +203,6 @@ class TeamController extends Controller
     public function destroy(Team $team): RedirectResponse
     {
         try {
-            $user = Auth::user()->load('team');
-
-            // Only team owner can delete the team
-            if ($user->id !== $team->owner_id) {
-                return back()->with('error', 'Only team owners can delete teams.');
-            }
-
-            // Use the service to delete the team
             $this->teamService->deleteTeam($team);
 
             return redirect()->route('teams.index')->with('success', 'Team deleted successfully.');

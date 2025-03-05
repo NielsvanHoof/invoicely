@@ -2,8 +2,8 @@ import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type Invoice } from '@/types';
-import { Link } from '@inertiajs/react';
+import { SharedData, type Invoice } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { BellIcon, EyeIcon, FileEditIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 
 interface InvoiceCardProps {
@@ -11,6 +11,9 @@ interface InvoiceCardProps {
 }
 
 export function InvoiceCard({ invoice }: InvoiceCardProps) {
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth?.user?.currency || 'USD';
+
     return (
         <Card className="overflow-hidden">
             <CardContent className="p-0">
@@ -45,7 +48,7 @@ export function InvoiceCard({ invoice }: InvoiceCardProps) {
                     <div className="text-muted-foreground text-sm">{invoice.client_name}</div>
 
                     <div className="mt-1 flex items-center justify-between">
-                        <div className="font-medium">{formatCurrency(invoice.amount)}</div>
+                        <div className="font-medium">{formatCurrency(invoice.amount, userCurrency)}</div>
                         <div className="text-muted-foreground text-xs">Due: {formatDate(invoice.due_date)}</div>
                     </div>
                 </div>

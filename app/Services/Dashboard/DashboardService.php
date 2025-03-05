@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Cache;
 class DashboardService
 {
     /**
+     * Cache TTL in minutes
+     */
+    protected int $cacheTtl = 60;
+
+    /**
      * Get dashboard statistics for a user.
      *
      * @return array<string, int|float>
@@ -20,7 +25,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'stats');
 
-        return Cache::remember($cacheKey, 60, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
             return [
                 'totalInvoices' => $this->getTotalInvoices($user),
                 'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
@@ -39,7 +44,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'latest-invoices');
 
-        return Cache::remember($cacheKey, 60, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
             return Invoice::query()
                 ->forUser($user)
                 ->latest()
@@ -57,7 +62,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'upcoming-invoices');
 
-        return Cache::remember($cacheKey, 60, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
             return Invoice::query()
                 ->forUser($user)
                 ->whereDate('due_date', '>=', now())
@@ -77,7 +82,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'recent-activity');
 
-        return Cache::remember($cacheKey, 60, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
             // Get recent invoices (created or updated)
             $recentInvoices = Invoice::query()
                 ->forUser($user)

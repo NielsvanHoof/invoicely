@@ -2,7 +2,6 @@
 
 namespace App\Mail\Invoices;
 
-use App\Helpers\Formatters;
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -10,6 +9,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Number;
 
 class InvoiceReceivedMail extends Mailable
 {
@@ -46,7 +46,7 @@ class InvoiceReceivedMail extends Mailable
             markdown: 'mail.invoice-received-mail',
             with: [
                 'invoice' => $this->invoice,
-                'formatted_amount' => Formatters::formatAmount($this->invoice->amount),
+                'formatted_amount' => Number::currency($this->invoice->amount, 'USD'),
             ],
         );
     }

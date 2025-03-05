@@ -4,8 +4,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils';
-import { type BreadcrumbItem, type Invoice } from '@/types';
-import { Deferred, Head, Link } from '@inertiajs/react';
+import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
+import { Deferred, Head, Link, usePage } from '@inertiajs/react';
 import { Activity, BellIcon, CheckCircle, Clock, CreditCard, DollarSign, FileText, PlusCircle, RefreshCw, TrendingUp } from 'lucide-react';
 
 interface ActivityItem {
@@ -42,6 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ stats, latestInvoices, upcomingInvoices, recentActivity }: DashboardProps) {
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth?.user?.currency || 'USD';
+
     // Function to get the appropriate icon for activity type
     const getActivityIcon = (type: string, status: string) => {
         if (type === 'created') return PlusCircle;
@@ -74,9 +77,19 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                 {/* Stats Cards */}
                 <div className="grid auto-rows-min grid-cols-2 gap-2 sm:gap-4 md:grid-cols-4">
                     <StatCard title="Total Invoices" value={stats.totalInvoices.toString()} icon={FileText} description="All time" />
-                    <StatCard title="Total Paid" value={formatCurrency(stats.totalPaid)} icon={DollarSign} description="All time" />
-                    <StatCard title="Total Pending" value={formatCurrency(stats.totalPending)} icon={CreditCard} description="Awaiting payment" />
-                    <StatCard title="Total Overdue" value={formatCurrency(stats.totalOverdue)} icon={TrendingUp} description="Needs attention" />
+                    <StatCard title="Total Paid" value={formatCurrency(stats.totalPaid, userCurrency)} icon={DollarSign} description="All time" />
+                    <StatCard
+                        title="Total Pending"
+                        value={formatCurrency(stats.totalPending, userCurrency)}
+                        icon={CreditCard}
+                        description="Awaiting payment"
+                    />
+                    <StatCard
+                        title="Total Overdue"
+                        value={formatCurrency(stats.totalOverdue, userCurrency)}
+                        icon={TrendingUp}
+                        description="Needs attention"
+                    />
                 </div>
 
                 {/* Latest Invoices - Card for mobile, Table for larger screens */}
@@ -116,7 +129,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                 </Link>
                                             </TableCell>
                                             <TableCell>{invoice.client_name}</TableCell>
-                                            <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+                                            <TableCell>{formatCurrency(invoice.amount, userCurrency)}</TableCell>
                                             <TableCell className="hidden md:table-cell">{formatDate(invoice.issue_date)}</TableCell>
                                             <TableCell>
                                                 <InvoiceStatusBadge status={invoice.status} />
@@ -146,7 +159,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                         </div>
                                         <div className="mt-1 text-sm text-neutral-500">{invoice.client_name}</div>
                                         <div className="mt-2 flex items-center justify-between">
-                                            <div className="font-medium">{formatCurrency(invoice.amount)}</div>
+                                            <div className="font-medium">{formatCurrency(invoice.amount, userCurrency)}</div>
                                             <div className="text-xs text-neutral-500">{formatDate(invoice.issue_date)}</div>
                                         </div>
                                     </div>
@@ -196,7 +209,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                 </Link>
                                             </TableCell>
                                             <TableCell>{invoice.client_name}</TableCell>
-                                            <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+                                            <TableCell>{formatCurrency(invoice.amount, userCurrency)}</TableCell>
                                             <TableCell className="hidden md:table-cell">{formatDate(invoice.due_date)}</TableCell>
                                             <TableCell>
                                                 <InvoiceStatusBadge status={invoice.status} />
@@ -224,7 +237,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                         </div>
                                         <div className="mt-1 text-sm text-neutral-500">{invoice.client_name}</div>
                                         <div className="mt-2 flex items-center justify-between">
-                                            <div className="font-medium">{formatCurrency(invoice.amount)}</div>
+                                            <div className="font-medium">{formatCurrency(invoice.amount, userCurrency)}</div>
                                             <div className="text-xs text-neutral-500">Due: {formatDate(invoice.due_date)}</div>
                                         </div>
                                     </div>
@@ -280,7 +293,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                     >
                                                         {activity.invoice_number} - {activity.client_name}
                                                     </Link>
-                                                    <span className="text-xs font-medium">{formatCurrency(activity.amount)}</span>
+                                                    <span className="text-xs font-medium">{formatCurrency(activity.amount, userCurrency)}</span>
                                                 </div>
                                                 {activity.type === 'reminder' && activity.scheduled_date && (
                                                     <div className="flex items-center justify-between">
