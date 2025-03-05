@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type Invoice } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { BellIcon, EyeIcon, FileEditIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
 
 interface InvoiceCardProps {
     invoice: Invoice;
@@ -14,7 +13,7 @@ interface InvoiceCardProps {
 export function InvoiceCard({ invoice }: InvoiceCardProps) {
     const { auth } = usePage<SharedData>().props;
     const userCurrency = auth?.user?.currency || 'USD';
-    
+
     return (
         <Card className="overflow-hidden">
             <CardContent className="p-0">
