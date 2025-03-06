@@ -45,34 +45,7 @@ class InvoiceController extends Controller
             'amount_to' => $request->input('amount_to', ''),
         ];
 
-        $invoices = Invoice::search($search)
-            ->query(function (Builder $query) use ($user, $filters) {
-                return $query
-                    ->withCount('reminders')
-                    ->when($user->team_id, function ($query) use ($user) {
-                        $query->where('team_id', $user->team_id);
-                    })
-                    ->when(! $user->team_id, function ($query) use ($user) {
-                        $query->where('user_id', $user->id);
-                    })
-                    ->when($filters['status'], function ($query) use ($filters) {
-                        $query->where('status', $filters['status']);
-                    })
-                    ->when($filters['date_from'], function ($query) use ($filters) {
-                        $query->whereDate('created_at', '>=', $filters['date_from']);
-                    })
-                    ->when($filters['date_to'], function ($query) use ($filters) {
-                        $query->whereDate('created_at', '<=', $filters['date_to']);
-                    })
-                    ->when($filters['amount_from'], function ($query) use ($filters) {
-                        $query->where('amount', '>=', $filters['amount_from']);
-                    })
-                    ->when($filters['amount_to'], function ($query) use ($filters) {
-                        $query->where('amount', '<=', $filters['amount_to']);
-                    });
-            })
-            ->latest()
-            ->paginate(10);
+        $invoices = Invoice::query()->getPaginatedInvoices($user, $search, $filters)->latest()->paginate(10);
 
         return Inertia::render('invoices/index', [
             'invoices' => Inertia::merge($invoices),

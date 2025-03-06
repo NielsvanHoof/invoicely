@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { router } from '@inertiajs/react';
+import { getActiveFilters } from '@/lib/utils';
+import { router, usePage } from '@inertiajs/react';
 import { FilterIcon, XIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -18,6 +19,7 @@ interface FilterBarProps {
 export function FilterBar({ filters }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [localFilters, setLocalFilters] = useState(filters);
+    const { search } = usePage().props as { search?: string };
 
     useEffect(() => {
         setLocalFilters(filters);
@@ -28,18 +30,16 @@ export function FilterBar({ filters }: FilterBarProps) {
     };
 
     const applyFilters = () => {
-        // Only include filters that have values
-        const activeFilters = Object.entries(localFilters).reduce(
-            (acc, [key, value]) => {
-                if (value !== undefined && value !== '') {
-                    acc[key] = value;
-                }
-                return acc;
-            },
-            {} as Record<string, string>,
-        );
+        // Use the shared utility function to get active filters
+        const activeFilters = getActiveFilters(localFilters);
 
-        router.get(route('invoices.index'), activeFilters, {
+        // Include the current search term if it exists
+        const params = {
+            ...activeFilters,
+            ...(search ? { search } : {}),
+        };
+
+        router.get(route('invoices.index'), params, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -47,14 +47,13 @@ export function FilterBar({ filters }: FilterBarProps) {
     };
 
     const clearFilters = () => {
-        router.get(
-            route('invoices.index'),
-            {},
-            {
-                preserveState: true,
-                preserveScroll: true,
-            },
-        );
+        // Keep the search parameter when clearing filters
+        const params = search ? { search } : {};
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
         setIsOpen(false);
     };
 

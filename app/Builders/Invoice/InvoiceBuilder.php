@@ -34,7 +34,7 @@ class InvoiceBuilder extends Builder
         return $this->byUser($user->id);
     }
 
-    public function getPaginatedInvoices(User $user, string $search = '', array $filters = [], int $perPage = 10): \Laravel\Scout\Builder
+    public function getPaginatedInvoices(User $user, ?string $search = '', ?array $filters = []): \Laravel\Scout\Builder
     {
         return Invoice::search($search)
             ->query(function (Builder $query) use ($user, $filters) {
@@ -43,7 +43,7 @@ class InvoiceBuilder extends Builder
                     ->when($user->team_id, function ($query) use ($user) {
                         $query->where('team_id', $user->team_id);
                     })
-                    ->when(! $user->team_id, function ($query) use ($user) {
+                    ->when(!$user->team_id, function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
                     ->when($filters['status'] ?? null, function ($query) use ($filters) {

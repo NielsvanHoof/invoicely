@@ -60,3 +60,21 @@ export function formatRelativeTime(date: Date): string {
     // Default to formatted date
     return formatDate(date.toISOString());
 }
+
+/**
+ * Filter an object to only include properties with non-empty values
+ * Useful for filtering out empty params in API requests
+ */
+export function getActiveFilters(filters: Record<string, string | undefined> | undefined): Record<string, string> {
+    if (!filters) return {};
+
+    return Object.entries(filters).reduce(
+        (acc, [key, value]) => {
+            if (value !== undefined && value !== '') {
+                acc[key] = value;
+            }
+            return acc;
+        },
+        {} as Record<string, string>,
+    );
+}
