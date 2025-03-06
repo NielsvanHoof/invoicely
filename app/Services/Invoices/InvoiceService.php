@@ -2,6 +2,7 @@
 
 namespace App\Services\Invoices;
 
+use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
@@ -23,9 +24,9 @@ class InvoiceService
      * @param  array  $data  Invoice data
      * @param  UploadedFile|null  $file  Optional attached file
      * @param  int  $userId  User ID
-     * @param  int|null  $teamId  Team ID
+     * @param  string|null  $teamId  Team ID
      */
-    public function createInvoice(array $data, ?UploadedFile $file, int $userId, ?int $teamId): Invoice
+    public function createInvoice(array $data, ?UploadedFile $file, int $userId, ?string $teamId): Invoice
     {
         $filePath = null;
 
@@ -48,8 +49,8 @@ class InvoiceService
             Mail::to($data['client_email'])->send(new InvoiceReceivedMail($invoice));
         }
 
-        // Invalidate dashboard cache
-        $this->invalidateDashboardCache($invoice->user);
+        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
+        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
 
         return $invoice;
     }
@@ -80,8 +81,8 @@ class InvoiceService
         // Schedule reminders for the updated invoice
         $this->reminderService->scheduleReminders($invoice);
 
-        // Invalidate dashboard cache
-        $this->invalidateDashboardCache($invoice->user);
+        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
+        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
 
         return $invoice;
     }
@@ -99,19 +100,9 @@ class InvoiceService
 
         $deleted = $invoice->delete();
 
-        // Invalidate dashboard cache
-        $this->invalidateDashboardCache($invoice->user);
+        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
+        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
 
         return $deleted;
-    }
-
-    /**
-     * Invalidate dashboard cache for the user
-     */
-    private function invalidateDashboardCache($user): void
-    {
-        if ($user) {
-            InvalidateDashBoardCacheEvent::dispatch($user);
-        }
     }
 }

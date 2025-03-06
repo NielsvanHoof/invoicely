@@ -7,7 +7,6 @@ use App\Enums\ReminderType;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Models\Invoice;
 use App\Models\Reminder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class ReminderService
@@ -113,16 +112,6 @@ class ReminderService
         ];
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);
-    }
-
-    /**
-     * Get all reminders that are due to be sent.
-     *
-     * @return Collection<int, Reminder>
-     */
-    public function getDueReminders(): Collection
-    {
-        return Reminder::due()->with('invoice')->get();
     }
 
     /**
