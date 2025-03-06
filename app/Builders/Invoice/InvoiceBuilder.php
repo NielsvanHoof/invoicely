@@ -43,7 +43,7 @@ class InvoiceBuilder extends Builder
                     ->when($user->team_id, function ($query) use ($user) {
                         $query->where('team_id', $user->team_id);
                     })
-                    ->when(!$user->team_id, function ($query) use ($user) {
+                    ->when(! $user->team_id, function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
                     ->when($filters['status'] ?? null, function ($query) use ($filters) {

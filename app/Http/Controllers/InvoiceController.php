@@ -7,7 +7,6 @@ use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
 use App\Services\Invoices\InvoiceService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
