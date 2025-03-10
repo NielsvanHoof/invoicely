@@ -870,16 +870,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.342.0",
+            "version": "3.342.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "5b8c837ab0c9754ab3408bd9afe6f0c67516b1fd"
+                "reference": "ef66e0fdba9e7f786a7b1e522f847d76d0320e89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5b8c837ab0c9754ab3408bd9afe6f0c67516b1fd",
-                "reference": "5b8c837ab0c9754ab3408bd9afe6f0c67516b1fd",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ef66e0fdba9e7f786a7b1e522f847d76d0320e89",
+                "reference": "ef66e0fdba9e7f786a7b1e522f847d76d0320e89",
                 "shasum": ""
             },
             "require": {
@@ -961,9 +961,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.342.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.342.2"
             },
-            "time": "2025-03-05T19:20:14+00:00"
+            "time": "2025-03-07T19:12:43+00:00"
         },
         {
             "name": "brick/math",
@@ -5734,16 +5734,16 @@
         },
         {
             "name": "spatie/laravel-health",
-            "version": "1.32.4",
+            "version": "1.32.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-health.git",
-                "reference": "6510025255c04fa2bd37c2a6611095c5129b53c2"
+                "reference": "afd55006d1ffe312b1e81cd0b6417f6a5226ae82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-health/zipball/6510025255c04fa2bd37c2a6611095c5129b53c2",
-                "reference": "6510025255c04fa2bd37c2a6611095c5129b53c2",
+                "url": "https://api.github.com/repos/spatie/laravel-health/zipball/afd55006d1ffe312b1e81cd0b6417f6a5226ae82",
+                "reference": "afd55006d1ffe312b1e81cd0b6417f6a5226ae82",
                 "shasum": ""
             },
             "require": {
@@ -5815,7 +5815,7 @@
                 "spatie"
             ],
             "support": {
-                "source": "https://github.com/spatie/laravel-health/tree/1.32.4"
+                "source": "https://github.com/spatie/laravel-health/tree/1.32.5"
             },
             "funding": [
                 {
@@ -5823,7 +5823,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-03T08:40:12+00:00"
+            "time": "2025-03-08T12:16:07+00:00"
         },
         {
             "name": "spatie/laravel-package-tools",
@@ -11369,16 +11369,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "6.3.0",
+            "version": "6.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "d4e47a769525c4dd38cea90e5dcd435ddbbc7115"
+                "reference": "24b8fbc2c8e201bb1308e7b05148d6ab393b6959"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/d4e47a769525c4dd38cea90e5dcd435ddbbc7115",
-                "reference": "d4e47a769525c4dd38cea90e5dcd435ddbbc7115",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/24b8fbc2c8e201bb1308e7b05148d6ab393b6959",
+                "reference": "24b8fbc2c8e201bb1308e7b05148d6ab393b6959",
                 "shasum": ""
             },
             "require": {
@@ -11397,7 +11397,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "6.2-dev"
+                    "dev-main": "6.3-dev"
                 }
             },
             "autoload": {
@@ -11437,7 +11437,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/6.3.0"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/6.3.1"
             },
             "funding": [
                 {
@@ -11445,7 +11445,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-06T10:28:19+00:00"
+            "time": "2025-03-07T06:57:01+00:00"
         },
         {
             "name": "sebastian/complexity",
