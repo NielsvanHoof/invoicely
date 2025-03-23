@@ -12,7 +12,7 @@ class TeamPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasRole('admin') || $user->hasRole('invoicer');
     }
 
     /**
@@ -20,7 +20,7 @@ class TeamPolicy
      */
     public function view(User $user, Team $team): bool
     {
-        return $user->team_id === $team->id;
+        return $user->hasRole('admin') || $user->team_id === $team->id && $user->hasRole('invoicer');
     }
 
     /**
@@ -28,7 +28,7 @@ class TeamPolicy
      */
     public function create(User $user): bool
     {
-        return $user->team_id === null;
+        return $user->hasRole('admin') || $user->hasRole('invoicer');
     }
 
     /**
@@ -36,7 +36,7 @@ class TeamPolicy
      */
     public function update(User $user, Team $team): bool
     {
-        return $user->id === $team->owner_id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer') || $user->id === $team->owner_id;
     }
 
     /**
@@ -44,7 +44,7 @@ class TeamPolicy
      */
     public function delete(User $user, Team $team): bool
     {
-        return $user->id === $team->owner_id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer') || $user->id === $team->owner_id;
     }
 
     /**
@@ -52,7 +52,7 @@ class TeamPolicy
      */
     public function restore(User $user, Team $team): bool
     {
-        return $user->team_id === $team->id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer');
     }
 
     /**
@@ -60,7 +60,7 @@ class TeamPolicy
      */
     public function forceDelete(User $user, Team $team): bool
     {
-        return $user->id === $team->owner_id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer') || $user->id === $team->owner_id;
     }
 
     /**
@@ -78,7 +78,7 @@ class TeamPolicy
     public function removeUser(User $user, Team $team): bool
     {
         // Only team owners can remove users
-        return $user->id === $team->owner_id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer') || $user->id === $team->owner_id;
     }
 
     /**
@@ -87,6 +87,6 @@ class TeamPolicy
     public function invite(User $user, Team $team): bool
     {
         // Only team owners can invite new members
-        return $user->id === $team->owner_id;
+        return $user->hasRole('admin') || $user->hasRole('invoicer') || $user->id === $team->owner_id;
     }
 }

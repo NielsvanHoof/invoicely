@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
             $table->string('invoice_number')->unique();
             $table->string('client_name');
             $table->string('client_email')->nullable();

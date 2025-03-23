@@ -47,9 +47,13 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
 
                 {/* Search and filters section - Always show if we have invoices or if we're searching */}
                 {(invoices.total > 0 || search || Object.values(filters).some(Boolean)) && (
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <SearchBar initialValue={search} placeholder="Search invoices..." />
-                        <FilterBar filters={filters} />
+                    <div className="flex flex-col gap-4">
+                        <div className="w-full">
+                            <SearchBar initialValue={search} placeholder="Search invoices..." />
+                        </div>
+                        <div className="w-full">
+                            <FilterBar filters={filters} />
+                        </div>
                     </div>
                 )}
 

@@ -26,7 +26,7 @@ class TeamController extends Controller
         protected TeamService $teamService,
         protected TeamInvitationService $invitationService
     ) {
-        $this->authorizeResource(Team::class, 'team');
+        $this->authorizeResource(Team::class);
     }
 
     /**

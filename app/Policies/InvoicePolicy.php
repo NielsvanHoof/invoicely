@@ -12,7 +12,7 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -20,11 +20,7 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin') || $user->hasRole('client');
     }
 
     /**
@@ -32,7 +28,7 @@ class InvoicePolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -40,11 +36,7 @@ class InvoicePolicy
      */
     public function update(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -52,11 +44,7 @@ class InvoicePolicy
      */
     public function delete(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -64,11 +52,7 @@ class InvoicePolicy
      */
     public function restore(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -76,11 +60,7 @@ class InvoicePolicy
      */
     public function forceDelete(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 
     /**
@@ -88,10 +68,6 @@ class InvoicePolicy
      */
     public function downloadFile(User $user, Invoice $invoice): bool
     {
-        if ($user->team_id) {
-            return $user->team->id === $invoice->user->team_id;
-        }
-
-        return $user->id === $invoice->user_id;
+        return $user->hasRole('invoicer') || $user->hasRole('admin') || $user->hasRole('client');
     }
 }

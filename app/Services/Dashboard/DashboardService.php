@@ -44,9 +44,8 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'latest-invoices');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             return Invoice::query()
-                ->forUser($user)
                 ->latest()
                 ->take($limit)
                 ->get();
@@ -62,9 +61,8 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'upcoming-invoices');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             return Invoice::query()
-                ->forUser($user)
                 ->whereDate('due_date', '>=', now())
                 ->whereNotIn('status', [InvoiceStatus::PAID])
                 ->orderBy('due_date')
@@ -82,10 +80,9 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'recent-activity');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             // Get recent invoices (created or updated)
             $recentInvoices = Invoice::query()
-                ->forUser($user)
                 ->latest('updated_at')
                 ->take($limit)
                 ->get()
@@ -110,9 +107,6 @@ class DashboardService
 
             // Get recent reminders
             $recentReminders = Reminder::query()
-                ->whereHas('invoice', function ($query) use ($user) {
-                    $query->forUser($user);
-                })
                 ->with('invoice')
                 ->latest('created_at')
                 ->take($limit)
@@ -162,7 +156,7 @@ class DashboardService
      */
     protected function getTotalInvoices(User $user): int
     {
-        return Invoice::query()->forUser($user)->count();
+        return Invoice::query()->count();
     }
 
     /**
@@ -171,7 +165,6 @@ class DashboardService
     protected function getTotalByStatus(User $user, InvoiceStatus $status): float
     {
         return Invoice::query()
-            ->forUser($user)
             ->where('status', $status)
             ->sum('amount');
     }
@@ -182,7 +175,6 @@ class DashboardService
     protected function getTotalPendingAmount(User $user): float
     {
         return Invoice::query()
-            ->forUser($user)
             ->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::SENT])
             ->sum('amount');
     }

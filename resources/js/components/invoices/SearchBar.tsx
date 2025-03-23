@@ -87,7 +87,7 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
     };
 
     return (
-        <div className="relative w-full md:max-w-sm">
+        <div className="relative w-full">
             <div className="relative">
                 <Input
                     type="search"

@@ -188,15 +188,6 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                         )}
                     </Card>
                 </div>
-
-                <div className="mt-2 flex flex-col gap-2 md:hidden">
-                    {invoice.file_path && (
-                        <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                            <DownloadIcon className="mr-2 h-4 w-4" />
-                            {isDownloading ? 'Generating link...' : 'Download Attachment'}
-                        </Button>
-                    )}
-                </div>
             </div>
         </AppLayout>
     );

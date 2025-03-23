@@ -34,7 +34,6 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search', '');
-        $user = Auth::user();
 
         $filters = [
             'status' => $request->input('status', ''),
@@ -44,7 +43,7 @@ class InvoiceController extends Controller
             'amount_to' => $request->input('amount_to', ''),
         ];
 
-        $invoices = Invoice::query()->getPaginatedInvoices($user, $search, $filters)->latest()->paginate(10);
+        $invoices = Invoice::query()->getPaginatedInvoices($search, $filters)->latest()->paginate(10);
 
         return Inertia::render('invoices/index', [
             'invoices' => Inertia::merge($invoices),
