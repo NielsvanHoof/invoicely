@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Reminder;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -25,14 +26,16 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'stats');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
-            return [
-                'totalInvoices' => $this->getTotalInvoices($user),
-                'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
-                'totalOverdue' => $this->getTotalByStatus($user, InvoiceStatus::OVERDUE),
-                'totalPending' => $this->getTotalPendingAmount($user),
-            ];
-        });
+        return Cache::remember($cacheKey, $this->cacheTtl, fn() => [
+            'totalInvoices' => $this->getTotalInvoices($user),
+            'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
+            'totalOverdue' => $this->getTotalByStatus($user, InvoiceStatus::OVERDUE),
+            'totalPending' => $this->getTotalPendingAmount($user),
+            'totalOutstanding' => $this->getTotalOutstandingAmount($user),
+            'overdueCount' => $this->getOverdueInvoiceCount($user),
+            'upcomingCount' => $this->getUpcomingInvoiceCount($user),
+            'averageDaysOverdue' => $this->getAverageDaysOverdue($user),
+        ]);
     }
 
     /**
@@ -177,6 +180,62 @@ class DashboardService
         return Invoice::query()
             ->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::SENT])
             ->sum('amount');
+    }
+
+    /**
+     * Get total outstanding amount (pending + overdue).
+     */
+    protected function getTotalOutstandingAmount(User $user): float
+    {
+        return Invoice::query()
+            ->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::SENT, InvoiceStatus::OVERDUE])
+            ->sum('amount');
+    }
+
+    /**
+     * Get count of overdue invoices.
+     */
+    protected function getOverdueInvoiceCount(User $user): int
+    {
+        return Invoice::query()
+            ->where('status', InvoiceStatus::OVERDUE)
+            ->count();
+    }
+
+    /**
+     * Get count of upcoming invoices.
+     */
+    protected function getUpcomingInvoiceCount(User $user): int
+    {
+        return Invoice::query()
+            ->whereDate('due_date', '>=', now())
+            ->whereDate('due_date', '<=', now()->addDays(7))
+            ->whereNotIn('status', [InvoiceStatus::PAID])
+            ->count();
+    }
+
+    /**
+     * Get average days overdue for overdue invoices.
+     */
+    protected function getAverageDaysOverdue(User $user): int
+    {
+        $overdueInvoices = Invoice::query()
+            ->where('status', InvoiceStatus::OVERDUE)
+            ->get();
+
+        if ($overdueInvoices->isEmpty()) {
+            return 0;
+        }
+
+        $totalDaysOverdue = 0;
+        $now = Carbon::now();
+
+        foreach ($overdueInvoices as $invoice) {
+            $dueDate = Carbon::parse($invoice->due_date);
+            $totalDaysOverdue += $now->diffInDays($dueDate);
+        }
+
+        return (int) round($totalDaysOverdue / $overdueInvoices->count());
     }
 
     /**

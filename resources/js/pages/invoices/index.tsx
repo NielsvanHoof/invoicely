@@ -1,9 +1,10 @@
-import { EmptyState, FilterBar, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
+import { BulkActionsBar, EmptyState, FilterBar, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
 import { Pagination } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Invoice, type PaginatedData } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { PlusIcon } from 'lucide-react';
+import { useState } from 'react';
 
 interface InvoicesIndexProps {
     invoices: PaginatedData<Invoice>;
@@ -29,6 +30,28 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function InvoicesIndex({ invoices, search, filters = {} }: InvoicesIndexProps) {
+    const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
+
+    const handleSelectInvoice = (invoice: Invoice, isSelected: boolean) => {
+        if (isSelected) {
+            setSelectedInvoices((prev) => [...prev, invoice]);
+        } else {
+            setSelectedInvoices((prev) => prev.filter((i) => i.id !== invoice.id));
+        }
+    };
+
+    const handleSelectAll = (isSelected: boolean) => {
+        if (isSelected) {
+            setSelectedInvoices(invoices.data);
+        } else {
+            setSelectedInvoices([]);
+        }
+    };
+
+    const clearSelection = () => {
+        setSelectedInvoices([]);
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Invoices" />
@@ -65,6 +88,7 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                         ) : (
                             <p>
                                 Found {invoices.total} result{invoices.total !== 1 ? 's' : ''}
+                                {selectedInvoices.length > 0 && <span className="ml-2">({selectedInvoices.length} selected)</span>}
                             </p>
                         )}
                     </div>
@@ -75,12 +99,22 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                 ) : (
                     <>
                         {/* Desktop view - Table */}
-                        <InvoiceTable invoices={invoices.data} />
+                        <InvoiceTable
+                            invoices={invoices.data}
+                            selectedInvoices={selectedInvoices}
+                            onSelectInvoice={handleSelectInvoice}
+                            onSelectAll={handleSelectAll}
+                        />
 
                         {/* Mobile view - Cards */}
                         <div className="space-y-4 md:hidden">
                             {invoices.data.map((invoice) => (
-                                <InvoiceCard key={invoice.id} invoice={invoice} />
+                                <InvoiceCard
+                                    key={invoice.id}
+                                    invoice={invoice}
+                                    isSelected={selectedInvoices.some((i) => i.id === invoice.id)}
+                                    onSelectInvoice={handleSelectInvoice}
+                                />
                             ))}
                         </div>
 
@@ -95,6 +129,9 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                                 total={invoices.total}
                             />
                         </div>
+
+                        {/* Bulk Actions Bar */}
+                        <BulkActionsBar selectedInvoices={selectedInvoices} onClearSelection={clearSelection} />
                     </>
                 )}
             </div>

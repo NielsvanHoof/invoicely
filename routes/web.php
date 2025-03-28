@@ -14,6 +14,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('health', HealthCheckResultsController::class);
 
     Route::get('invoices/{invoice}/download', [InvoiceController::class, 'downloadFile'])->name('invoices.download');
+    Route::post('invoices/bulk-action', [InvoiceController::class, 'bulkAction'])->name('invoices.bulk-action');
     Route::resource('invoices', InvoiceController::class);
 
     Route::get('invoices/{invoice}/reminders', [ReminderController::class, 'index'])->name('reminders.index');
@@ -23,5 +24,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('invoices/{invoice}/reminders/schedule-defaults', [ReminderController::class, 'scheduleDefaults'])->name('reminders.schedule-defaults');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
