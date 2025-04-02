@@ -17,19 +17,16 @@ class InvoiceByTeamOrUserScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if (! $model instanceof Invoice) {
+        if (!Auth::check()) {
             return;
         }
 
-        if (! Auth::check()) {
-            return;
-        }
 
         $builder->when($model->team_id, function (Builder $query) use ($model) {
             $query->where('team_id', $model->team_id);
         })
-            ->when(! $model->team_id, function (Builder $query) {
-                $query->where('user_id', Auth::user()->id);
+            ->when(!$model->team_id, function (Builder $query) {
+                $query->where('user_id', Auth::id());
             });
     }
 }

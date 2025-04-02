@@ -162,100 +162,47 @@ class InvoiceController extends Controller
         ]);
 
         $action = $validated['action'];
-
         $invoiceIds = $validated['invoice_ids'];
-        $invoices = Invoice::query()->whereIn('id', $invoiceIds)->get();
-
-        if ($invoices->isEmpty()) {
-            return back()->with('error', 'No invoices found.');
-        }
+        $userId = Auth::id();
 
         switch ($action) {
             case 'mark_as_sent':
-                foreach ($invoices as $invoice) {
-                    $invoice->status = InvoiceStatus::SENT;
-                    $invoice->save();
-                }
-                return back()->with('success', count($invoices) . ' invoice(s) marked as sent.');
+                $count = $this->invoiceService->bulkUpdateStatus($invoiceIds, InvoiceStatus::SENT, $userId);
+                return back()->with('success', $count . ' invoice(s) marked as sent.');
 
             case 'mark_as_paid':
-                foreach ($invoices as $invoice) {
-                    $invoice->status = InvoiceStatus::PAID;
-                    $invoice->paid_at = now();
-                    $invoice->save();
-                }
-                return back()->with('success', count($invoices) . ' invoice(s) marked as paid.');
+                $count = $this->invoiceService->bulkUpdateStatus($invoiceIds, InvoiceStatus::PAID, $userId);
+                return back()->with('success', $count . ' invoice(s) marked as paid.');
 
             case 'mark_as_overdue':
-                foreach ($invoices as $invoice) {
-                    $invoice->status = InvoiceStatus::OVERDUE;
-                    $invoice->save();
-                }
-                return back()->with('success', count($invoices) . ' invoice(s) marked as overdue.');
+                $count = $this->invoiceService->bulkUpdateStatus($invoiceIds, InvoiceStatus::OVERDUE, $userId);
+                return back()->with('success', $count . ' invoice(s) marked as overdue.');
 
             case 'create_reminder_upcoming':
-                $reminderCount = 0;
-                foreach ($invoices as $invoice) {
-                    if ($invoice->status !== InvoiceStatus::PAID) {
-                        $invoice->reminders()->create([
-                            'type' => ReminderType::UPCOMING,
-                            'scheduled_date' => now()->addDay(),
-                            'message' => ReminderType::UPCOMING->defaultMessage(),
-                        ]);
-                        $reminderCount++;
-                    }
-                }
-                return back()->with('success', $reminderCount . ' upcoming payment reminder(s) created.');
+                $count = $this->invoiceService->bulkCreateReminders($invoiceIds, ReminderType::UPCOMING, $userId);
+                return back()->with('success', $count . ' upcoming payment reminder(s) created.');
 
             case 'create_reminder_overdue':
-                $reminderCount = 0;
-                foreach ($invoices as $invoice) {
-                    if ($invoice->status !== InvoiceStatus::PAID) {
-                        $invoice->reminders()->create([
-                            'type' => ReminderType::OVERDUE,
-                            'scheduled_date' => now()->addDay(),
-                            'message' => ReminderType::OVERDUE->defaultMessage(),
-                        ]);
-                        $reminderCount++;
-                    }
-                }
-                return back()->with('success', $reminderCount . ' overdue payment reminder(s) created.');
+                $count = $this->invoiceService->bulkCreateReminders($invoiceIds, ReminderType::OVERDUE, $userId);
+                return back()->with('success', $count . ' overdue payment reminder(s) created.');
 
             case 'create_reminder_thank_you':
-                $reminderCount = 0;
-                foreach ($invoices as $invoice) {
-                    if ($invoice->status === InvoiceStatus::PAID) {
-                        $invoice->reminders()->create([
-                            'type' => ReminderType::THANK_YOU,
-                            'scheduled_date' => now()->addDay(),
-                            'message' => ReminderType::THANK_YOU->defaultMessage(),
-                        ]);
-                        $reminderCount++;
-                    }
-                }
-                return back()->with('success', $reminderCount . ' thank you reminder(s) created.');
+                $count = $this->invoiceService->bulkCreateReminders($invoiceIds, ReminderType::THANK_YOU, $userId);
+                return back()->with('success', $count . ' thank you reminder(s) created.');
 
             case 'delete':
-                // First check if the invoices can be deleted
-                $canDeleteCount = 0;
-                foreach ($invoices as $invoice) {
-                    // Logic to check if invoice can be deleted (add any business rules here)
-                    $canDeleteCount++;
+                $result = $this->invoiceService->bulkDeleteInvoices($invoiceIds, $userId);
+                $successMessage = $result['deletedCount'] . ' invoice(s) deleted.';
+                if ($result['failedCount'] > 0) {
+                    $successMessage .= ' (' . $result['failedCount'] . ' could not be deleted, possibly because they were already paid).';
                 }
-
-                if ($canDeleteCount === 0) {
-                    return back()->with('error', 'None of the selected invoices can be deleted.');
+                if ($result['deletedCount'] === 0 && $result['failedCount'] > 0) {
+                    return back()->with('error', 'None of the selected invoices could be deleted, possibly because they were already paid.');
                 }
-
-                // Delete the invoices
-                foreach ($invoices as $invoice) {
-                    $invoice->delete();
-                }
-
-                return back()->with('success', count($invoices) . ' invoice(s) deleted.');
+                return back()->with('success', $successMessage);
 
             default:
-                return back()->with('error', 'Invalid action.');
+                return back()->with('error', 'Unsupported bulk action specified.');
         }
     }
 }

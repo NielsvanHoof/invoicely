@@ -33,11 +33,13 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
     const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
 
     const handleSelectInvoice = (invoice: Invoice, isSelected: boolean) => {
-        if (isSelected) {
-            setSelectedInvoices((prev) => [...prev, invoice]);
-        } else {
-            setSelectedInvoices((prev) => prev.filter((i) => i.id !== invoice.id));
-        }
+        setSelectedInvoices((prev) => {
+            if (isSelected) {
+                return prev.some((i) => i.id === invoice.id) ? prev : [...prev, invoice];
+            } else {
+                return prev.filter((i) => i.id !== invoice.id);
+            }
+        });
     };
 
     const handleSelectAll = (isSelected: boolean) => {
