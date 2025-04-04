@@ -19,7 +19,7 @@ interface FilterBarProps {
 export function FilterBar({ filters }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [localFilters, setLocalFilters] = useState(filters);
-    const { search } = usePage().props as { search?: string };
+    const { search, sort } = usePage().props as { search?: string; sort?: Record<string, string> };
 
     useEffect(() => {
         setLocalFilters(filters);
@@ -31,7 +31,7 @@ export function FilterBar({ filters }: FilterBarProps) {
 
     const applyFilters = () => {
         // Use the shared utility function to get active filters
-        const activeFilters = getActiveFilters(localFilters);
+        const activeFilters = getActiveFilters(localFilters, sort);
 
         // Include the current search term if it exists
         const params = {

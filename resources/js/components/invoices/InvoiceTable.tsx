@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type Invoice } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BellIcon, EyeIcon, FileEditIcon, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
+import { ArrowUpDown, BellIcon, EyeIcon, FileEditIcon, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 interface InvoiceTableProps {
@@ -14,27 +14,41 @@ interface InvoiceTableProps {
     selectedInvoices: Invoice[];
     onSelectInvoice: (invoice: Invoice, isSelected: boolean) => void;
     onSelectAll: (isSelected: boolean) => void;
+    sort: {
+        field: string;
+        direction: 'asc' | 'desc';
+    };
+    onSort: (field: string) => void;
 }
 
-export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSelectAll }: InvoiceTableProps) {
+export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSelectAll, sort, onSort }: InvoiceTableProps) {
     const { auth } = usePage<SharedData>().props;
     const userCurrency = auth?.user?.currency || 'USD';
 
     const allSelected = invoices.length > 0 && selectedInvoices.length === invoices.length;
     const someSelected = selectedInvoices.length > 0 && selectedInvoices.length < invoices.length;
 
-    const checkboxRef = useRef<HTMLButtonElement>(null);
+    const checkboxRef = useRef<HTMLButtonElement & { indeterminate?: boolean }>(null);
 
     useEffect(() => {
         if (checkboxRef.current && someSelected) {
-            // Apply indeterminate state programmatically
-            (checkboxRef.current as any).indeterminate = true;
+            checkboxRef.current.indeterminate = true;
         }
     }, [someSelected, selectedInvoices]);
 
     const handleSelectAll = (checked: boolean) => {
         onSelectAll(checked);
     };
+
+    const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
+        <TableHead className="cursor-pointer select-none" onClick={() => onSort(field)}>
+            <div className="flex items-center gap-1">
+                {children}
+                {sort.field === field ? <ArrowUpDown className="h-4 w-4" /> : <ArrowUpDown className="text-muted-foreground/50 h-4 w-4" />}
+                {sort.field === field && <span className="text-muted-foreground ml-1 text-xs">{sort.direction === 'asc' ? '↑' : '↓'}</span>}
+            </div>
+        </TableHead>
+    );
 
     return (
         <div className="border-sidebar-border/70 dark:border-sidebar-border hidden rounded-xl border md:block">
@@ -44,12 +58,12 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                         <TableHead className="w-12">
                             <Checkbox ref={checkboxRef} checked={allSelected} onCheckedChange={handleSelectAll} aria-label="Select all invoices" />
                         </TableHead>
-                        <TableHead>Invoice #</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead className="hidden lg:table-cell">Issue Date</TableHead>
-                        <TableHead className="hidden lg:table-cell">Due Date</TableHead>
-                        <TableHead>Status</TableHead>
+                        <SortableHeader field="invoice_number">Invoice #</SortableHeader>
+                        <SortableHeader field="client_name">Client</SortableHeader>
+                        <SortableHeader field="amount">Amount</SortableHeader>
+                        <SortableHeader field="issue_date">Issue Date</SortableHeader>
+                        <SortableHeader field="due_date">Due Date</SortableHeader>
+                        <SortableHeader field="status">Status</SortableHeader>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>

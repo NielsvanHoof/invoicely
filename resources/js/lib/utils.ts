@@ -65,10 +65,13 @@ export function formatRelativeTime(date: Date): string {
  * Filter an object to only include properties with non-empty values
  * Useful for filtering out empty params in API requests
  */
-export function getActiveFilters(filters: Record<string, string | undefined> | undefined): Record<string, string> {
+export function getActiveFilters(
+    filters: Record<string, string | undefined> | undefined,
+    sort: Record<string, string> | undefined,
+): Record<string, string> {
     if (!filters) return {};
 
-    return Object.entries(filters).reduce(
+    const activeFilters = Object.entries(filters).reduce(
         (acc, [key, value]) => {
             if (value !== undefined && value !== '') {
                 acc[key] = value;
@@ -77,4 +80,11 @@ export function getActiveFilters(filters: Record<string, string | undefined> | u
         },
         {} as Record<string, string>,
     );
+
+    if (sort) {
+        activeFilters.sort_field = sort.field;
+        activeFilters.sort_direction = sort.direction;
+    }
+
+    return activeFilters;
 }

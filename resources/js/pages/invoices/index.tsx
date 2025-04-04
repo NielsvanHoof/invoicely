@@ -1,9 +1,11 @@
 import { BulkActionsBar, EmptyState, FilterBar, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
+import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
+import { getActiveFilters } from '@/lib/utils';
 import { type BreadcrumbItem, type Invoice, type PaginatedData } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { PlusIcon } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowUpDown, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface InvoicesIndexProps {
@@ -15,6 +17,10 @@ interface InvoicesIndexProps {
         date_to?: string;
         amount_from?: string;
         amount_to?: string;
+    };
+    sort?: {
+        field: string;
+        direction: 'asc' | 'desc';
     };
 }
 
@@ -29,7 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function InvoicesIndex({ invoices, search, filters = {} }: InvoicesIndexProps) {
+export default function InvoicesIndex({ invoices, search, filters = {}, sort = { field: 'created_at', direction: 'desc' } }: InvoicesIndexProps) {
     const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
 
     const handleSelectInvoice = (invoice: Invoice, isSelected: boolean) => {
@@ -54,6 +60,37 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
         setSelectedInvoices([]);
     };
 
+    const handleSort = (field: string) => {
+        const newDirection = sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc';
+
+        // Only include active filters and sort parameters
+        const params = {
+            ...getActiveFilters(filters, { field, direction: newDirection }),
+            ...(search ? { search } : {}),
+            ...(field !== 'created_at' ? { sort_field: field, sort_direction: newDirection } : {}),
+        };
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleResetSort = () => {
+        // Only include active filters, removing sort parameters
+        const params = {
+            ...getActiveFilters(filters, undefined),
+            ...(search ? { search } : {}),
+        };
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const isCustomSort = sort.field !== 'created_at' || sort.direction !== 'desc';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Invoices" />
@@ -71,10 +108,18 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                 </div>
 
                 {/* Search and filters section - Always show if we have invoices or if we're searching */}
-                {(invoices.total > 0 || search || Object.values(filters).some(Boolean)) && (
+                {(invoices.total > 0 || search || Object.values(filters).some(Boolean) || isCustomSort) && (
                     <div className="flex flex-col gap-4">
-                        <div className="w-full">
-                            <SearchBar initialValue={search} placeholder="Search invoices..." />
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="w-full">
+                                <SearchBar initialValue={search} placeholder="Search invoices..." />
+                            </div>
+                            {isCustomSort && (
+                                <Button variant="outline" size="sm" onClick={handleResetSort} className="w-full sm:w-auto">
+                                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                                    Reset Sort
+                                </Button>
+                            )}
                         </div>
                         <div className="w-full">
                             <FilterBar filters={filters} />
@@ -83,7 +128,7 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                 )}
 
                 {/* Search results info */}
-                {(search || Object.values(filters).some(Boolean)) && (
+                {(search || Object.values(filters).some(Boolean) || isCustomSort) && (
                     <div className="text-muted-foreground text-sm">
                         {invoices.total === 0 ? (
                             <p>No results found</p>
@@ -106,6 +151,8 @@ export default function InvoicesIndex({ invoices, search, filters = {} }: Invoic
                             selectedInvoices={selectedInvoices}
                             onSelectInvoice={handleSelectInvoice}
                             onSelectAll={handleSelectAll}
+                            sort={sort}
+                            onSort={handleSort}
                         />
 
                         {/* Mobile view - Cards */}

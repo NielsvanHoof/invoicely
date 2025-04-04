@@ -45,12 +45,20 @@ class InvoiceController extends Controller
             'amount_to' => $request->input('amount_to', ''),
         ];
 
-        $invoices = Invoice::query()->getPaginatedInvoices($search, $filters)->latest()->paginate(10);
+        $sort = [
+            'field' => $request->input('sort_field', 'created_at'),
+            'direction' => $request->input('sort_direction', 'desc'),
+        ];
+
+        $invoices = Invoice::query()
+            ->getInvoices($search, $filters, $sort)
+            ->paginate(10);
 
         return Inertia::render('invoices/index', [
             'invoices' => Inertia::merge($invoices),
             'search' => $search,
             'filters' => $filters,
+            'sort' => $sort,
         ]);
     }
 

@@ -16,7 +16,7 @@ interface SearchBarProps {
 export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invoices.index' }: SearchBarProps) {
     const [searchTerm, setSearchTerm] = useState(initialValue);
     const [isSearching, setIsSearching] = useState(false);
-    const { filters } = usePage().props as { filters?: Record<string, string> };
+    const { filters, sort } = usePage().props as { filters?: Record<string, string>; sort?: Record<string, string> };
 
     // Update searchTerm when initialValue changes
     useEffect(() => {
@@ -33,7 +33,7 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
         }
 
         // Get only the active filters using the utility function
-        const activeFilters = getActiveFilters(filters);
+        const activeFilters = getActiveFilters(filters, sort);
 
         router.get(
             route(routeName),
@@ -68,7 +68,7 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
         }
 
         // Get only the active filters using the utility function
-        const activeFilters = getActiveFilters(filters);
+        const activeFilters = getActiveFilters(filters, sort);
 
         router.get(
             route(routeName),
