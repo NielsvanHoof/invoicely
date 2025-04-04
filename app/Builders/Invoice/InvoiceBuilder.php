@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class InvoiceBuilder extends Builder
 {
-    public function getInvoices(?string $search = '', ?array $filters = [], ?array $sort = []): Builder
+    public function getInvoices(?string $search = '', ?array $filters = [], ?array $sort = []): self|ScoutBuilder
     {
         $query = $search
             ? Invoice::search($search)->query(fn ($query) => $query)
@@ -22,7 +22,7 @@ class InvoiceBuilder extends Builder
         return $query;
     }
 
-    private function filterInvoices(Builder $query, ?array $filters = []): Builder
+    private function filterInvoices(ScoutBuilder|Builder $query, ?array $filters = []): self|ScoutBuilder
     {
         return $query
             ->when($filters['status'] ?? null, function ($query) use ($filters) {
@@ -42,7 +42,7 @@ class InvoiceBuilder extends Builder
             });
     }
 
-    private function sortInvoices(Builder $query, ?array $sort = []): Builder
+    private function sortInvoices(ScoutBuilder|Builder $query, ?array $sort = []): self|ScoutBuilder
     {
         return $query->when($sort['field'] !== 'created_at', function ($query) use ($sort) {
             $query->orderBy($sort['field'], $sort['direction']);
