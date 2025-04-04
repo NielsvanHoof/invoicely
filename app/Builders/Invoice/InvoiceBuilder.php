@@ -4,7 +4,7 @@ namespace App\Builders\Invoice;
 
 use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Builder;
-
+use Laravel\Scout\Builder as ScoutBuilder;
 /**
  * @extends Builder<Invoice>
  */
