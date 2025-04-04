@@ -24,5 +24,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('invoices/{invoice}/reminders/schedule-defaults', [ReminderController::class, 'scheduleDefaults'])->name('reminders.schedule-defaults');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

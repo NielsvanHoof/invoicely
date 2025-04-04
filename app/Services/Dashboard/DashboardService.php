@@ -26,7 +26,7 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'stats');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, fn() => [
+        return Cache::remember($cacheKey, $this->cacheTtl, fn () => [
             'totalInvoices' => $this->getTotalInvoices($user),
             'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
             'totalOverdue' => $this->getTotalByStatus($user, InvoiceStatus::OVERDUE),

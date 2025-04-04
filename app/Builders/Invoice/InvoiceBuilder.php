@@ -4,7 +4,6 @@ namespace App\Builders\Invoice;
 
 use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Builder;
-use Laravel\Scout\Builder as ScoutBuilder;
 
 /**
  * @extends Builder<Invoice>
@@ -14,7 +13,7 @@ class InvoiceBuilder extends Builder
     public function getInvoices(?string $search = '', ?array $filters = [], ?array $sort = []): Builder
     {
         $query = $search
-            ? Invoice::search($search)->query(fn($query) => $query)
+            ? Invoice::search($search)->query(fn ($query) => $query)
             : $this;
 
         $query = $this->filterInvoices($query, $filters);
@@ -48,7 +47,7 @@ class InvoiceBuilder extends Builder
         return $query->when($sort['field'] !== 'created_at', function ($query) use ($sort) {
             $query->orderBy($sort['field'], $sort['direction']);
         })
-            ->when($sort['field'] === 'created_at', function ($query) use ($sort) {
+            ->when($sort['field'] === 'created_at', function ($query) {
                 $query->latest();
             });
     }

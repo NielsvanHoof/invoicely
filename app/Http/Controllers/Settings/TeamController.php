@@ -177,7 +177,7 @@ class TeamController extends Controller
             $user = Auth::user()->load('team');
             $team = $user->team;
 
-            if (!$team) {
+            if (! $team) {
                 return redirect()->route('teams.index')->with('error', 'You are not a member of any team.');
             }
 
