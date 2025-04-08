@@ -11,10 +11,7 @@ use Inertia\Inertia;
 
 class DocumentController extends Controller
 {
-
-    public function __construct(protected FileService $fileService)
-    {
-    }
+    public function __construct(protected FileService $fileService) {}
 
     public function index(Invoice $invoice)
     {
@@ -36,7 +33,7 @@ class DocumentController extends Controller
             'documents'
         );
 
-        if (!$filePath) {
+        if (! $filePath) {
             return redirect()->back()->with('error', 'Failed to upload document');
         }
 
@@ -56,7 +53,7 @@ class DocumentController extends Controller
     {
         $url = $this->fileService->getTemporaryUrl($document->file_path);
 
-        if (!$url) {
+        if (! $url) {
             return redirect()->back()->with('error', 'Failed to generate download link');
         }
 

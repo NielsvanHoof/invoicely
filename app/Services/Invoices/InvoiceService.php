@@ -21,8 +21,7 @@ class InvoiceService
     public function __construct(
         protected FileService $fileService,
         protected ReminderService $reminderService
-    ) {
-    }
+    ) {}
 
     /**
      * Create a new invoice with file handling and reminders
@@ -171,7 +170,7 @@ class InvoiceService
             }
         }
 
-        if (!empty($remindersToInsert)) {
+        if (! empty($remindersToInsert)) {
             Reminder::query()->insert($remindersToInsert);
         }
 
@@ -197,7 +196,7 @@ class InvoiceService
         $deletedCount = 0;
         $failedCount = 0;
 
-        $deletableInvoices = $invoices->filter(fn(Invoice $invoice) => $invoice->status !== InvoiceStatus::PAID);
+        $deletableInvoices = $invoices->filter(fn (Invoice $invoice) => $invoice->status !== InvoiceStatus::PAID);
 
         $failedCount = count($invoiceIds) - $deletableInvoices->count();
 

@@ -2,12 +2,22 @@ import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type Invoice } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowUpDown, BellIcon, CircleEllipsisIcon, EyeIcon, FileEditIcon, FileText, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+    ArrowUpDown,
+    BellIcon,
+    CircleEllipsisIcon,
+    EyeIcon,
+    FileEditIcon,
+    FileText,
+    MoreHorizontalIcon,
+    PaperclipIcon,
+    TrashIcon,
+} from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 interface InvoiceTableProps {
@@ -86,15 +96,13 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                                         <Link href={`/invoices/${invoice.id}`} className="hover:underline">
                                             {invoice.invoice_number}
                                         </Link>
-                                        {(
-                                            invoice.file_path || 
-                                            (invoice.documents_count && invoice.documents_count > 0) || 
-                                            (invoice.reminders_count && invoice.reminders_count > 0)
-                                        ) && (
+                                        {(invoice.file_path ||
+                                            (invoice.documents_count && invoice.documents_count > 0) ||
+                                            (invoice.reminders_count && invoice.reminders_count > 0)) && (
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <Button variant="ghost" className="h-6 w-6 p-0" title="View attachments and notifications">
-                                                        <CircleEllipsisIcon className="h-4 w-4 text-muted-foreground" />
+                                                        <CircleEllipsisIcon className="text-muted-foreground h-4 w-4" />
                                                     </Button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-60 p-2" align="start">
@@ -108,13 +116,17 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                                                         {invoice.documents_count !== undefined && invoice.documents_count > 0 && (
                                                             <div className="flex items-center gap-2 text-sm">
                                                                 <FileText className="h-4 w-4 text-blue-500" />
-                                                                <span>{invoice.documents_count} document{invoice.documents_count !== 1 ? 's' : ''}</span>
+                                                                <span>
+                                                                    {invoice.documents_count} document{invoice.documents_count !== 1 ? 's' : ''}
+                                                                </span>
                                                             </div>
                                                         )}
                                                         {invoice.reminders_count !== undefined && invoice.reminders_count > 0 && (
                                                             <div className="flex items-center gap-2 text-sm">
                                                                 <BellIcon className="h-4 w-4 text-amber-500" />
-                                                                <span>{invoice.reminders_count} reminder{invoice.reminders_count !== 1 ? 's' : ''}</span>
+                                                                <span>
+                                                                    {invoice.reminders_count} reminder{invoice.reminders_count !== 1 ? 's' : ''}
+                                                                </span>
                                                             </div>
                                                         )}
                                                     </div>
