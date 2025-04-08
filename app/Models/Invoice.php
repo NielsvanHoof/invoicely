@@ -7,7 +7,6 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Scopes\InvoiceByTeamOrUserScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +18,7 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 #[ScopedBy([InvoiceByTeamOrUserScope::class])]
 class Invoice extends Model implements AuditableContract
 {
-    use Auditable, HasFactory, HasUlids, Searchable;
+    use Auditable, HasFactory, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -114,5 +113,15 @@ class Invoice extends Model implements AuditableContract
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the documents for the invoice.
+     *
+     * @return HasMany<Document, Invoice>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
     }
 }

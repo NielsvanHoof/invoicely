@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reminders', function (Blueprint $table) {
-            $table->ulid('id')->primary();
-            $table->foreignUlid('invoice_id')->constrained()->cascadeOnDelete();
+            $table->id();
+            $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
             $table->string('type'); // 'upcoming', 'overdue', etc.
             $table->dateTime('scheduled_date');
             $table->dateTime('sent_at')->nullable();

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ReminderController;
 use Illuminate\Support\Facades\Route;
@@ -17,11 +18,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('invoices/bulk-action', [InvoiceController::class, 'bulkAction'])->name('invoices.bulk-action');
     Route::resource('invoices', InvoiceController::class);
 
-    Route::get('invoices/{invoice}/reminders', [ReminderController::class, 'index'])->name('reminders.index');
-    Route::post('invoices/{invoice}/reminders', [ReminderController::class, 'store'])->name('reminders.store');
-    Route::put('invoices/{invoice}/reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
-    Route::delete('invoices/{invoice}/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
-    Route::post('invoices/{invoice}/reminders/schedule-defaults', [ReminderController::class, 'scheduleDefaults'])->name('reminders.schedule-defaults');
+    Route::post('invoices/{invoice}/reminders/schedule-defaults', [ReminderController::class, 'scheduleDefaults'])->name('invoices.reminders.schedule-defaults');
+    Route::resource('invoices.reminders', ReminderController::class);
+
+    Route::resource('invoices.documents', DocumentController::class);
 });
 
 require __DIR__.'/settings.php';

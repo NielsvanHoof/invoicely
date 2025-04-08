@@ -4,14 +4,13 @@ namespace App\Models;
 
 use App\Builders\Reminder\ReminderBuilder;
 use App\Enums\ReminderType;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reminder extends Model
 {
-    use HasFactory, HasUlids;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.

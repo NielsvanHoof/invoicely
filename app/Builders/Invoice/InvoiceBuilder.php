@@ -18,6 +18,7 @@ class InvoiceBuilder extends Builder
             : $this;
 
         $query = $this->filterInvoices($query, $filters);
+
         $query = $this->sortInvoices($query, $sort);
 
         return $query;

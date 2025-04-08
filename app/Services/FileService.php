@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services\Invoices;
+namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-class InvoiceFileService
+class FileService
 {
     /**
      * The disk to use for file storage.
@@ -13,25 +13,26 @@ class InvoiceFileService
     protected string $disk = 's3';
 
     /**
-     * Store an invoice file.
+     * Store a file.
      *
      * @param  UploadedFile  $file  The file to store
      * @param  int  $userId  The user ID
+     * @param  string  $directory  The directory to store the file in (e.g., 'invoices', 'documents')
      * @return string|null The file path
      */
-    public function storeFile(UploadedFile $file, int $userId): ?string
+    public function storeFile(UploadedFile $file, int $userId, string $directory): ?string
     {
         $fileName = time().'_'.$file->getClientOriginalName();
 
         return Storage::disk($this->disk)->putFileAs(
-            'invoices/'.$userId,
+            $directory.'/'.$userId,
             $file,
             $fileName
         );
     }
 
     /**
-     * Delete an invoice file.
+     * Delete a file.
      *
      * @param  string|null  $filePath  The file path
      * @return bool True if the file was deleted, false otherwise
@@ -46,13 +47,14 @@ class InvoiceFileService
     }
 
     /**
-     * Handle file replacement for an invoice.
+     * Handle file replacement.
      */
     public function handleFileUpdate(
         ?string $currentFilePath,
         ?UploadedFile $newFile,
         bool $removeFile,
-        int $userId
+        int $userId,
+        string $directory
     ): ?string {
         // Handle file removal if requested
         if ($removeFile && $currentFilePath) {
@@ -68,7 +70,7 @@ class InvoiceFileService
                 $this->deleteFile($currentFilePath);
             }
 
-            return $this->storeFile($newFile, $userId);
+            return $this->storeFile($newFile, $userId, $directory);
         }
 
         return $currentFilePath;
@@ -101,4 +103,4 @@ class InvoiceFileService
             return null;
         }
     }
-}
+} 

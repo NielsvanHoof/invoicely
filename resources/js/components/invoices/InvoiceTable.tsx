@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type Invoice } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowUpDown, BellIcon, EyeIcon, FileEditIcon, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
+import { ArrowUpDown, BellIcon, CircleEllipsisIcon, EyeIcon, FileEditIcon, FileText, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useEffect, useRef } from 'react';
 
 interface InvoiceTableProps {
@@ -85,26 +86,41 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                                         <Link href={`/invoices/${invoice.id}`} className="hover:underline">
                                             {invoice.invoice_number}
                                         </Link>
-                                        <div className="flex items-center gap-1">
-                                            {invoice.file_path && <PaperclipIcon className="h-3.5 w-3.5 text-neutral-400" />}
-                                            {invoice.reminders_count !== undefined && (
-                                                <div
-                                                    className="flex items-center"
-                                                    title={
-                                                        invoice.reminders_count > 0
-                                                            ? `${invoice.reminders_count} reminder${invoice.reminders_count !== 1 ? 's' : ''}`
-                                                            : 'No reminders'
-                                                    }
-                                                >
-                                                    <BellIcon
-                                                        className={`h-3.5 w-3.5 ${invoice.reminders_count > 0 ? 'text-amber-500' : 'text-neutral-300'}`}
-                                                    />
-                                                    {invoice.reminders_count > 0 && (
-                                                        <span className="ml-0.5 text-xs font-medium text-amber-600">{invoice.reminders_count}</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
+                                        {(
+                                            invoice.file_path || 
+                                            (invoice.documents_count && invoice.documents_count > 0) || 
+                                            (invoice.reminders_count && invoice.reminders_count > 0)
+                                        ) && (
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" className="h-6 w-6 p-0" title="View attachments and notifications">
+                                                        <CircleEllipsisIcon className="h-4 w-4 text-muted-foreground" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-60 p-2" align="start">
+                                                    <div className="space-y-2">
+                                                        {invoice.file_path && (
+                                                            <div className="flex items-center gap-2 text-sm">
+                                                                <PaperclipIcon className="h-4 w-4 text-neutral-400" />
+                                                                <span>Has invoice attachment</span>
+                                                            </div>
+                                                        )}
+                                                        {invoice.documents_count !== undefined && invoice.documents_count > 0 && (
+                                                            <div className="flex items-center gap-2 text-sm">
+                                                                <FileText className="h-4 w-4 text-blue-500" />
+                                                                <span>{invoice.documents_count} document{invoice.documents_count !== 1 ? 's' : ''}</span>
+                                                            </div>
+                                                        )}
+                                                        {invoice.reminders_count !== undefined && invoice.reminders_count > 0 && (
+                                                            <div className="flex items-center gap-2 text-sm">
+                                                                <BellIcon className="h-4 w-4 text-amber-500" />
+                                                                <span>{invoice.reminders_count} reminder{invoice.reminders_count !== 1 ? 's' : ''}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        )}
                                     </div>
                                 </TableCell>
                                 <TableCell>{invoice.client_name}</TableCell>
@@ -136,7 +152,7 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                                                 </Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuItem asChild>
-                                                <Link href={route('reminders.index', invoice.id)}>
+                                                <Link href={route('invoices.reminders.index', invoice.id)}>
                                                     <BellIcon
                                                         className={`mr-2 h-4 w-4 ${invoice.reminders_count && invoice.reminders_count > 0 ? 'text-amber-500' : ''}`}
                                                     />

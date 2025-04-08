@@ -303,7 +303,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                     <Link
                                                         href={
                                                             activity.type === 'reminder'
-                                                                ? route('reminders.index', activity.id)
+                                                                ? route('invoices.reminders.index', activity.id)
                                                                 : route('invoices.show', activity.id)
                                                         }
                                                         className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"
