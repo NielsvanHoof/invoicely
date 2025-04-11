@@ -40,7 +40,6 @@ class AnalyticsService
             if ($paidInvoices->count() > 0) {
                 $totalDays = 0;
 
-                /** @var Invoice $invoice */
                 foreach ($paidInvoices as $invoice) {
                     // Using created_at as a proxy for when the invoice was generated
                     // In a real app, you might want to use the date the invoice was changed to 'sent' status
