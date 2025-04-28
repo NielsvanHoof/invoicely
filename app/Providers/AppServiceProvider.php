@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
 
         Model::shouldBeStrict(! app()->isProduction());
 
+        Model::automaticallyEagerLoadRelationships();
+
         Inertia::encryptHistory(true);
     }
 

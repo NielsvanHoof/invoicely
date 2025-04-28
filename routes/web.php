@@ -3,6 +3,8 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Invoices\InvoiceIndexController;
+use App\Http\Controllers\Invoices\InvoiceShowController;
 use App\Http\Controllers\ReminderController;
 use Illuminate\Support\Facades\Route;
 use Spatie\Health\Http\Controllers\HealthCheckResultsController;
@@ -14,7 +16,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('health', HealthCheckResultsController::class);
 
     Route::get('invoices/{invoice}/download', [InvoiceController::class, 'downloadFile'])->name('invoices.download');
-    Route::resource('invoices', InvoiceController::class);
+    Route::get('invoices/{invoice}', InvoiceShowController::class)->name('invoices.show');
+    Route::get('invoices', InvoiceIndexController::class)->name('invoices.index');
 
     Route::get('invoices/{invoice}/reminders', [ReminderController::class, 'index'])->name('reminders.index');
     Route::post('invoices/{invoice}/reminders', [ReminderController::class, 'store'])->name('reminders.store');

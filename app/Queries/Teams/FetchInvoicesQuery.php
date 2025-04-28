@@ -1,40 +1,24 @@
 <?php
 
-namespace App\Builders\Invoice;
+namespace App\Queries\Teams;
 
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Laravel\Scout\Builder as ScoutBuilder;
 
-/**
- * @extends Builder<Invoice>
- */
-class InvoiceBuilder extends Builder
+class FetchInvoicesQuery
 {
-    public function ByTeam(?string $teamId): self
-    {
-        if ($teamId) {
-            return $this->where('team_id', $teamId);
-        }
-
-        return $this;
-    }
-
-    public function ByUser(int $userId): self
-    {
-        return $this->where('user_id', $userId);
-    }
-
-    public function ForUser(User $user): self
-    {
-        if ($user->team_id) {
-            return $this->byTeam($user->team_id);
-        }
-
-        return $this->byUser($user->id);
-    }
-
-    public function getPaginatedInvoices(User $user, string $search = '', array $filters = [], int $perPage = 10): \Laravel\Scout\Builder
+    /**
+     * @param array{
+     *     status?: string,
+     *     date_from?: string,
+     *     date_to?: string,
+     *     amount_from?: string,
+     *     amount_to?: string,
+     * } $filters
+     */
+    public function execute(User $user, string $search = '', array $filters = []): ScoutBuilder
     {
         return Invoice::search($search)
             ->query(function (Builder $query) use ($user, $filters) {

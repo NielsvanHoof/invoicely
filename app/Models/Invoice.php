@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Builders\Invoice\InvoiceBuilder;
 use App\Enums\InvoiceStatus;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,11 +48,6 @@ class Invoice extends Model
         'status' => InvoiceStatus::class,
     ];
 
-    public function newEloquentBuilder($query): InvoiceBuilder
-    {
-        return new InvoiceBuilder($query);
-    }
-
     /**
      * Get the searchable array for the invoice.
      *
@@ -65,6 +61,32 @@ class Invoice extends Model
         $array['invoice_number'] = $this->invoice_number;
 
         return $array;
+    }
+
+    #[Scope]
+    public function scopeByTeam(Builder $query, ?string $teamId): Builder
+    {
+        if ($teamId) {
+            return $query->where('team_id', $teamId);
+        }
+
+        return $this;
+    }
+
+    #[Scope]
+    public function scopeByUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    #[Scope]
+    public function scopeForUser(Builder $query, User $user): Builder
+    {
+        if ($user->team_id) {
+            return $query->scopeByTeam($user->team_id);
+        }
+
+        return $query->scopeByUser($user->id);
     }
 
     /**

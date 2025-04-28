@@ -7,8 +7,6 @@ use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use App\Services\Invoices\InvoiceFileService;
 use App\Services\Invoices\InvoiceService;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -27,58 +25,6 @@ class InvoiceController extends Controller
         protected InvoiceService $invoiceService
     ) {
         $this->authorizeResource(Invoice::class, 'invoice');
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $search = $request->input('search', '');
-        $user = Auth::user();
-
-        $filters = [
-            'status' => $request->input('status', ''),
-            'date_from' => $request->input('date_from', ''),
-            'date_to' => $request->input('date_to', ''),
-            'amount_from' => $request->input('amount_from', ''),
-            'amount_to' => $request->input('amount_to', ''),
-        ];
-
-        $invoices = Invoice::search($search)
-            ->query(function (Builder $query) use ($user, $filters) {
-                return $query
-                    ->withCount('reminders')
-                    ->when($user->team_id, function ($query) use ($user) {
-                        $query->where('team_id', $user->team_id);
-                    })
-                    ->when(! $user->team_id, function ($query) use ($user) {
-                        $query->where('user_id', $user->id);
-                    })
-                    ->when($filters['status'], function ($query) use ($filters) {
-                        $query->where('status', $filters['status']);
-                    })
-                    ->when($filters['date_from'], function ($query) use ($filters) {
-                        $query->whereDate('created_at', '>=', $filters['date_from']);
-                    })
-                    ->when($filters['date_to'], function ($query) use ($filters) {
-                        $query->whereDate('created_at', '<=', $filters['date_to']);
-                    })
-                    ->when($filters['amount_from'], function ($query) use ($filters) {
-                        $query->where('amount', '>=', $filters['amount_from']);
-                    })
-                    ->when($filters['amount_to'], function ($query) use ($filters) {
-                        $query->where('amount', '<=', $filters['amount_to']);
-                    });
-            })
-            ->latest()
-            ->paginate(10);
-
-        return Inertia::render('invoices/index', [
-            'invoices' => Inertia::merge($invoices),
-            'search' => $search,
-            'filters' => $filters,
-        ]);
     }
 
     /**
@@ -106,18 +52,6 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Invoice $invoice)
-    {
-        $invoice->load('reminders');
-
-        return Inertia::render('invoices/show', [
-            'invoice' => $invoice,
-        ]);
     }
 
     /**
