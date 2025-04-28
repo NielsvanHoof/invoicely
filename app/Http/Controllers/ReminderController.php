@@ -24,14 +24,9 @@ class ReminderController extends Controller
 
         $invoice->load('reminders');
 
-        $reminders = $invoice->reminders()
-            ->orderBy('scheduled_date', 'desc')
-            ->get();
-
         return Inertia::render('reminders/index', [
             'invoice' => $invoice,
-            'reminders' => $reminders,
-            'reminderTypes' => $this->getReminderTypes(),
+            'types' => $this->getReminderTypes(),
         ]);
     }
 
@@ -54,7 +49,7 @@ class ReminderController extends Controller
 
         InvalidateDashBoardCacheEvent::dispatch($invoice->user);
 
-        return redirect()->route('reminders.index', $invoice)
+        return redirect()->route('invoices.reminders.index', $invoice)
             ->with('success', 'Reminder scheduled successfully.');
     }
 
@@ -67,7 +62,7 @@ class ReminderController extends Controller
 
         // Don't allow updating reminders that have already been sent
         if ($reminder->sent_at) {
-            return redirect()->route('reminders.index', $invoice)
+            return redirect()->route('invoices.reminders.index', [$invoice, $reminder])
                 ->with('error', 'Cannot update a reminder that has already been sent.');
         }
 
@@ -77,7 +72,7 @@ class ReminderController extends Controller
 
         InvalidateDashBoardCacheEvent::dispatch($invoice->user);
 
-        return redirect()->route('reminders.index', $invoice)
+        return redirect()->route('invoices.reminders.index', [$invoice, $reminder])
             ->with('success', 'Reminder updated successfully.');
     }
 
@@ -90,7 +85,7 @@ class ReminderController extends Controller
 
         // Don't allow deleting reminders that have already been sent
         if ($reminder->sent_at) {
-            return redirect()->route('reminders.index', $invoice)
+            return redirect()->route('invoices.reminders.index', [$invoice, $reminder])
                 ->with('error', 'Cannot delete a reminder that has already been sent.');
         }
 
@@ -98,7 +93,7 @@ class ReminderController extends Controller
 
         InvalidateDashBoardCacheEvent::dispatch($invoice->user);
 
-        return redirect()->route('reminders.index', $invoice)
+        return redirect()->route('invoices.reminders.index', [$invoice, $reminder])
             ->with('success', 'Reminder deleted successfully.');
     }
 
@@ -113,7 +108,7 @@ class ReminderController extends Controller
 
         InvalidateDashBoardCacheEvent::dispatch($invoice->user);
 
-        return redirect()->route('reminders.index', $invoice)
+        return redirect()->route('invoices.reminders.index', $invoice)
             ->with('success', 'Default reminders scheduled successfully.');
     }
 

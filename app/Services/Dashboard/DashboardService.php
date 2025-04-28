@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Reminder;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -25,14 +26,16 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'stats');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
-            return [
-                'totalInvoices' => $this->getTotalInvoices($user),
-                'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
-                'totalOverdue' => $this->getTotalByStatus($user, InvoiceStatus::OVERDUE),
-                'totalPending' => $this->getTotalPendingAmount($user),
-            ];
-        });
+        return Cache::remember($cacheKey, $this->cacheTtl, fn () => [
+            'totalInvoices' => $this->getTotalInvoices($user),
+            'totalPaid' => $this->getTotalByStatus($user, InvoiceStatus::PAID),
+            'totalOverdue' => $this->getTotalByStatus($user, InvoiceStatus::OVERDUE),
+            'totalPending' => $this->getTotalPendingAmount($user),
+            'totalOutstanding' => $this->getTotalOutstandingAmount($user),
+            'overdueCount' => $this->getOverdueInvoiceCount($user),
+            'upcomingCount' => $this->getUpcomingInvoiceCount($user),
+            'averageDaysOverdue' => $this->getAverageDaysOverdue($user),
+        ]);
     }
 
     /**
@@ -44,9 +47,8 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'latest-invoices');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             return Invoice::query()
-                ->forUser($user)
                 ->latest()
                 ->take($limit)
                 ->get();
@@ -62,9 +64,8 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'upcoming-invoices');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             return Invoice::query()
-                ->forUser($user)
                 ->whereDate('due_date', '>=', now())
                 ->whereNotIn('status', [InvoiceStatus::PAID])
                 ->orderBy('due_date')
@@ -82,10 +83,9 @@ class DashboardService
     {
         $cacheKey = $this->getCacheKey($user, 'recent-activity');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             // Get recent invoices (created or updated)
             $recentInvoices = Invoice::query()
-                ->forUser($user)
                 ->latest('updated_at')
                 ->take($limit)
                 ->get()
@@ -110,9 +110,6 @@ class DashboardService
 
             // Get recent reminders
             $recentReminders = Reminder::query()
-                ->whereHas('invoice', function ($query) use ($user) {
-                    $query->forUser($user);
-                })
                 ->with('invoice')
                 ->latest('created_at')
                 ->take($limit)
@@ -162,7 +159,7 @@ class DashboardService
      */
     protected function getTotalInvoices(User $user): int
     {
-        return Invoice::query()->forUser($user)->count();
+        return Invoice::query()->count();
     }
 
     /**
@@ -171,7 +168,6 @@ class DashboardService
     protected function getTotalByStatus(User $user, InvoiceStatus $status): float
     {
         return Invoice::query()
-            ->forUser($user)
             ->where('status', $status)
             ->sum('amount');
     }
@@ -182,9 +178,64 @@ class DashboardService
     protected function getTotalPendingAmount(User $user): float
     {
         return Invoice::query()
-            ->forUser($user)
             ->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::SENT])
             ->sum('amount');
+    }
+
+    /**
+     * Get total outstanding amount (pending + overdue).
+     */
+    protected function getTotalOutstandingAmount(User $user): float
+    {
+        return Invoice::query()
+            ->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::SENT, InvoiceStatus::OVERDUE])
+            ->sum('amount');
+    }
+
+    /**
+     * Get count of overdue invoices.
+     */
+    protected function getOverdueInvoiceCount(User $user): int
+    {
+        return Invoice::query()
+            ->where('status', InvoiceStatus::OVERDUE)
+            ->count();
+    }
+
+    /**
+     * Get count of upcoming invoices.
+     */
+    protected function getUpcomingInvoiceCount(User $user): int
+    {
+        return Invoice::query()
+            ->whereDate('due_date', '>=', now())
+            ->whereDate('due_date', '<=', now()->addDays(7))
+            ->whereNotIn('status', [InvoiceStatus::PAID])
+            ->count();
+    }
+
+    /**
+     * Get average days overdue for overdue invoices.
+     */
+    protected function getAverageDaysOverdue(User $user): int
+    {
+        $overdueInvoices = Invoice::query()
+            ->where('status', InvoiceStatus::OVERDUE)
+            ->get();
+
+        if ($overdueInvoices->isEmpty()) {
+            return 0;
+        }
+
+        $totalDaysOverdue = 0;
+        $now = Carbon::now();
+
+        foreach ($overdueInvoices as $invoice) {
+            $dueDate = Carbon::parse($invoice->due_date);
+            $totalDaysOverdue += $now->diffInDays($dueDate);
+        }
+
+        return (int) round($totalDaysOverdue / $overdueInvoices->count());
     }
 
     /**

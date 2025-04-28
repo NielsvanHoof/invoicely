@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { router } from '@inertiajs/react';
+import { getActiveFilters } from '@/lib/utils';
+import { router, usePage } from '@inertiajs/react';
 import { debounce } from 'lodash';
 import { LoaderIcon, SearchIcon, XIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ interface SearchBarProps {
 export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invoices.index' }: SearchBarProps) {
     const [searchTerm, setSearchTerm] = useState(initialValue);
     const [isSearching, setIsSearching] = useState(false);
+    const { filters, sort } = usePage().props as { filters?: Record<string, string>; sort?: Record<string, string> };
 
     // Update searchTerm when initialValue changes
     useEffect(() => {
@@ -30,9 +32,16 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
             return;
         }
 
+        // Get only the active filters using the utility function
+        const activeFilters = getActiveFilters(filters, sort);
+
         router.get(
             route(routeName),
-            { search: value },
+            {
+                search: value,
+                // Preserve only active filters
+                ...activeFilters,
+            },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -58,9 +67,16 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
             return;
         }
 
+        // Get only the active filters using the utility function
+        const activeFilters = getActiveFilters(filters, sort);
+
         router.get(
             route(routeName),
-            { search: '' },
+            {
+                search: '',
+                // Preserve only active filters
+                ...activeFilters,
+            },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -71,7 +87,7 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
     };
 
     return (
-        <div className="relative w-full md:max-w-sm">
+        <div className="relative w-full">
             <div className="relative">
                 <Input
                     type="search"

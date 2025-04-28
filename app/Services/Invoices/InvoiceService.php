@@ -2,10 +2,15 @@
 
 namespace App\Services\Invoices;
 
+use App\Enums\InvoiceStatus;
+use App\Enums\ReminderType;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
+use App\Models\Reminder;
+use App\Models\User;
+use App\Services\FileService;
 use App\Services\Reminders\ReminderService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
@@ -14,7 +19,7 @@ use Illuminate\Support\Facades\Mail;
 class InvoiceService
 {
     public function __construct(
-        protected InvoiceFileService $fileService,
+        protected FileService $fileService,
         protected ReminderService $reminderService
     ) {}
 
@@ -31,7 +36,7 @@ class InvoiceService
         $filePath = null;
 
         if ($file) {
-            $filePath = $this->fileService->storeFile($file, $userId);
+            $filePath = $this->fileService->storeFile($file, $userId, 'invoices');
         }
 
         $invoice = Invoice::create([
@@ -49,8 +54,9 @@ class InvoiceService
             Mail::to($data['client_email'])->send(new InvoiceReceivedMail($invoice));
         }
 
-        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
-        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
+        $user = User::find($userId);
+        InvalidateDashBoardCacheEvent::dispatch($user);
+        InvalidateAnalyticsCacheEvent::dispatch($user);
 
         return $invoice;
     }
@@ -70,7 +76,8 @@ class InvoiceService
             $invoice->file_path,
             $file,
             $removeFile,
-            $userId
+            $userId,
+            'invoices'
         );
 
         $invoice->update([
@@ -81,8 +88,9 @@ class InvoiceService
         // Schedule reminders for the updated invoice
         $this->reminderService->scheduleReminders($invoice);
 
-        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
-        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
+        $user = User::find($userId);
+        InvalidateDashBoardCacheEvent::dispatch($user);
+        InvalidateAnalyticsCacheEvent::dispatch($user);
 
         return $invoice;
     }
@@ -100,9 +108,116 @@ class InvoiceService
 
         $deleted = $invoice->delete();
 
-        InvalidateDashBoardCacheEvent::dispatch($invoice->user);
-        InvalidateAnalyticsCacheEvent::dispatch($invoice->user);
+        $user = User::find($invoice->user_id);
+        InvalidateDashBoardCacheEvent::dispatch($user);
+        InvalidateAnalyticsCacheEvent::dispatch($user);
 
         return $deleted;
+    }
+
+    /**
+     * Update the status for multiple invoices.
+     *
+     * @param  array<int>  $invoiceIds
+     * @param  int|null  $userId  (Optional: for context like cache invalidation)
+     * @return int Number of invoices updated.
+     */
+    public function bulkUpdateStatus(array $invoiceIds, InvoiceStatus $status, ?int $userId = null): int
+    {
+        $updateData = ['status' => $status];
+
+        $updateData['paid_at'] = ($status === InvoiceStatus::PAID) ? now() : null;
+
+        $count = Invoice::whereIn('id', $invoiceIds)
+            ->whereNot('status', InvoiceStatus::PAID)
+            ->update($updateData);
+
+        if ($userId) {
+            $user = User::find($userId);
+            InvalidateDashBoardCacheEvent::dispatch($user);
+            InvalidateAnalyticsCacheEvent::dispatch($user);
+        }
+
+        return $count;
+    }
+
+    /**
+     * Create reminders for multiple invoices.
+     *
+     * @param  array<int>  $invoiceIds
+     * @param  int|null  $userId  (Optional: for context like cache invalidation)
+     * @return int Number of reminders created.
+     */
+    public function bulkCreateReminders(array $invoiceIds, ReminderType $type, ?int $userId = null): int
+    {
+        $invoices = Invoice::whereIn('id', $invoiceIds)->get();
+        $reminderCount = 0;
+        $remindersToInsert = [];
+        $now = now();
+
+        foreach ($invoices as $invoice) {
+            $shouldCreate = match ($type) {
+                ReminderType::THANK_YOU => $invoice->status === InvoiceStatus::PAID,
+                ReminderType::UPCOMING => $invoice->due_date > now(),
+                ReminderType::OVERDUE => $invoice->due_date < now(),
+                default => false,
+            };
+
+            if ($shouldCreate) {
+                $reminderCount++;
+
+                $remindersToInsert[] = ['invoice_id' => $invoice->id, 'type' => $type->value, 'scheduled_date' => $now->addDay(), 'message' => $type->defaultMessage()];
+            }
+        }
+
+        if (! empty($remindersToInsert)) {
+            Reminder::query()->insert($remindersToInsert);
+        }
+
+        if ($reminderCount > 0 && $userId) {
+            $user = User::find($userId);
+            InvalidateDashBoardCacheEvent::dispatch($user);
+            InvalidateAnalyticsCacheEvent::dispatch($user);
+        }
+
+        return $reminderCount;
+    }
+
+    /**
+     * Delete multiple invoices.
+     *
+     * @param  array<int>  $invoiceIds
+     * @param  int|null  $userId  (Optional: for context like cache invalidation)
+     * @return array{deletedCount: int, failedCount: int}
+     */
+    public function bulkDeleteInvoices(array $invoiceIds, ?int $userId = null): array
+    {
+        $invoices = Invoice::whereIn('id', $invoiceIds)->get();
+        $deletedCount = 0;
+        $failedCount = 0;
+
+        $deletableInvoices = $invoices->filter(fn (Invoice $invoice) => $invoice->status !== InvoiceStatus::PAID);
+
+        $failedCount = count($invoiceIds) - $deletableInvoices->count();
+
+        if ($deletableInvoices->isEmpty()) {
+            return ['deletedCount' => 0, 'failedCount' => $failedCount];
+        }
+
+        foreach ($deletableInvoices as $invoice) {
+            if ($invoice->file_path) {
+                $this->fileService->deleteFile($invoice->file_path);
+            }
+        }
+
+        $deletedCount = Invoice::whereIn('id', $deletableInvoices->pluck('id')->toArray())->delete();
+
+        if ($deletedCount > 0 && $userId) {
+            $user = User::find($userId);
+            InvalidateDashBoardCacheEvent::dispatch($user);
+            InvalidateAnalyticsCacheEvent::dispatch($user);
+        }
+
+        return ['deletedCount' => $deletedCount, 'failedCount' => $failedCount];
     }
 }

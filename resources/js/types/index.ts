@@ -58,6 +58,9 @@ export interface Invoice {
     created_at: string;
     updated_at: string;
     reminders_count?: number;
+    documents_count?: number;
+    reminders?: Reminder[];
+    documents?: Document[];
 }
 
 export interface PaginatedData<T> {
@@ -107,4 +110,18 @@ export interface ReminderType {
 export interface Currency {
     value: string;
     label: string;
+}
+
+export interface Document {
+    id: number;
+    invoice_id: number;
+    name: string;
+    url: string;
+    type: string;
+    mime_type: string;
+    size: number;
+    category: 'contract' | 'invoice' | 'receipt' | 'other';
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
 }

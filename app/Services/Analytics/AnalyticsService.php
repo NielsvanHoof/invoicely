@@ -25,9 +25,8 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'financial-metrics');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () {
             $invoices = Invoice::query()
-                ->forUser($user)
                 ->get();
 
             $totalOutstanding = $invoices
@@ -41,7 +40,6 @@ class AnalyticsService
             if ($paidInvoices->count() > 0) {
                 $totalDays = 0;
 
-                /** @var Invoice $invoice */
                 foreach ($paidInvoices as $invoice) {
                     // Using created_at as a proxy for when the invoice was generated
                     // In a real app, you might want to use the date the invoice was changed to 'sent' status
@@ -76,9 +74,8 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'status-distribution');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () {
             $statusCounts = Invoice::query()
-                ->forUser($user)
                 ->select('status', DB::raw('count(*) as count'))
                 ->groupBy('status')
                 ->pluck('count', 'status')
@@ -105,11 +102,10 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'monthly-revenue');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () {
             $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
 
             $monthlyRevenue = Invoice::query()
-                ->forUser($user)
                 ->where('status', InvoiceStatus::PAID->value)
                 ->where('issue_date', '>=', $sixMonthsAgo)
                 ->select(
@@ -156,9 +152,8 @@ class AnalyticsService
     {
         $cacheKey = $this->getCacheKey($user, 'top-clients');
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($user, $limit) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($limit) {
             return Invoice::query()
-                ->forUser($user)
                 ->where('status', InvoiceStatus::PAID->value)
                 ->select('client_name', DB::raw('SUM(amount) as revenue'))
                 ->groupBy('client_name')

@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
-import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
+import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, FileIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface ShowInvoiceProps {
@@ -89,17 +89,17 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                    <Link href={route('invoices.index')}>
-                        <Button variant="outline">
-                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                            Back to Invoices
-                        </Button>
-                    </Link>
-
-                    <Link href={route('reminders.index', invoice.id)}>
+                    <Link href={route('invoices.reminders.index', invoice.id)}>
                         <Button variant="outline">
                             <BellIcon className="mr-2 h-4 w-4" />
                             Manage Reminders
+                        </Button>
+                    </Link>
+
+                    <Link href={route('invoices.documents.index', invoice.id)}>
+                        <Button variant="outline">
+                            <FileIcon className="mr-2 h-4 w-4" />
+                            Manage Documents
                         </Button>
                     </Link>
                 </div>
@@ -194,15 +194,6 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                             </CardFooter>
                         )}
                     </Card>
-                </div>
-
-                <div className="mt-2 flex flex-col gap-2 md:hidden">
-                    {invoice.file_path && (
-                        <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                            <DownloadIcon className="mr-2 h-4 w-4" />
-                            {isDownloading ? 'Generating link...' : 'Download Attachment'}
-                        </Button>
-                    )}
                 </div>
             </div>
         </AppLayout>

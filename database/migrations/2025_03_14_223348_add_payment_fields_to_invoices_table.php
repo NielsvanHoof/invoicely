@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->foreignId('team_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('payment_method')->nullable()->after('status');
+            $table->timestamp('paid_at')->nullable()->after('payment_method');
+            $table->string('payment_reference')->nullable()->after('paid_at');
         });
     }
 
@@ -22,8 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->dropForeign(['team_id']);
-            $table->dropColumn('team_id');
+            $table->dropColumn(['payment_method', 'paid_at', 'payment_reference']);
         });
     }
 };

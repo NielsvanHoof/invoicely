@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teams', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->foreignId('client_id')->nullable()->after('team_id')->constrained()->nullOnDelete();
         });
     }
 
@@ -23,6 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teams');
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->dropForeign(['client_id']);
+            $table->dropColumn('client_id');
+        });
     }
 };

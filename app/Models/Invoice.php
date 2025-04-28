@@ -3,18 +3,21 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use App\Enums\PaymentMethod;
+use App\Models\Scopes\InvoiceByTeamOrUserScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Invoice extends Model
+#[ScopedBy([InvoiceByTeamOrUserScope::class])]
+class Invoice extends Model implements AuditableContract
 {
-    use HasFactory, HasUlids, Searchable;
+    use Auditable, HasFactory, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -34,6 +37,7 @@ class Invoice extends Model
         'notes',
         'file_path',
         'team_id',
+        'client_id',
     ];
 
     /**
@@ -46,6 +50,8 @@ class Invoice extends Model
         'due_date' => 'date',
         'amount' => 'decimal:2',
         'status' => InvoiceStatus::class,
+        'payment_method' => PaymentMethod::class,
+        'paid_at' => 'datetime',
     ];
 
     /**
@@ -117,5 +123,25 @@ class Invoice extends Model
     public function reminders(): HasMany
     {
         return $this->hasMany(Reminder::class);
+    }
+
+    /**
+     * Get the client that owns the invoice.
+     *
+     * @return BelongsTo<Client, Invoice>
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the documents for the invoice.
+     *
+     * @return HasMany<Document, Invoice>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
     }
 }

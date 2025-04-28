@@ -10,15 +10,14 @@ import { formatDate } from '@/lib/utils';
 import { type BreadcrumbItem, type Invoice, type Reminder, type ReminderType } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { AlertTriangleIcon, BellIcon, CalendarIcon, PencilIcon, PlusIcon, RefreshCwIcon, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface RemindersIndexProps {
     invoice: Invoice;
-    reminders: Reminder[];
-    reminderTypes: ReminderType[];
+    types: ReminderType[];
 }
 
-export default function RemindersIndex({ invoice, reminders, reminderTypes }: RemindersIndexProps) {
+export default function RemindersIndex({ invoice, types }: RemindersIndexProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -40,13 +39,13 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
         },
         {
             title: 'Reminders',
-            href: route('reminders.index', invoice.id),
+            href: route('invoices.reminders.index', invoice.id),
         },
     ];
 
     const form = useForm({
         type: '',
-        scheduled_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+        scheduled_date: new Date().toISOString().split('T')[0],
         message: '',
     });
 
@@ -57,7 +56,7 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.post(route('reminders.store', invoice.id), {
+        form.post(route('invoices.reminders.store', invoice.id), {
             onSuccess: () => {
                 setIsAddDialogOpen(false);
                 form.reset();
@@ -69,7 +68,7 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
         e.preventDefault();
         if (!selectedReminder) return;
 
-        editForm.put(route('reminders.update', [invoice.id, selectedReminder.id]), {
+        editForm.put(route('invoices.reminders.update', [invoice.id, selectedReminder.id]), {
             onSuccess: () => {
                 setIsEditDialogOpen(false);
                 setSelectedReminder(null);
@@ -80,7 +79,6 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
 
     function handleEditClick(reminder: Reminder) {
         setSelectedReminder(reminder);
-        // Format date to YYYY-MM-DD
         const date = new Date(reminder.scheduled_date);
         const formattedDate = date.toISOString().split('T')[0];
 
@@ -98,7 +96,7 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
 
     function confirmDelete() {
         if (!selectedReminder) return;
-        router.delete(route('reminders.destroy', [invoice.id, selectedReminder.id]));
+        router.delete(route('invoices.reminders.destroy', [invoice.id, selectedReminder.id]));
         setIsDeleteDialogOpen(false);
     }
 
@@ -107,11 +105,10 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
     }
 
     function confirmScheduleDefaults() {
-        router.post(route('reminders.schedule-defaults', invoice.id));
+        router.post(route('invoices.reminders.schedule-defaults', invoice.id));
         setIsScheduleDefaultsDialogOpen(false);
     }
 
-    // Helper function to get reminder status badge
     function getReminderStatusBadge(reminder: Reminder) {
         if (reminder.sent_at) {
             return (
@@ -143,98 +140,93 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Reminders for Invoice #${invoice.invoice_number}`} />
 
-            <div className="mb-8 flex flex-col gap-4 px-1 md:flex-row md:items-center md:justify-between">
-                <div className="pl-1">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold">Reminders</h1>
-                        <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset dark:bg-blue-900/30 dark:text-blue-400">
-                            Invoice #{invoice.invoice_number}
-                        </span>
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4">
+                <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Payment Reminders</h1>
+                        <p className="text-muted-foreground mt-1">Manage payment reminders for Invoice #{invoice.invoice_number}</p>
                     </div>
-                    <p className="text-muted-foreground mt-1.5">Manage payment reminders for {invoice.client_name}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" onClick={handleScheduleDefaults} className="flex-shrink-0">
-                        <RefreshCwIcon className="mr-2 h-4 w-4" />
-                        <span>Schedule Defaults</span>
-                    </Button>
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="flex-shrink-0">
-                                <PlusIcon className="mr-2 h-4 w-4" />
-                                <span>Add Reminder</span>
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                                <DialogTitle>Add New Reminder</DialogTitle>
-                                <DialogDescription>Create a new reminder for this invoice.</DialogDescription>
-                            </DialogHeader>
-                            <form onSubmit={onSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="type" className="text-sm font-medium">
-                                        Reminder Type
-                                    </Label>
-                                    <Select value={form.data.type} onValueChange={(value) => form.setData('type', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a reminder type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {reminderTypes.map((type) => (
-                                                <SelectItem key={type.value} value={type.value}>
-                                                    {type.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {form.errors.type && <p className="text-sm text-red-500">{form.errors.type}</p>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="scheduled_date" className="text-sm font-medium">
-                                        Scheduled Date
-                                    </Label>
-                                    <div className="relative">
-                                        <CalendarIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                                        <Input
-                                            id="scheduled_date"
-                                            type="date"
-                                            className="pl-10"
-                                            value={form.data.scheduled_date}
-                                            onChange={(e) => form.setData('scheduled_date', e.target.value)}
-                                        />
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" onClick={handleScheduleDefaults} className="flex-shrink-0">
+                            <RefreshCwIcon className="mr-2 h-4 w-4" />
+                            <span>Schedule Defaults</span>
+                        </Button>
+                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="flex-shrink-0">
+                                    <PlusIcon className="mr-2 h-4 w-4" />
+                                    <span>Add Reminder</span>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Add New Reminder</DialogTitle>
+                                    <DialogDescription>Create a new reminder for this invoice.</DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={onSubmit} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="type" className="text-sm font-medium">
+                                            Reminder Type
+                                        </Label>
+                                        <Select value={form.data.type} onValueChange={(value) => form.setData('type', value)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a reminder type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {types.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {form.errors.type && <p className="text-sm text-red-500">{form.errors.type}</p>}
                                     </div>
-                                    {form.errors.scheduled_date && <p className="text-sm text-red-500">{form.errors.scheduled_date}</p>}
-                                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="message" className="text-sm font-medium">
-                                        Message (Optional)
-                                    </Label>
-                                    <Textarea
-                                        id="message"
-                                        placeholder="Leave blank to use the default message template"
-                                        className="min-h-[100px] resize-y"
-                                        value={form.data.message}
-                                        onChange={(e) => form.setData('message', e.target.value)}
-                                    />
-                                    {form.errors.message && <p className="text-sm text-red-500">{form.errors.message}</p>}
-                                </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="scheduled_date" className="text-sm font-medium">
+                                            Scheduled Date
+                                        </Label>
+                                        <div className="relative">
+                                            <CalendarIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                                            <Input
+                                                id="scheduled_date"
+                                                type="date"
+                                                className="pl-10"
+                                                value={form.data.scheduled_date}
+                                                onChange={(e) => form.setData('scheduled_date', e.target.value)}
+                                            />
+                                        </div>
+                                        {form.errors.scheduled_date && <p className="text-sm text-red-500">{form.errors.scheduled_date}</p>}
+                                    </div>
 
-                                <DialogFooter className="mt-6">
-                                    <Button type="submit" disabled={form.processing}>
-                                        {form.processing ? 'Scheduling...' : 'Schedule Reminder'}
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="message" className="text-sm font-medium">
+                                            Message (Optional)
+                                        </Label>
+                                        <Textarea
+                                            id="message"
+                                            placeholder="Leave blank to use the default message template"
+                                            className="min-h-[100px] resize-y"
+                                            value={form.data.message}
+                                            onChange={(e) => form.setData('message', e.target.value)}
+                                        />
+                                        {form.errors.message && <p className="text-sm text-red-500">{form.errors.message}</p>}
+                                    </div>
+
+                                    <DialogFooter className="mt-6">
+                                        <Button type="submit" disabled={form.processing}>
+                                            {form.processing ? 'Scheduling...' : 'Schedule Reminder'}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
-            </div>
 
-            <div className="px-1">
-                {reminders.length === 0 ? (
-                    <Card className="overflow-hidden">
+                {invoice.reminders?.length === 0 ? (
+                    <Card className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border">
                         <CardContent className="pt-6">
                             <div className="flex flex-col items-center justify-center py-12 text-center">
                                 <div className="bg-muted mb-4 rounded-full p-3">
@@ -253,14 +245,14 @@ export default function RemindersIndex({ invoice, reminders, reminderTypes }: Re
                     </Card>
                 ) : (
                     <div className="space-y-4">
-                        {reminders.map((reminder) => (
-                            <Card key={reminder.id} className="overflow-hidden">
+                        {invoice.reminders?.map((reminder) => (
+                            <Card key={reminder.id} className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border">
                                 <CardHeader className="pb-2">
                                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <CardTitle className="text-lg">
-                                                    {reminderTypes.find((t) => t.value === reminder.type)?.label || reminder.type}
+                                                    {types.find((t) => t.value === reminder.type)?.label || reminder.type}
                                                 </CardTitle>
                                                 {getReminderStatusBadge(reminder)}
                                             </div>

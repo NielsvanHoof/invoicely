@@ -1,3 +1,4 @@
+import { InvoiceStatisticsWidget } from '@/components/invoice-statistics-widget';
 import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
 import { StatCard } from '@/components/stat-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,6 +29,10 @@ interface DashboardProps {
         totalPaid: number;
         totalOverdue: number;
         totalPending: number;
+        totalOutstanding: number;
+        overdueCount: number;
+        upcomingCount: number;
+        averageDaysOverdue: number;
     };
     latestInvoices: Invoice[];
     upcomingInvoices: Invoice[];
@@ -89,6 +94,18 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                         value={formatCurrency(stats.totalOverdue, userCurrency)}
                         icon={TrendingUp}
                         description="Needs attention"
+                    />
+                </div>
+
+                {/* Invoice Statistics Widget */}
+                <div className="mt-4">
+                    <InvoiceStatisticsWidget
+                        stats={{
+                            totalOutstanding: stats.totalOutstanding,
+                            overdueCount: stats.overdueCount,
+                            upcomingCount: stats.upcomingCount,
+                            averageDaysOverdue: stats.averageDaysOverdue,
+                        }}
                     />
                 </div>
 
@@ -286,7 +303,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                     <Link
                                                         href={
                                                             activity.type === 'reminder'
-                                                                ? route('reminders.index', activity.id)
+                                                                ? route('invoices.reminders.index', activity.id)
                                                                 : route('invoices.show', activity.id)
                                                         }
                                                         className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"

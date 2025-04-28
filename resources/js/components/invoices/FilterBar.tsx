@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { router } from '@inertiajs/react';
+import { getActiveFilters } from '@/lib/utils';
+import { router, usePage } from '@inertiajs/react';
 import { FilterIcon, XIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -18,6 +19,7 @@ interface FilterBarProps {
 export function FilterBar({ filters }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [localFilters, setLocalFilters] = useState(filters);
+    const { search, sort } = usePage().props as { search?: string; sort?: Record<string, string> };
 
     useEffect(() => {
         setLocalFilters(filters);
@@ -28,18 +30,16 @@ export function FilterBar({ filters }: FilterBarProps) {
     };
 
     const applyFilters = () => {
-        // Only include filters that have values
-        const activeFilters = Object.entries(localFilters).reduce(
-            (acc, [key, value]) => {
-                if (value !== undefined && value !== '') {
-                    acc[key] = value;
-                }
-                return acc;
-            },
-            {} as Record<string, string>,
-        );
+        // Use the shared utility function to get active filters
+        const activeFilters = getActiveFilters(localFilters, sort);
 
-        router.get(route('invoices.index'), activeFilters, {
+        // Include the current search term if it exists
+        const params = {
+            ...activeFilters,
+            ...(search ? { search } : {}),
+        };
+
+        router.get(route('invoices.index'), params, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -47,22 +47,21 @@ export function FilterBar({ filters }: FilterBarProps) {
     };
 
     const clearFilters = () => {
-        router.get(
-            route('invoices.index'),
-            {},
-            {
-                preserveState: true,
-                preserveScroll: true,
-            },
-        );
+        // Keep the search parameter when clearing filters
+        const params = search ? { search } : {};
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
         setIsOpen(false);
     };
 
     const hasActiveFilters = Object.values(filters).some((value) => value !== undefined && value !== '');
 
     return (
-        <div className="relative">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsOpen(!isOpen)}>
+        <div className="relative w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="w-full gap-2 sm:w-auto" onClick={() => setIsOpen(!isOpen)}>
                 <FilterIcon className="h-4 w-4" />
                 Filters
                 {hasActiveFilters && (
@@ -73,10 +72,13 @@ export function FilterBar({ filters }: FilterBarProps) {
             </Button>
 
             {isOpen && (
-                <div className="bg-background absolute top-full right-0 z-50 mt-2 w-80 rounded-lg border p-4 shadow-lg">
-                    <div className="mb-4 flex items-center justify-between">
+                <div className="bg-background fixed inset-0 top-0 right-0 z-50 h-full w-full overflow-auto border p-4 shadow-lg sm:absolute sm:inset-auto sm:top-full sm:mt-2 sm:h-auto sm:w-80 sm:overflow-visible sm:rounded-lg">
+                    <div className="bg-background sticky top-0 mb-4 flex items-center justify-between pb-4">
                         <h3 className="font-medium">Filters</h3>
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 w-8 p-0">
+                        <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="h-8 w-8 p-0 sm:hidden">
+                            <XIcon className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={clearFilters} className="hidden h-8 w-8 p-0 sm:flex">
                             <XIcon className="h-4 w-4" />
                         </Button>
                     </div>
@@ -144,9 +146,20 @@ export function FilterBar({ filters }: FilterBarProps) {
                             </div>
                         </div>
 
-                        <Button className="w-full" onClick={applyFilters}>
-                            Apply Filters
-                        </Button>
+                        <div className="bg-background sticky bottom-0 flex gap-2 pt-4">
+                            <Button variant="outline" className="w-full sm:hidden" onClick={() => setIsOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button className="w-full" onClick={applyFilters}>
+                                Apply Filters
+                            </Button>
+                        </div>
+
+                        {hasActiveFilters && (
+                            <Button variant="outline" className="mt-2 w-full sm:hidden" onClick={clearFilters}>
+                                Clear All Filters
+                            </Button>
+                        )}
                     </div>
                 </div>
             )}

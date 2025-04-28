@@ -3,7 +3,6 @@
 namespace App\Queries\Teams;
 
 use App\Models\Invoice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Scout\Builder as ScoutBuilder;
 
@@ -45,6 +44,8 @@ class FetchInvoicesQuery
                     ->when($filters['amount_to'] ?? null, function ($query) use ($filters) {
                         $query->where('amount', '<=', $filters['amount_to']);
                     });
-            });
+                }
+            }
+        }
     }
 }
