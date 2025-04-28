@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ReminderType;
-use App\Http\Requests\Invoices\StoreInvoiceRequest;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use App\Services\FileService;
@@ -31,75 +30,11 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $search = $request->input('search', '');
-
-        $filters = [
-            'status' => $request->input('status', ''),
-            'date_from' => $request->input('date_from', ''),
-            'date_to' => $request->input('date_to', ''),
-            'amount_from' => $request->input('amount_from', ''),
-            'amount_to' => $request->input('amount_to', ''),
-        ];
-
-        $sort = [
-            'field' => $request->input('sort_field', 'created_at'),
-            'direction' => $request->input('sort_direction', 'desc'),
-        ];
-
-        $invoices = Invoice::query()
-            ->withCount(['reminders', 'documents'])
-            ->getInvoices($search, $filters, $sort)
-            ->paginate(10);
-
-        return Inertia::render('invoices/index', [
-            'invoices' => Inertia::merge($invoices),
-            'search' => $search,
-            'filters' => $filters,
-            'sort' => $sort,
-        ]);
-    }
-
-    /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
         return Inertia::render('invoices/create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreInvoiceRequest $request)
-    {
-        $validated = $request->except('file');
-        $user = Auth::user();
-
-        $invoice = $this->invoiceService->createInvoice(
-            $validated,
-            $request->file('file'),
-            $user->id,
-            $user->team_id
-        );
-
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Invoice created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Invoice $invoice)
-    {
-        $invoice->load(['reminders', 'documents']);
-
-        return Inertia::render('invoices/show', [
-            'invoice' => $invoice,
-        ]);
     }
 
     /**
