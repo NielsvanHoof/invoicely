@@ -1,16 +1,16 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatFileSize } from '@/lib/utils';
 import { type BreadcrumbItem, type Document, type Invoice } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { FileIcon, PlusIcon, SearchIcon, TrashIcon, UploadIcon, FilterIcon } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import { FileIcon, FilterIcon, PlusIcon, SearchIcon, TrashIcon, UploadIcon } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 
 interface DocumentsIndexProps {
     invoice: Invoice;
@@ -50,11 +50,13 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
 
     // Filter documents based on search and category
     const filteredDocuments = useMemo(() => {
-        return invoice.documents?.filter((doc) => {
-            const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        }) || [];
+        return (
+            invoice.documents?.filter((doc) => {
+                const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            }) || []
+        );
     }, [invoice.documents, searchQuery, selectedCategory]);
 
     function onSubmit(e: React.FormEvent) {
@@ -117,10 +119,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="category">Category</Label>
-                                    <Select
-                                        value={form.data.category}
-                                        onValueChange={(value) => form.setData('category', value)}
-                                    >
+                                    <Select value={form.data.category} onValueChange={(value) => form.setData('category', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
@@ -149,7 +148,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                 {/* Search and Filter Section */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <div className="relative flex-1">
-                        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                         <Input
                             placeholder="Search documents..."
                             value={searchQuery}
@@ -158,7 +157,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <FilterIcon className="h-4 w-4 text-muted-foreground" />
+                        <FilterIcon className="text-muted-foreground h-4 w-4" />
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Filter by category" />
