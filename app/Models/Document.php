@@ -16,6 +16,7 @@ class Document extends Model
         'url',
         'type',
         'mime_type',
+        'category',
         'invoice_id',
     ];
 

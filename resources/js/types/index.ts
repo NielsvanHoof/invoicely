@@ -120,6 +120,7 @@ export interface Document {
     type: string;
     mime_type: string;
     size: number;
+    category: 'contract' | 'invoice' | 'receipt' | 'other';
     created_at: string;
     updated_at: string;
     deleted_at: string | null;

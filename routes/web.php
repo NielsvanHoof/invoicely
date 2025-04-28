@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('invoices/{invoice}/reminders/schedule-defaults', [ReminderController::class, 'scheduleDefaults'])->name('invoices.reminders.schedule-defaults');
     Route::resource('invoices.reminders', ReminderController::class);
 
+    Route::get('invoices/{invoice}/documents/{document}/download', [DocumentController::class, 'download'])->name('invoices.documents.download');
     Route::resource('invoices.documents', DocumentController::class);
 });
 

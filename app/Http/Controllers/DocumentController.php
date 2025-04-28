@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DocumentType;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Services\FileService;
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class DocumentController extends Controller
@@ -25,6 +27,7 @@ class DocumentController extends Controller
         $validated = $request->validate([
             'file' => 'required|file|max:2048',
             'name' => 'required|string|max:255',
+            'category' => ['required', Rule::enum(DocumentType::class)],
         ]);
 
         $filePath = $this->fileService->storeFile(
@@ -43,6 +46,7 @@ class DocumentController extends Controller
             'url' => $filePath,
             'size' => $validated['file']->getSize(),
             'mime_type' => $validated['file']->getMimeType(),
+            'category' => $validated['category'],
             'invoice_id' => $invoice->id,
         ]);
 
@@ -51,7 +55,7 @@ class DocumentController extends Controller
 
     public function download(Invoice $invoice, Document $document)
     {
-        $url = $this->fileService->getTemporaryUrl($document->file_path);
+        $url = $this->fileService->getTemporaryUrl($document->url);
 
         if (! $url) {
             return redirect()->back()->with('error', 'Failed to generate download link');
@@ -62,7 +66,7 @@ class DocumentController extends Controller
 
     public function destroy(Invoice $invoice, Document $document)
     {
-        $this->fileService->deleteFile($document->file_path);
+        $this->fileService->deleteFile($document->url);
         $document->delete();
 
         return redirect()->back()->with('success', 'Document deleted successfully');

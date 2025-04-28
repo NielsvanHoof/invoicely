@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('url', 512);
             $table->string('type');
             $table->string('mime_type');
+            $table->string('category')->default('other');
             $table->foreignId('invoice_id')->constrained('invoices')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
