@@ -18,7 +18,7 @@ class InviteExistingUserToTeamAction
         $invitedUser->team()->associate($team);
         $invitedUser->save();
 
-        // Send email without password
+        // Send email without a password
         Mail::to($invitedUser->email)->send(new TeamInviteMail($inviter, $invitedUser, $team, null));
 
         return $invitedUser;

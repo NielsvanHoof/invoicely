@@ -37,6 +37,20 @@ class Reminder extends Model
         'type' => ReminderType::class,
     ];
 
+    public function formatMessage(ReminderType $type, Invoice $invoice): string
+    {
+        $template = $type->defaultMessage($type);
+
+        $replacements = [
+            '{{invoice_number}}' => $invoice->invoice_number,
+            '{{amount}}' => '$'.number_format($invoice->amount, 2),
+            '{{due_date}}' => $invoice->due_date->format('F j, Y'),
+            '{{client_name}}' => $invoice->client_name,
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $template);
+    }
+
     #[Scope]
     public function scopeDue(Builder $query): Builder
     {

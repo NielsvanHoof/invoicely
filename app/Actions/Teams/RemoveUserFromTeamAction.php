@@ -8,7 +8,7 @@ use Exception;
 
 class RemoveUserFromTeamAction
 {
-    public function execute(Team $team, User $user): void
+    public function execute(Team $team, User $user): bool
     {
         // Don't allow removing a team owner from their own team
         if ($user->team && $user->isTeamOwner()) {
@@ -16,6 +16,7 @@ class RemoveUserFromTeamAction
         }
 
         $user->team()->dissociate();
-        $user->save();
+
+        return $user->save();
     }
 }

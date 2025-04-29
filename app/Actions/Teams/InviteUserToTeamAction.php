@@ -18,7 +18,7 @@ class InviteUserToTeamAction
      */
     public function execute(User $inviter, Team $team, TeamInvitationData $data): User
     {
-        // Check if user already exists
+        // Check if a user already exists
         $invitedUser = User::where('email', $data->email)->first();
 
         if ($invitedUser) {

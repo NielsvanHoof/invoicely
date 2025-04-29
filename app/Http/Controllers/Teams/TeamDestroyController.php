@@ -12,6 +12,8 @@ class TeamDestroyController extends Controller
 {
     public function __invoke(Team $team, DeleteTeamAction $action)
     {
+        $this->authorize('delete', $team);
+
         try {
             $action->execute($team);
 
