@@ -39,7 +39,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
         },
         {
             title: 'Reminders',
-            href: route('invoices.reminders.index', invoice.id),
+            href: route('reminders.index', invoice.id),
         },
     ];
 
@@ -68,7 +68,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
         e.preventDefault();
         if (!selectedReminder) return;
 
-        editForm.put(route('invoices.reminders.update', [invoice.id, selectedReminder.id]), {
+        editForm.put(route('reminders.update', [invoice.id, selectedReminder.id]), {
             onSuccess: () => {
                 setIsEditDialogOpen(false);
                 setSelectedReminder(null);
@@ -96,7 +96,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
 
     function confirmDelete() {
         if (!selectedReminder) return;
-        router.delete(route('invoices.reminders.destroy', [invoice.id, selectedReminder.id]));
+        router.delete(route('reminders.destroy', [invoice.id, selectedReminder.id]));
         setIsDeleteDialogOpen(false);
     }
 
@@ -105,7 +105,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
     }
 
     function confirmScheduleDefaults() {
-        router.post(route('invoices.reminders.schedule-defaults', invoice.id));
+        router.post(route('reminders.schedule-defaults', invoice.id));
         setIsScheduleDefaultsDialogOpen(false);
     }
 

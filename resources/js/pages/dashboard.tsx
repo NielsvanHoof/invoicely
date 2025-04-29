@@ -21,6 +21,7 @@ interface ActivityItem {
     reminder_id?: string;
     sent_at?: string;
     scheduled_date?: string;
+    timestamp: string;
 }
 
 interface DashboardProps {
@@ -81,15 +82,17 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
 
                 {/* Stats Cards */}
                 <div className="grid auto-rows-min grid-cols-2 gap-2 sm:gap-4 md:grid-cols-4">
-                    <StatCard title="Total Invoices" value={stats.totalInvoices.toString()} icon={FileText} description="All time" />
-                    <StatCard title="Total Paid" value={formatCurrency(stats.totalPaid, userCurrency)} icon={DollarSign} description="All time" />
+                    <StatCard key="total-invoices" title="Total Invoices" value={stats.totalInvoices.toString()} icon={FileText} description="All time" />
+                    <StatCard key="total-paid" title="Total Paid" value={formatCurrency(stats.totalPaid, userCurrency)} icon={DollarSign} description="All time" />
                     <StatCard
+                        key="total-pending"
                         title="Total Pending"
                         value={formatCurrency(stats.totalPending, userCurrency)}
                         icon={CreditCard}
                         description="Awaiting payment"
                     />
                     <StatCard
+                        key="total-overdue"
                         title="Total Overdue"
                         value={formatCurrency(stats.totalOverdue, userCurrency)}
                         icon={TrendingUp}
@@ -139,7 +142,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                     </TableRow>
                                 ) : (
                                     latestInvoices.map((invoice) => (
-                                        <TableRow key={invoice.id}>
+                                        <TableRow key={`${invoice.id}-${invoice.invoice_number}`}>
                                             <TableCell className="font-medium">
                                                 <Link href={`/invoices/${invoice.id}`} className="hover:underline">
                                                     {invoice.invoice_number}
@@ -167,7 +170,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                         ) : (
                             <div className="divide-sidebar-border/70 dark:divide-sidebar-border divide-y">
                                 {latestInvoices.map((invoice) => (
-                                    <div key={invoice.id} className="p-3">
+                                    <div key={`${invoice.id}-${invoice.invoice_number}`} className="p-3">
                                         <div className="flex items-center justify-between">
                                             <Link href={`/invoices/${invoice.id}`} className="font-medium hover:underline">
                                                 {invoice.invoice_number}
@@ -219,7 +222,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                     </TableRow>
                                 ) : (
                                     upcomingInvoices.map((invoice) => (
-                                        <TableRow key={invoice.id}>
+                                        <TableRow key={`${invoice.id}-${invoice.invoice_number}`}>
                                             <TableCell className="font-medium">
                                                 <Link href={`/invoices/${invoice.id}`} className="hover:underline">
                                                     {invoice.invoice_number}
@@ -245,7 +248,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                         ) : (
                             <div className="divide-sidebar-border/70 dark:divide-sidebar-border divide-y">
                                 {upcomingInvoices.map((invoice) => (
-                                    <div key={invoice.id} className="p-3">
+                                    <div key={`${invoice.id}-${invoice.invoice_number}`} className="p-3">
                                         <div className="flex items-center justify-between">
                                             <Link href={`/invoices/${invoice.id}`} className="font-medium hover:underline">
                                                 {invoice.invoice_number}
@@ -280,7 +283,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                     const ActivityIcon = getActivityIcon(activity.type, activity.status);
                                     return (
                                         <div
-                                            key={`${activity.id}-${activity.type}${activity.reminder_id ? `-${activity.reminder_id}` : ''}`}
+                                            key={`${activity.id}-${activity.type}-${activity.timestamp}${activity.reminder_id ? `-${activity.reminder_id}` : ''}`}
                                             className="flex items-start gap-3"
                                         >
                                             <div
@@ -303,7 +306,7 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                                                     <Link
                                                         href={
                                                             activity.type === 'reminder'
-                                                                ? route('invoices.reminders.index', activity.id)
+                                                                ? route('reminders.index', activity.id)
                                                                 : route('invoices.show', activity.id)
                                                         }
                                                         className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"

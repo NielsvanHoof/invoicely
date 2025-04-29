@@ -164,7 +164,7 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
                                                 </Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuItem asChild>
-                                                <Link href={route('invoices.reminders.index', invoice.id)}>
+                                                <Link href={route('reminders.index', invoice.id)}>
                                                     <BellIcon
                                                         className={`mr-2 h-4 w-4 ${invoice.reminders_count && invoice.reminders_count > 0 ? 'text-amber-500' : ''}`}
                                                     />

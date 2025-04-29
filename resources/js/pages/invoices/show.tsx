@@ -89,14 +89,14 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                    <Link href={route('invoices.reminders.index', invoice.id)}>
+                    <Link href={route('reminders.index', invoice.id)}>
                         <Button variant="outline">
                             <BellIcon className="mr-2 h-4 w-4" />
                             Manage Reminders
                         </Button>
                     </Link>
 
-                    <Link href={route('invoices.documents.index', invoice.id)}>
+                    <Link href={route('documents.index', invoice.id)}>
                         <Button variant="outline">
                             <FileIcon className="mr-2 h-4 w-4" />
                             Manage Documents

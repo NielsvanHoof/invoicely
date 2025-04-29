@@ -1,103 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Invoices;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\ReminderType;
-use App\Http\Requests\Invoices\UpdateInvoiceRequest;
-use App\Models\Invoice;
-use App\Services\FileService;
-use App\Services\Invoices\InvoiceService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
-class InvoiceController extends Controller
+class InvoiceBulkActionController extends Controller
 {
-    public function resourceAbilityMap(): array
-    {
-        return [
-            ...parent::resourceAbilityMap(),
-            'downloadFile' => 'downloadFile',
-        ];
-    }
-
-    public function __construct(
-        protected FileService $fileService,
-        protected InvoiceService $invoiceService
-    ) {
-        $this->authorizeResource(Invoice::class, 'invoice');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return Inertia::render('invoices/create');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Invoice $invoice)
-    {
-        $invoice->load('reminders');
-
-        return Inertia::render('invoices/edit', [
-            'invoice' => $invoice,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
-    {
-        $validated = $request->except('file');
-
-        $this->invoiceService->updateInvoice(
-            $invoice,
-            $validated,
-            $request->file('file'),
-            $request->input('remove_file', false),
-            Auth::id()
-        );
-
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Invoice updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Invoice $invoice)
-    {
-        $this->invoiceService->deleteInvoice($invoice);
-
-        return redirect()->route('invoices.index')
-            ->with('success', 'Invoice deleted successfully.');
-    }
-
-    /**
-     * Generate a secure download URL for the invoice file.
-     */
-    public function downloadFile(Invoice $invoice)
-    {
-        if (! $invoice->file_path) {
-            return response()->json(['error' => 'No file attached to this invoice'], 404);
-        }
-
-        $temporaryUrl = $this->fileService->getTemporaryUrl($invoice->file_path);
-
-        if (! $temporaryUrl) {
-            return response()->json(['error' => 'Could not generate download link'], 500);
-        }
-
-        return response()->json(['url' => $temporaryUrl]);
-    }
-
-    public function bulkAction(Request $request)
+    public function __invoke(Request $request)
     {
         $validated = $request->validate([
             'action' => 'required|string',

@@ -38,7 +38,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
         },
         {
             title: 'Documents',
-            href: route('invoices.documents.index', invoice.id),
+            href: route('reminders.index', invoice.id),
         },
     ];
 
@@ -61,7 +61,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.post(route('invoices.documents.store', invoice.id), {
+        form.post(route('reminders.store', invoice.id), {
             onSuccess: () => {
                 setIsAddDialogOpen(false);
                 form.reset();
@@ -77,7 +77,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
     function handleDelete() {
         if (!selectedDocument) return;
 
-        router.delete(route('invoices.documents.destroy', [invoice.id, selectedDocument.id]), {
+        router.delete(route('documents.destroy', [invoice.id, selectedDocument.id]), {
             onSuccess: () => {
                 setIsDeleteDialogOpen(false);
                 setSelectedDocument(null);
@@ -195,7 +195,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => window.open(route('invoices.documents.download', [invoice.id, document.id]), '_blank')}
+                                        onClick={() => window.open(route('documents.download', [invoice.id, document.id]), '_blank')}
                                         className="h-8"
                                     >
                                         <UploadIcon className="mr-1.5 h-3.5 w-3.5" />

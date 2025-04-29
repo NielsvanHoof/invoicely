@@ -1,28 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Documents;
 
-use App\Enums\DocumentType;
+use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\Invoice;
-use App\Services\FileService;
 use Auth;
+use Dom\DocumentType;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
-class DocumentController extends Controller
+class DocumentStoreController extends Controller
 {
-    public function __construct(protected FileService $fileService) {}
-
-    public function index(Invoice $invoice)
-    {
-        return Inertia::render('invoices/documents/index', [
-            'invoice' => $invoice->load('documents'),
-        ]);
-    }
-
-    public function store(Request $request, Invoice $invoice)
+    public function __invoke(Request $request, Invoice $invoice)
     {
         $validated = $request->validate([
             'file' => 'required|file|max:2048',
@@ -51,24 +41,5 @@ class DocumentController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Document uploaded successfully');
-    }
-
-    public function download(Invoice $invoice, Document $document)
-    {
-        $url = $this->fileService->getTemporaryUrl($document->url);
-
-        if (! $url) {
-            return redirect()->back()->with('error', 'Failed to generate download link');
-        }
-
-        return response()->json(['url' => $url]);
-    }
-
-    public function destroy(Invoice $invoice, Document $document)
-    {
-        $this->fileService->deleteFile($document->url);
-        $document->delete();
-
-        return redirect()->back()->with('success', 'Document deleted successfully');
     }
 }
