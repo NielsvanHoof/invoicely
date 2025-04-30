@@ -38,7 +38,7 @@ export function InvoiceCard({ invoice, isSelected = false, onSelectInvoice }: In
                                 />
                             )}
                             <div className="flex items-center gap-1.5">
-                                <Link href={`/invoices/${invoice.id}`} className="font-medium hover:underline">
+                                <Link href={route('invoices.show', invoice.id)} className="font-medium hover:underline">
                                     {invoice.invoice_number}
                                 </Link>
                                 <div className="flex items-center gap-1">

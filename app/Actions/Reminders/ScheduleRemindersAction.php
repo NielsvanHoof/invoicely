@@ -15,7 +15,7 @@ class ScheduleRemindersAction
 
     public function execute(Invoice $invoice): void
     {
-        $invoice->load('reminders');
+        $invoice->loadMissing('reminders');
         // Delete any existing unsent reminders for this invoice
         $invoice->reminders()->whereNull('sent_at')->delete();
 

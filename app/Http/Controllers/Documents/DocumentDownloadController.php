@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Documents;
 
+use App\Actions\Files\GetTemporaryUrlAction;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 
 class DocumentDownloadController extends Controller
 {
-    public function __invoke(Document $document)
+    public function __invoke(Document $document, GetTemporaryUrlAction $action)
     {
-        $url = $this->fileService->getTemporaryUrl($document->url);
+        $url = $action->execute($document->url);
 
         if (! $url) {
             return redirect()->back()->with('error', 'Failed to generate download link');
         }
 
-        return response()->json(['url' => $url]);
+        return redirect()->away($url);
     }
 }

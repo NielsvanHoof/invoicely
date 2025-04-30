@@ -92,7 +92,7 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         }
 
         setIsSubmitting(true);
-        updateTeam(route('teams.update', { team: team }), {
+        updateTeam(route('teams.update', { team: team.id }), {
             onSuccess: () => {
                 setShowEditDialog(false);
                 resetTeamForm();
@@ -137,7 +137,7 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         }
 
         setIsSubmitting(true);
-        sendInvite(route('teams.invite'), {
+        sendInvite(route('teams.members.invite', { team: team?.id }), {
             onSuccess: () => {
                 setShowInviteDialog(false);
                 resetInviteForm();
@@ -155,8 +155,10 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
     };
 
     const confirmLeaveTeam = () => {
+        if (!team) return;
+        
         setIsSubmitting(true);
-        router.delete(route('teams.leave'), {
+        router.post(route('teams.members.leave', { team: team.id }), {}, {
             onSuccess: () => {
                 setShowLeaveDialog(false);
                 setIsSubmitting(false);
@@ -177,13 +179,10 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
     };
 
     const confirmRemoveUser = () => {
-        if (!userToRemove) return;
+        if (!userToRemove || !team) return;
 
         setIsSubmitting(true);
-        router.delete(route('teams.remove-user'), {
-            data: {
-                user_id: userToRemove,
-            },
+        router.delete(route('teams.members.remove', { team: team.id, user: userToRemove }), {
             onSuccess: () => {
                 setShowRemoveUserDialog(false);
                 setUserToRemove(null);

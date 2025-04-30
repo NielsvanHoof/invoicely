@@ -18,7 +18,7 @@ class FetchInvoicesQuery
      *     amount_to?: string,
      * } $filters
      */
-    public function execute(User $user, string $search = '', array $filters = []): ScoutBuilder
+    public function execute(User $user, ?string $search = '', array $filters = []): ScoutBuilder
     {
         return Invoice::search($search)
             ->query(function (Builder $query) use ($user, $filters) {
