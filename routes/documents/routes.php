@@ -10,8 +10,8 @@ Route::group([
     'prefix' => 'documents',
     'as' => 'documents.',
 ], function () {
-    Route::get('/', DocumentIndexController::class)->name('index');
-    Route::post('/', DocumentStoreController::class)->name('store');
+    Route::get('/{invoice}', DocumentIndexController::class)->name('index');
+    Route::post('/{invoice}', DocumentStoreController::class)->name('store');
     Route::delete('/{document}', DocumentDestroyController::class)->name('destroy');
     Route::get('/{document}/download', DocumentDownloadController::class)->name('download');
 });

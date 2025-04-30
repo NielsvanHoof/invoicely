@@ -38,7 +38,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
         },
         {
             title: 'Documents',
-            href: route('reminders.index', invoice.id),
+            href: route('documents.index', invoice.id),
         },
     ];
 
@@ -61,7 +61,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.post(route('reminders.store', invoice.id), {
+        form.post(route('documents.store', invoice.id), {
             onSuccess: () => {
                 setIsAddDialogOpen(false);
                 form.reset();

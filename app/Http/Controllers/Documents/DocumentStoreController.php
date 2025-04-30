@@ -2,28 +2,30 @@
 
 namespace App\Http\Controllers\Documents;
 
+use App\Actions\Files\StoreFileAction;
+use App\Enums\DocumentType;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\Invoice;
 use Auth;
-use Dom\DocumentType;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class DocumentStoreController extends Controller
 {
-    public function __invoke(Request $request, Invoice $invoice)
+
+    public function __invoke(Request $request, Invoice $invoice, StoreFileAction $storeFileAction)
     {
         $validated = $request->validate([
-            'file' => 'required|file|max:2048',
-            'name' => 'required|string|max:255',
+            'file' => ['required', 'file', 'max:2048'],
+            'name' => ['required', 'string', 'max:255'],
             'category' => ['required', Rule::enum(DocumentType::class)],
         ]);
 
-        $filePath = $this->fileService->storeFile(
+        $filePath = $storeFileAction->execute(
             $validated['file'],
             Auth::id(),
-            'documents'
+            "documents/{$invoice->invoice_number}"
         );
 
         if (! $filePath) {

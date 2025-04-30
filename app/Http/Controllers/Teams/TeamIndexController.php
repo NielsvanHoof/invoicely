@@ -11,7 +11,6 @@ class TeamIndexController extends Controller
     public function __invoke()
     {
         $user = Auth::user()->load('team');
-        $team = $user->team;
         $teamMembers = [];
         $isTeamOwner = false;
         $permissions = [
@@ -22,23 +21,23 @@ class TeamIndexController extends Controller
             'update' => false,
         ];
 
-        if ($team) {
-            $team->load('owner');
-            $teamMembers = $team->users;
-            $isTeamOwner = $user->id === $team->owner_id;
+        if ($user->team) {
+            $user->team->load('owner');
+            $teamMembers = $user->team->users;
+            $isTeamOwner = $user->id === $user->team->owner_id;
 
             // Only check permissions if the user has a team
             $permissions = [
-                'leave' => $user->can('leave', $team),
-                'removeUser' => $user->can('removeUser', $team),
-                'delete' => $user->can('delete', $team),
-                'invite' => $user->can('invite', $team),
-                'update' => $user->can('update', $team),
+                'leave' => $user->can('leave', $user->team),
+                'removeUser' => $user->can('removeUser', $user->team),
+                'delete' => $user->can('delete', $user->team),
+                'invite' => $user->can('invite', $user->team),
+                'update' => $user->can('update', $user->team),
             ];
         }
 
         return Inertia::render('settings/teams', [
-            'team' => $team,
+            'team' => $user->team,
             'teamMembers' => $teamMembers,
             'isTeamOwner' => $isTeamOwner,
             'can' => $permissions,
