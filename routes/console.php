@@ -3,6 +3,7 @@
 use App\Console\Commands\SendInvoiceRemindersCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 
+Schedule::command('telescope:prune')->daily();
 Schedule::command('backup:clean')->daily()->at('01:00');
 Schedule::command('backup:run')->daily()->at('01:30');
 

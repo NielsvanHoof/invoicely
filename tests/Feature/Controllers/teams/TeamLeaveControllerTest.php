@@ -22,7 +22,7 @@ test('it can leave team', function () {
 
     // Act
     $response = actingAs($member)
-        ->post(route('teams.leave'));
+        ->post(route('teams.members.leave', $team));
 
     // Assert
     $response->assertRedirect(route('teams.index'));
@@ -40,7 +40,7 @@ test('it prevents team owner from leaving', function () {
 
     // Act
     $response = actingAs($user)
-        ->post(route('teams.leave'));
+        ->post(route('teams.members.leave', $team));
 
     // Assert
     $response->assertForbidden();

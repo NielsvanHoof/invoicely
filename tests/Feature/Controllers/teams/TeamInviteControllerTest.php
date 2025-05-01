@@ -23,7 +23,7 @@ test('it can invite user to team', function () {
 
     // Act
     $response = actingAs($user)
-        ->post(route('teams.invite'), $inviteData);
+        ->post(route('teams.members.invite', $team), $inviteData);
 
     // Assert
     $response->assertRedirect();
@@ -39,7 +39,7 @@ test('it validates required fields', function () {
 
     // Act
     $response = actingAs($user)
-        ->post(route('teams.invite'), []);
+        ->post(route('teams.members.invite', $team), []);
 
     // Assert
     $response->assertSessionHasErrors(['email', 'name']);
@@ -61,7 +61,7 @@ test('it prevents unauthorized invites', function () {
 
     // Act
     $response = actingAs($member)
-        ->post(route('teams.invite'), $inviteData);
+        ->post(route('teams.members.invite', $team), $inviteData);
 
     // Assert
     $response->assertForbidden();
