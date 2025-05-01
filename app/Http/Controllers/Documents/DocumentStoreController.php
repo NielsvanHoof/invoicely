@@ -8,10 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\Invoice;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 
 class DocumentStoreController extends Controller
 {
-    public function __invoke(StoreDocumentData $data, Invoice $invoice, StoreFileAction $storeFileAction)
+    public function __invoke(StoreDocumentData $data, Invoice $invoice, StoreFileAction $storeFileAction): RedirectResponse
     {
         $filePath = $storeFileAction->execute(
             $data->file,

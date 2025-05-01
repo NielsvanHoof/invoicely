@@ -56,7 +56,7 @@ class User extends Authenticatable
     /**
      * Get the invoices for the user.
      *
-     * @return HasMany<Invoice, User>
+     * @return HasMany<Invoice, static>
      */
     public function invoices(): HasMany
     {
@@ -66,7 +66,7 @@ class User extends Authenticatable
     /**
      * Get the team the user belongs to.
      *
-     * @return BelongsTo<Team, User>
+     * @return BelongsTo<Team, static>
      */
     public function team(): BelongsTo
     {
@@ -76,7 +76,7 @@ class User extends Authenticatable
     /**
      * Get the team owned by the user.
      *
-     * @return HasOne<Team, User>
+     * @return HasOne<Team, static>
      */
     public function ownedTeam(): HasOne
     {

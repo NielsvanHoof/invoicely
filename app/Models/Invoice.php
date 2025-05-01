@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Scopes\InvoiceByTeamOrUserScope;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -70,29 +72,27 @@ class Invoice extends Model implements AuditableContract
     }
 
     #[Scope]
-    public function scopeByTeam(Builder $query, ?string $teamId): Builder
+    public function ByTeam(Builder $query, ?int $teamId): void
     {
         if ($teamId) {
-            return $query->where('team_id', $teamId);
+            $query->where('team_id', $teamId);
         }
-
-        return $this;
     }
 
     #[Scope]
-    public function scopeByUser(Builder $query, int $userId): Builder
+    public function ByUser(Builder $query, int $userId): void
     {
-        return $query->where('user_id', $userId);
+        $query->where('user_id', $userId);
     }
 
     #[Scope]
-    public function scopeForUser(Builder $query, User $user): Builder
+    public function ForUser(Builder $query, User $user): void
     {
         if ($user->team_id) {
-            return $query->scopeByTeam($user->team_id);
+            $query->ByTeam($user->team_id);
         }
 
-        return $query->scopeByUser($user->id);
+        $query->ByUser($user->id);
     }
 
     /**

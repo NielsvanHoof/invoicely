@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Invoices;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
+use Illuminate\Http\RedirectResponse;
 
 class InvoiceUpdateController extends Controller
 {
-    public function __invoke(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function __invoke(UpdateInvoiceRequest $request, Invoice $invoice): RedirectResponse
     {
         $this->authorize('update', $invoice);
 

@@ -9,7 +9,7 @@ use Exception;
 
 class StoreTeamAction
 {
-    public function execute(User $user, TeamData $data): Team
+    public function execute(User $user, TeamData $data): bool
     {
         if ($user->team) {
             throw new Exception('User already has a team.');
@@ -21,8 +21,7 @@ class StoreTeamAction
         ]);
 
         $user->team()->associate($team);
-        $user->save();
 
-        return $team;
+        return $user->save();
     }
 }

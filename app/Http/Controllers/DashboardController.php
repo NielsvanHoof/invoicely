@@ -8,6 +8,7 @@ use App\Queries\Dashboard\FetchRecentActivityQuery;
 use App\Queries\Dashboard\FetchUpcomingInvoicesQuery;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
@@ -18,7 +19,7 @@ class DashboardController extends Controller
         private FetchRecentActivityQuery $fetchRecentActivityQuery
     ) {}
 
-    public function index()
+    public function index(): Response
     {
         $user = Auth::user();
 

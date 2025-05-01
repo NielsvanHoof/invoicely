@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Documents;
 use App\Actions\Files\DeleteFileAction;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use Illuminate\Http\RedirectResponse;
 
 class DocumentDestroyController extends Controller
 {
-    public function __invoke(Document $document, DeleteFileAction $action)
+    public function __invoke(Document $document, DeleteFileAction $action): RedirectResponse
     {
         $action->execute($document->url);
 

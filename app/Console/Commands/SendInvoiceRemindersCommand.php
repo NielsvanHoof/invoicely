@@ -27,7 +27,7 @@ class SendInvoiceRemindersCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(MarkReminderAsSent $markReminderAsSent)
+    public function handle(MarkReminderAsSent $markReminderAsSent): int
     {
         $this->info('Sending invoice reminders...');
 

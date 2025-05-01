@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Team;
 use Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class TeamIndexController extends Controller
 {
-    public function __invoke()
+    public function __invoke(): Response
     {
         $this->authorize('viewAny', Team::class);
 

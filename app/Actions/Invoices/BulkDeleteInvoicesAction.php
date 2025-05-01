@@ -4,6 +4,7 @@ namespace App\Actions\Invoices;
 
 use App\Actions\Files\DeleteFileAction;
 use App\Data\Invoices\BulkInvoiceData;
+use App\Enums\InvoiceStatus;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Models\Invoice;
@@ -42,7 +43,7 @@ class BulkDeleteInvoicesAction
 
         $deletedCount = Invoice::query()->whereIn('id', $deletableInvoices->pluck('id')->toArray())->delete();
 
-        if ($deletedCount > 0 && $user) {
+        if ($deletedCount > 0) {
             InvalidateDashBoardCacheEvent::dispatch($user);
             InvalidateAnalyticsCacheEvent::dispatch($user);
         }

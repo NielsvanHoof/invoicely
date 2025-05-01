@@ -12,6 +12,8 @@ class FetchInvoicesQuery
 {
     /**
      * Fetch invoices for a user.
+     *
+     * @return ScoutBuilder<Invoice>
      */
     public function execute(User $user, FetchInvoicesData $data): ScoutBuilder
     {

@@ -33,7 +33,6 @@ class InvoiceReminderMail extends Mailable implements ShouldQueue
             ReminderType::UPCOMING->value => "Upcoming Invoice Payment Reminder: #{$this->invoice->invoice_number}",
             ReminderType::OVERDUE->value => "Overdue Invoice Payment: #{$this->invoice->invoice_number}",
             ReminderType::THANK_YOU->value => "Thank You for Your Payment: #{$this->invoice->invoice_number}",
-            default => "Invoice Reminder: #{$this->invoice->invoice_number}",
         };
 
         return new Envelope(

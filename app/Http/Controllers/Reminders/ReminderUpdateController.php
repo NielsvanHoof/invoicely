@@ -7,10 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Reminders\UpdateReminderRequest;
 use App\Models\Invoice;
 use App\Models\Reminder;
+use Illuminate\Http\RedirectResponse;
 
 class ReminderUpdateController extends Controller
 {
-    public function __invoke(UpdateReminderRequest $request, Invoice $invoice, Reminder $reminder)
+    public function __invoke(UpdateReminderRequest $request, Invoice $invoice, Reminder $reminder): RedirectResponse
     {
         $this->authorize('update', $invoice);
 

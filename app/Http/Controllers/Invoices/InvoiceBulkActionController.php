@@ -6,11 +6,12 @@ use App\Actions\Invoices\BulkInvoiceAction;
 use App\Data\Invoices\BulkInvoiceData;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceBulkActionController extends Controller
 {
-    public function __invoke(BulkInvoiceData $data, BulkInvoiceAction $action)
+    public function __invoke(BulkInvoiceData $data, BulkInvoiceAction $action): RedirectResponse
     {
         $this->authorize('bulkAction', Invoice::class);
 

@@ -6,6 +6,7 @@ use App\Actions\Reminders\ScheduleRemindersAction;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use Illuminate\Http\RedirectResponse;
 
 class ReminderScheduleDefaultsController extends Controller
 {
@@ -13,7 +14,7 @@ class ReminderScheduleDefaultsController extends Controller
         private ScheduleRemindersAction $scheduleRemindersAction,
     ) {}
 
-    public function __invoke(Invoice $invoice)
+    public function __invoke(Invoice $invoice): RedirectResponse
     {
         $this->authorize('update', $invoice);
 

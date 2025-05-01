@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Reminders;
 
 use App\Enums\ReminderType;
 use App\Events\InvalidateDashBoardCacheEvent;
+use App\Helpers\ReminderMessageFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reminders\StoreReminderRequest;
 use App\Models\Invoice;
+use Illuminate\Http\RedirectResponse;
 
 class ReminderStoreController extends Controller
 {
-    public function __invoke(StoreReminderRequest $request, Invoice $invoice)
+    public function __construct(
+        private ReminderMessageFormatter $reminderMessageFormatter,
+    ) {}
+
+    public function __invoke(StoreReminderRequest $request, Invoice $invoice): RedirectResponse
     {
         $this->authorize('update', $invoice);
 
@@ -19,7 +25,7 @@ class ReminderStoreController extends Controller
         // Get the default message if none provided
         if (empty($validated['message'])) {
             $reminderType = ReminderType::from($validated['type']);
-            $validated['message'] = $this->reminderService->formatMessage($reminderType, $invoice);
+            $validated['message'] = $this->reminderMessageFormatter->format($reminderType, $invoice);
         }
 
         $invoice->reminders()->create($validated);

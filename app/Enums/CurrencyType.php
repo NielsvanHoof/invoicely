@@ -36,6 +36,8 @@ enum CurrencyType: string
 
     /**
      * Get all available currencies as an array of select options.
+     *
+     * @return array<array-key, array{value: string, label: string}>
      */
     public static function options(): array
     {

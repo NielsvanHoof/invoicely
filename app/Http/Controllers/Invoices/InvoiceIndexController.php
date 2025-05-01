@@ -8,10 +8,11 @@ use App\Models\Invoice;
 use App\Queries\Teams\FetchInvoicesQuery;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class InvoiceIndexController extends Controller
 {
-    public function __invoke(FetchInvoicesData $data, FetchInvoicesQuery $fetchInvoicesQuery)
+    public function __invoke(FetchInvoicesData $data, FetchInvoicesQuery $fetchInvoicesQuery): Response
     {
         $this->authorize('viewAny', Invoice::class);
 

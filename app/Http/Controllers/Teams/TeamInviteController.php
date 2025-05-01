@@ -7,10 +7,11 @@ use App\Data\Team\TeamInvitationData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\InviteTeamMemberRequest;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 
 class TeamInviteController extends Controller
 {
-    public function __invoke(InviteTeamMemberRequest $request, InviteUserToTeamAction $inviteUserToTeamAction)
+    public function __invoke(InviteTeamMemberRequest $request, InviteUserToTeamAction $inviteUserToTeamAction): RedirectResponse
     {
         $user = Auth::user()->load('team');
         $team = $user->team;

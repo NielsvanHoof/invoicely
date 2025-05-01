@@ -25,13 +25,12 @@ class BulkCreateInvoiceRemindersAction
                 ReminderType::THANK_YOU => $invoice->status === InvoiceStatus::PAID,
                 ReminderType::UPCOMING => $invoice->due_date > now(),
                 ReminderType::OVERDUE => $invoice->due_date < now(),
-                default => false,
             };
 
             if ($shouldCreate) {
                 $reminderCount++;
 
-                $remindersToInsert[] = ['invoice_id' => $invoice->id, 'type' => $type->value, 'scheduled_date' => $now->addDay(), 'message' => $type->defaultMessage()];
+                $remindersToInsert[] = ['invoice_id' => $invoice->id, 'type' => $type->value, 'scheduled_date' => $now->addDay(), 'message' => $type->defaultMessage($type)];
             }
         }
 
@@ -39,7 +38,7 @@ class BulkCreateInvoiceRemindersAction
             Reminder::query()->insert($remindersToInsert);
         }
 
-        if ($reminderCount > 0 && $user) {
+        if ($reminderCount > 0) {
             InvalidateDashBoardCacheEvent::dispatch($user);
             InvalidateAnalyticsCacheEvent::dispatch($user);
         }

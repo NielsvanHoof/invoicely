@@ -6,11 +6,12 @@ use App\Actions\Teams\DeleteTeamAction;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 use Log;
 
 class TeamDestroyController extends Controller
 {
-    public function __invoke(Team $team, DeleteTeamAction $action)
+    public function __invoke(Team $team, DeleteTeamAction $action): RedirectResponse
     {
         $this->authorize('delete', $team);
 

@@ -8,11 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Models\Team;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 use Log;
 
 class TeamUpdateController extends Controller
 {
-    public function __invoke(UpdateTeamRequest $request, Team $team, UpdateTeamAction $updateTeamAction)
+    public function __invoke(UpdateTeamRequest $request, Team $team, UpdateTeamAction $updateTeamAction): RedirectResponse
     {
         $this->authorize('update', $team);
 

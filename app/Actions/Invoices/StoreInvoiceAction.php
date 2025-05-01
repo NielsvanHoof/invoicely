@@ -20,7 +20,7 @@ class StoreInvoiceAction
         protected ScheduleRemindersAction $scheduleRemindersAction,
     ) {}
 
-    public function execute(array $data, ?UploadedFile $file, int $userId, ?string $teamId): Invoice
+    public function execute(array $data, ?UploadedFile $file, int $userId, ?int $teamId): Invoice
     {
         $filePath = null;
 
@@ -31,7 +31,7 @@ class StoreInvoiceAction
         $invoice = Invoice::create([
             ...$data,
             'user_id' => $userId,
-            'team_id' => $teamId ?? null,
+            'team_id' => $teamId,
             'file_path' => $filePath,
         ]);
 

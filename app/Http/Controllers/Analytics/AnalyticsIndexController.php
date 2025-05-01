@@ -9,6 +9,7 @@ use App\Queries\Analytics\FetchStatusDistributionQuery;
 use App\Queries\Analytics\FetchTopClientsQuery;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class AnalyticsIndexController extends Controller
 {
@@ -19,7 +20,7 @@ class AnalyticsIndexController extends Controller
         private FetchTopClientsQuery $fetchTopClientsQuery
     ) {}
 
-    public function __invoke()
+    public function __invoke(): Response
     {
         $user = Auth::user();
 

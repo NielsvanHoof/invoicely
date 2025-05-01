@@ -21,10 +21,8 @@ class BulkUpdateInvoiceStatusAction
             ->whereNot('status', $status)
             ->update($updateData);
 
-        if ($user) {
-            InvalidateDashBoardCacheEvent::dispatch($user);
-            InvalidateAnalyticsCacheEvent::dispatch($user);
-        }
+        InvalidateDashBoardCacheEvent::dispatch($user);
+        InvalidateAnalyticsCacheEvent::dispatch($user);
 
         return $count;
     }
