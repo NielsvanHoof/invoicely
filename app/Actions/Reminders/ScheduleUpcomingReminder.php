@@ -3,9 +3,9 @@
 namespace App\Actions\Reminders;
 
 use App\Enums\ReminderType;
+use App\Helpers\ReminderMessageFormatter;
 use App\Models\Invoice;
 use App\Models\Reminder;
-use App\Helpers\ReminderMessageFormatter;
 
 class ScheduleUpcomingReminder
 {
