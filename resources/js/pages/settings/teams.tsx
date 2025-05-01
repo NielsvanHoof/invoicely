@@ -156,18 +156,22 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
 
     const confirmLeaveTeam = () => {
         if (!team) return;
-        
+
         setIsSubmitting(true);
-        router.post(route('teams.members.leave', { team: team.id }), {}, {
-            onSuccess: () => {
-                setShowLeaveDialog(false);
-                setIsSubmitting(false);
+        router.post(
+            route('teams.members.leave', { team: team.id }),
+            {},
+            {
+                onSuccess: () => {
+                    setShowLeaveDialog(false);
+                    setIsSubmitting(false);
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                    setShowLeaveDialog(false);
+                },
             },
-            onError: () => {
-                setIsSubmitting(false);
-                setShowLeaveDialog(false);
-            },
-        });
+        );
     };
 
     const handleRemoveUser = (userId: number, userName: string) => {

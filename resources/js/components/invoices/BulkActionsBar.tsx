@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { type Invoice } from '@/types';
 import { router } from '@inertiajs/react';
 import { AlertCircle, BellIcon, CheckCircle, ChevronDown, ClockIcon, Trash2 } from 'lucide-react';
@@ -96,12 +96,7 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={() => setIsDeleteDialogOpen(true)}
-                    >
+                    <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => setIsDeleteDialogOpen(true)}>
                         <Trash2 className="h-4 w-4" />
                         <span>Delete</span>
                     </Button>
@@ -113,18 +108,15 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
                     <DialogHeader>
                         <DialogTitle>Delete Invoices</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''}? This action cannot be undone.
+                            Are you sure you want to delete {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''}? This action
+                            cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button 
-                            variant="destructive" 
-                            onClick={() => handleAction('delete')}
-                            disabled={isSubmitting}
-                        >
+                        <Button variant="destructive" onClick={() => handleAction('delete')} disabled={isSubmitting}>
                             {isSubmitting ? 'Deleting...' : 'Delete'}
                         </Button>
                     </DialogFooter>

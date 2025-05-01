@@ -82,8 +82,20 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
 
                 {/* Stats Cards */}
                 <div className="grid auto-rows-min grid-cols-2 gap-2 sm:gap-4 md:grid-cols-4">
-                    <StatCard key="total-invoices" title="Total Invoices" value={stats.totalInvoices.toString()} icon={FileText} description="All time" />
-                    <StatCard key="total-paid" title="Total Paid" value={formatCurrency(stats.totalPaid, userCurrency)} icon={DollarSign} description="All time" />
+                    <StatCard
+                        key="total-invoices"
+                        title="Total Invoices"
+                        value={stats.totalInvoices.toString()}
+                        icon={FileText}
+                        description="All time"
+                    />
+                    <StatCard
+                        key="total-paid"
+                        title="Total Paid"
+                        value={formatCurrency(stats.totalPaid, userCurrency)}
+                        icon={DollarSign}
+                        description="All time"
+                    />
                     <StatCard
                         key="total-pending"
                         title="Total Pending"
