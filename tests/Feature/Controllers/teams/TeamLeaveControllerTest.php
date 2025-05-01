@@ -4,10 +4,16 @@ namespace Tests\Feature\Controllers\Teams;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Policies\TeamPolicy;
+use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
 
 test('it can leave team', function () {
+    $this->partialMock(TeamPolicy::class, function (MockInterface $mock) {
+        $mock->shouldReceive('leave')->andReturn(true);
+    });
+
     // Arrange
     $owner = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $owner->id]);
@@ -32,6 +38,10 @@ test('it can leave team', function () {
 });
 
 test('it prevents team owner from leaving', function () {
+    $this->partialMock(TeamPolicy::class, function (MockInterface $mock) {
+        $mock->shouldReceive('leave')->andReturn(false);
+    });
+
     // Arrange
     $user = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $user->id]);

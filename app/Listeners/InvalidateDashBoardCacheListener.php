@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Actions\Dashboard\GetDashboardStatsAction;
-use App\Actions\Dashboard\GetLatestInvoicesAction;
-use App\Actions\Dashboard\GetRecentActivityAction;
-use App\Actions\Dashboard\GetUpcomingInvoicesAction;
 use App\Events\InvalidateDashBoardCacheEvent;
+use App\Queries\Dashboard\FetchDashboardStatsQuery;
+use App\Queries\Dashboard\FetchLatestInvoicesQuery;
+use App\Queries\Dashboard\FetchRecentActivityQuery;
+use App\Queries\Dashboard\FetchUpcomingInvoicesQuery;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class InvalidateDashBoardCacheListener implements ShouldQueue
@@ -15,10 +15,10 @@ class InvalidateDashBoardCacheListener implements ShouldQueue
      * Create the event listener.
      */
     public function __construct(
-        private GetDashboardStatsAction $getDashboardStatsAction,
-        private GetLatestInvoicesAction $getLatestInvoicesAction,
-        private GetUpcomingInvoicesAction $getUpcomingInvoicesAction,
-        private GetRecentActivityAction $getRecentActivityAction
+        private FetchDashboardStatsQuery $fetchDashboardStatsQuery,
+        private FetchLatestInvoicesQuery $fetchLatestInvoicesQuery,
+        private FetchUpcomingInvoicesQuery $fetchUpcomingInvoicesQuery,
+        private FetchRecentActivityQuery $fetchRecentActivityQuery
     ) {}
 
     /**
@@ -26,9 +26,9 @@ class InvalidateDashBoardCacheListener implements ShouldQueue
      */
     public function handle(InvalidateDashBoardCacheEvent $event): void
     {
-        $this->getDashboardStatsAction->invalidateCache($event->user, 'stats');
-        $this->getLatestInvoicesAction->invalidateCache($event->user, 'latest-invoices');
-        $this->getUpcomingInvoicesAction->invalidateCache($event->user, 'upcoming-invoices');
-        $this->getRecentActivityAction->invalidateCache($event->user, 'recent-activity');
+        $this->fetchDashboardStatsQuery->invalidateCache($event->user, 'stats');
+        $this->fetchLatestInvoicesQuery->invalidateCache($event->user, 'latest-invoices');
+        $this->fetchUpcomingInvoicesQuery->invalidateCache($event->user, 'upcoming-invoices');
+        $this->fetchRecentActivityQuery->invalidateCache($event->user, 'recent-activity');
     }
 }

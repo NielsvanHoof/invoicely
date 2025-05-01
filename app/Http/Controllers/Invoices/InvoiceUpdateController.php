@@ -10,6 +10,8 @@ class InvoiceUpdateController extends Controller
 {
     public function __invoke(UpdateInvoiceRequest $request, Invoice $invoice)
     {
+        $this->authorize('update', $invoice);
+
         $validated = $request->except('file');
 
         $this->invoiceService->updateInvoice(

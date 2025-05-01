@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Actions\Dashboard;
+namespace App\Queries\Dashboard;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 use Carbon\Carbon;
 
-class GetDashboardStatsAction extends BaseDashboardAction
+class FetchDashboardStatsQuery extends BaseQuery
 {
     /**
      * Get dashboard statistics for a user.

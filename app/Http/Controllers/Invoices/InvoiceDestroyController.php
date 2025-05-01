@@ -12,6 +12,8 @@ class InvoiceDestroyController extends Controller
      */
     public function __invoke(Invoice $invoice)
     {
+        $this->authorize('delete', $invoice);
+
         $this->invoiceService->deleteInvoice($invoice);
 
         return redirect()->route('invoices.index')

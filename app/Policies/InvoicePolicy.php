@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Invoice;
 use App\Models\User;
 
 class InvoicePolicy
@@ -18,7 +17,7 @@ class InvoicePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Invoice $invoice): bool
+    public function view(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin') || $user->hasRole('client');
     }
@@ -34,7 +33,7 @@ class InvoicePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Invoice $invoice): bool
+    public function update(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
@@ -42,7 +41,7 @@ class InvoicePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Invoice $invoice): bool
+    public function delete(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
@@ -50,7 +49,7 @@ class InvoicePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Invoice $invoice): bool
+    public function restore(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
@@ -58,7 +57,7 @@ class InvoicePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Invoice $invoice): bool
+    public function forceDelete(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
@@ -66,8 +65,13 @@ class InvoicePolicy
     /**
      * Determine whether the user can download the file.
      */
-    public function downloadFile(User $user, Invoice $invoice): bool
+    public function downloadFile(User $user): bool
     {
         return $user->hasRole('invoicer') || $user->hasRole('admin') || $user->hasRole('client');
+    }
+
+    public function bulkAction(User $user): bool
+    {
+        return $user->hasRole('invoicer') || $user->hasRole('admin');
     }
 }

@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers\Analytics;
 
-use App\Actions\Analytics\GetFinancialMetricsAction;
-use App\Actions\Analytics\GetMonthlyRevenueAction;
-use App\Actions\Analytics\GetStatusDistributionAction;
-use App\Actions\Analytics\GetTopClientsAction;
 use App\Http\Controllers\Controller;
+use App\Queries\Analytics\FetchFinancialMetricsQuery;
+use App\Queries\Analytics\FetchMonthlyRevenueQuery;
+use App\Queries\Analytics\FetchStatusDistributionQuery;
+use App\Queries\Analytics\FetchTopClientsQuery;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class AnalyticsIndexController extends Controller
 {
     public function __construct(
-        private GetFinancialMetricsAction $getFinancialMetricsAction,
-        private GetStatusDistributionAction $getStatusDistributionAction,
-        private GetMonthlyRevenueAction $getMonthlyRevenueAction,
-        private GetTopClientsAction $getTopClientsAction
+        private FetchFinancialMetricsQuery $fetchFinancialMetricsQuery,
+        private FetchStatusDistributionQuery $fetchStatusDistributionQuery,
+        private FetchMonthlyRevenueQuery $fetchMonthlyRevenueQuery,
+        private FetchTopClientsQuery $fetchTopClientsQuery
     ) {}
 
     public function __invoke()
     {
         $user = Auth::user();
 
-        $financialMetrics = $this->getFinancialMetricsAction->execute($user);
-        $statusDistribution = $this->getStatusDistributionAction->execute($user);
-        $monthlyRevenue = $this->getMonthlyRevenueAction->execute($user);
-        $topClients = $this->getTopClientsAction->execute($user);
+        $financialMetrics = $this->fetchFinancialMetricsQuery->execute($user);
+        $statusDistribution = $this->fetchStatusDistributionQuery->execute($user);
+        $monthlyRevenue = $this->fetchMonthlyRevenueQuery->execute($user);
+        $topClients = $this->fetchTopClientsQuery->execute($user);
 
         return Inertia::render('analytics', [
             'financialMetrics' => $financialMetrics,

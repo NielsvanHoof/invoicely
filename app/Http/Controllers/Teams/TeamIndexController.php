@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teams;
 
 use App\Http\Controllers\Controller;
+use App\Models\Team;
 use Auth;
 use Inertia\Inertia;
 
@@ -10,6 +11,8 @@ class TeamIndexController extends Controller
 {
     public function __invoke()
     {
+        $this->authorize('viewAny', Team::class);
+
         $user = Auth::user()->load('team');
         $teamMembers = [];
         $isTeamOwner = false;

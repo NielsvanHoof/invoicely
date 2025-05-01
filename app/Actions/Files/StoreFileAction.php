@@ -4,6 +4,7 @@ namespace App\Actions\Files;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Ramsey\Uuid\Uuid;
 
 class StoreFileAction
 {
@@ -22,7 +23,7 @@ class StoreFileAction
      */
     public function execute(UploadedFile $file, int $userId, string $directory): ?string
     {
-        $fileName = time().'_'.$file->getClientOriginalName();
+        $fileName = Uuid::uuid7()->toString().'.'.$file->getClientOriginalExtension();
 
         return Storage::disk($this->disk)->putFileAs(
             $directory.'/'.$userId,

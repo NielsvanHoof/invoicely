@@ -6,12 +6,15 @@ use App\Actions\Teams\StoreTeamAction;
 use App\Data\Team\TeamData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\CreateTeamRequest;
+use App\Models\Team;
 use Auth;
 
 class TeamStoreController extends Controller
 {
     public function __invoke(CreateTeamRequest $request, StoreTeamAction $action)
     {
+        $this->authorize('create', Team::class);
+
         $user = Auth::user()->load('team');
         $teamData = TeamData::from($request);
         $createdTeam = $action->execute($user, $teamData);

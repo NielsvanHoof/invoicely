@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Actions\Analytics;
+namespace App\Queries;
 
 use App\Models\User;
+use Closure;
 use Illuminate\Support\Facades\Cache;
 
-abstract class BaseAnalyticsAction
+abstract class BaseQuery
 {
     /**
      * Cache TTL in minutes
@@ -25,7 +26,7 @@ abstract class BaseAnalyticsAction
     /**
      * Get cached data or compute it if not cached.
      */
-    protected function getCachedData(User $user, string $type, callable $compute): mixed
+    protected function getCachedData(User $user, string $type, Closure $compute): mixed
     {
         $cacheKey = $this->getCacheKey($user, $type);
 

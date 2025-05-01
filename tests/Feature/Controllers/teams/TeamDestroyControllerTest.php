@@ -5,10 +5,17 @@ namespace Tests\Feature\Controllers\Teams;
 use App\Actions\Teams\DeleteTeamAction;
 use App\Models\Team;
 use App\Models\User;
+use App\Policies\TeamPolicy;
+use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 
 test('it can delete team', function () {
+    $this->partialMock(TeamPolicy::class, function (MockInterface $mock) {
+        $mock->shouldReceive('delete')->andReturn(true);
+    });
+
     // Arrange
     $user = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $user->id]);
@@ -27,6 +34,10 @@ test('it can delete team', function () {
 });
 
 test('it handles errors gracefully', function () {
+    $this->partialMock(TeamPolicy::class, function (MockInterface $mock) {
+        $mock->shouldReceive('delete')->andReturn(true);
+    });
+
     // Arrange
     $user = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $user->id]);
@@ -46,7 +57,7 @@ test('it handles errors gracefully', function () {
     $response->assertRedirect();
     $response->assertSessionHas('error', 'Failed to delete team: Test error');
 
-    $this->assertDatabaseHas('teams', ['id' => $team->id]);
+    assertDatabaseHas('teams', ['id' => $team->id]);
 });
 
 test('it prevents unauthorized deletion', function () {
@@ -64,5 +75,5 @@ test('it prevents unauthorized deletion', function () {
     // Assert
     $response->assertForbidden();
 
-    $this->assertDatabaseHas('teams', ['id' => $team->id]);
+    assertDatabaseHas('teams', ['id' => $team->id]);
 });

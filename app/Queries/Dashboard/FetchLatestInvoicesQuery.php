@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Actions\Dashboard;
+namespace App\Queries\Dashboard;
 
 use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 use Illuminate\Database\Eloquent\Collection;
 
-class GetLatestInvoicesAction extends BaseDashboardAction
+class FetchLatestInvoicesQuery extends BaseQuery
 {
     /**
      * Get latest invoices for a user.

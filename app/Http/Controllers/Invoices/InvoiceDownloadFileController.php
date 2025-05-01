@@ -9,6 +9,8 @@ class InvoiceDownloadFileController extends Controller
 {
     public function __invoke(Invoice $invoice)
     {
+        $this->authorize('downloadFile', $invoice);
+
         if (! $invoice->file_path) {
             return response()->json(['error' => 'No file attached to this invoice'], 404);
         }

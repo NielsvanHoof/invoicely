@@ -1,35 +1,35 @@
 <?php
 
-namespace App\Actions\Analytics;
+namespace App\Queries\Analytics;
 
+use App\Data\Analytics\FetchTopClientsData;
 use App\Enums\InvoiceStatus;
-use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
-class GetTopClientsAction extends BaseAnalyticsAction
+class FetchTopClientsQuery extends BaseQuery
 {
     /**
-     * Get top clients by revenue.
+     * Get the top clients by revenue.
      *
-     * @return array<int, array{client: string, revenue: float}>
+     * @return array<int, FetchTopClientsData>
      */
     public function execute(User $user, int $limit = 5): array
     {
         return $this->getCachedData($user, 'top-clients', function () use ($limit) {
-            return Invoice::query()
+            return DB::table('invoices')
                 ->where('status', InvoiceStatus::PAID->value)
                 ->select('client_name', DB::raw('SUM(amount) as revenue'))
                 ->groupBy('client_name')
                 ->orderByDesc('revenue')
                 ->limit($limit)
                 ->get()
-                ->map(function ($item) {
-                    return [
-                        'client' => $item->client_name,
-                        'revenue' => (float) $item->revenue,
-                    ];
-                })
+                ->map(fn (stdClass $item) => FetchTopClientsData::from([
+                    'client' => $item->client_name,
+                    'revenue' => (float) $item->revenue,
+                ]))
                 ->toArray();
         });
     }

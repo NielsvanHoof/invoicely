@@ -14,6 +14,8 @@ class TeamUpdateController extends Controller
 {
     public function __invoke(UpdateTeamRequest $request, Team $team, UpdateTeamAction $updateTeamAction)
     {
+        $this->authorize('update', $team);
+
         try {
             $teamData = TeamData::from($request);
             $updateTeamAction->execute($team, $teamData);

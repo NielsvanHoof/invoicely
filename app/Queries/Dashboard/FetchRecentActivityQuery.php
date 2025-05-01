@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Actions\Dashboard;
+namespace App\Queries\Dashboard;
 
 use App\Models\Invoice;
 use App\Models\Reminder;
 use App\Models\User;
+use App\Queries\BaseQuery;
 
-class GetRecentActivityAction extends BaseDashboardAction
+class FetchRecentActivityQuery extends BaseQuery
 {
     /**
      * Get recent activity for a user.

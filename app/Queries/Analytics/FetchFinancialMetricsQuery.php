@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Actions\Analytics;
+namespace App\Queries\Analytics;
 
+use App\Data\Analytics\FetchFinancialMetricsData;
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 
-class GetFinancialMetricsAction extends BaseAnalyticsAction
+class FetchFinancialMetricsQuery extends BaseQuery
 {
     /**
-     * Get key financial metrics.
-     *
-     * @return array<string, float|int>
+     * Get financial metrics for the user.
      */
-    public function execute(User $user): array
+    public function execute(User $user): FetchFinancialMetricsData
     {
         return $this->getCachedData($user, 'financial-metrics', function () {
             $invoices = Invoice::query()->get();
@@ -43,12 +43,12 @@ class GetFinancialMetricsAction extends BaseAnalyticsAction
                 $overduePercentage = ($overdueCount / $invoices->count()) * 100;
             }
 
-            return [
+            return FetchFinancialMetricsData::from([
                 'totalOutstanding' => $totalOutstanding,
                 'avgTimeToPayment' => round($avgTimeToPayment, 1),
                 'overduePercentage' => round($overduePercentage, 1),
                 'totalRevenue' => $paidInvoices->sum('amount'),
-            ];
+            ]);
         });
     }
 }

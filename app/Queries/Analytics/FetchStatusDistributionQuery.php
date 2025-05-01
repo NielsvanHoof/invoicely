@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Actions\Analytics;
+namespace App\Queries\Analytics;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 use Illuminate\Support\Facades\DB;
 
-class GetStatusDistributionAction extends BaseAnalyticsAction
+class FetchStatusDistributionQuery extends BaseQuery
 {
     /**
      * Get invoice status distribution.
      *
-     * @return array<int, array{name: string, value: int}>
+     * @return array<int, array<string, int>>
      */
     public function execute(User $user): array
     {
@@ -24,6 +25,7 @@ class GetStatusDistributionAction extends BaseAnalyticsAction
                 ->toArray();
 
             $result = [];
+
             foreach (InvoiceStatus::cases() as $status) {
                 $result[] = [
                     'name' => ucfirst($status->value),

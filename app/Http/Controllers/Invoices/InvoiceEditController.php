@@ -10,6 +10,8 @@ class InvoiceEditController extends Controller
 {
     public function __invoke(Invoice $invoice)
     {
+        $this->authorize('update', $invoice);
+
         $invoice->load('reminders');
 
         return Inertia::render('invoices/edit', [

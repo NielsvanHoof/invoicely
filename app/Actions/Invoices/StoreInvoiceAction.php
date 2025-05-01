@@ -31,7 +31,7 @@ class StoreInvoiceAction
         $invoice = Invoice::create([
             ...$data,
             'user_id' => $userId,
-            'team_id' => $teamId,
+            'team_id' => $teamId ?? null,
             'file_path' => $filePath,
         ]);
 

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Actions\Dashboard;
+namespace App\Queries\Dashboard;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Queries\BaseQuery;
 use Illuminate\Database\Eloquent\Collection;
 
-class GetUpcomingInvoicesAction extends BaseDashboardAction
+class FetchUpcomingInvoicesQuery extends BaseQuery
 {
     /**
      * Get upcoming invoices for a user (due in the future and not paid).

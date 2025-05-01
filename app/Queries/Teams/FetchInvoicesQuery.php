@@ -2,6 +2,7 @@
 
 namespace App\Queries\Teams;
 
+use App\Data\Invoices\FetchInvoicesData;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,40 +11,34 @@ use Laravel\Scout\Builder as ScoutBuilder;
 class FetchInvoicesQuery
 {
     /**
-     * @param array{
-     *     status?: string,
-     *     date_from?: string,
-     *     date_to?: string,
-     *     amount_from?: string,
-     *     amount_to?: string,
-     * } $filters
+     * Fetch invoices for a user.
      */
-    public function execute(User $user, ?string $search = '', array $filters = []): ScoutBuilder
+    public function execute(User $user, FetchInvoicesData $data): ScoutBuilder
     {
-        return Invoice::search($search)
-            ->query(function (Builder $query) use ($user, $filters) {
+        return Invoice::search($data->search)
+            ->query(function (Builder $query) use ($user, $data) {
                 return $query
                     ->withCount('reminders')
-                    ->when($user->team_id, function ($query) use ($user) {
+                    ->when(! empty($user->team_id), function ($query) use ($user) {
                         $query->where('team_id', $user->team_id);
                     })
-                    ->when(! $user->team_id, function ($query) use ($user) {
+                    ->when(empty($user->team_id), function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
-                    ->when($filters['status'] ?? null, function ($query) use ($filters) {
-                        $query->where('status', $filters['status']);
+                    ->when($data->status ?? null, function ($query) use ($data) {
+                        $query->where('status', $data->status);
                     })
-                    ->when($filters['date_from'] ?? null, function ($query) use ($filters) {
-                        $query->whereDate('created_at', '>=', $filters['date_from']);
+                    ->when($data->dateFrom ?? null, function ($query) use ($data) {
+                        $query->whereDate('created_at', '>=', $data->dateFrom);
                     })
-                    ->when($filters['date_to'] ?? null, function ($query) use ($filters) {
-                        $query->whereDate('created_at', '<=', $filters['date_to']);
+                    ->when($data->dateTo ?? null, function ($query) use ($data) {
+                        $query->whereDate('created_at', '<=', $data->dateTo);
                     })
-                    ->when($filters['amount_from'] ?? null, function ($query) use ($filters) {
-                        $query->where('amount', '>=', $filters['amount_from']);
+                    ->when($data->amountFrom ?? null, function ($query) use ($data) {
+                        $query->where('amount', '>=', $data->amountFrom);
                     })
-                    ->when($filters['amount_to'] ?? null, function ($query) use ($filters) {
-                        $query->where('amount', '<=', $filters['amount_to']);
+                    ->when($data->amountTo ?? null, function ($query) use ($data) {
+                        $query->where('amount', '<=', $data->amountTo);
                     });
             });
     }
