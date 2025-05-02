@@ -4,6 +4,7 @@ namespace Tests\Feature\Controllers\Invoices;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
+use App\Models\Team;
 use App\Models\User;
 use App\Policies\InvoicePolicy;
 use Illuminate\Http\UploadedFile;
@@ -21,6 +22,11 @@ test('A user can create an invoice', function () {
     $this->partialMock(InvoicePolicy::class, function (MockInterface $mock) {
         $mock->shouldReceive('create')->andReturn(true);
     });
+
+
+    $team = Team::factory()->create();
+    $this->user->team()->associate($team);
+    $this->user->save();
 
     $data = [
         'invoice_number' => 'INV-123',
@@ -48,6 +54,11 @@ test('A user can create an invoice with a file', function () {
     $this->partialMock(InvoicePolicy::class, function (MockInterface $mock) {
         $mock->shouldReceive('create')->andReturn(true);
     });
+
+    $team = Team::factory()->create();
+    $this->user->team()->associate($team);
+    $this->user->save();
+
 
     $data = [
         'invoice_number' => 'INV-123',

@@ -21,10 +21,10 @@ class FetchInvoicesQuery
             ->query(function (Builder $query) use ($user, $data) {
                 return $query
                     ->withCount('reminders')
-                    ->when(! empty($user->team_id), function ($query) use ($user) {
+                    ->when(! empty($user->team_id ?? null), function ($query) use ($user) {
                         $query->where('team_id', $user->team_id);
                     })
-                    ->when(empty($user->team_id), function ($query) use ($user) {
+                    ->when(empty($user->team_id ?? null), function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
                     ->when($data->status ?? null, function ($query) use ($data) {
