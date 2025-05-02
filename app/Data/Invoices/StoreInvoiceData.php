@@ -47,6 +47,5 @@ class StoreInvoiceData extends Data
 
         #[File, Mimes(mimes: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']), Max(10240)]
         public ?UploadedFile $file = null,
-    ) {
-    }
+    ) {}
 }

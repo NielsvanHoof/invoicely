@@ -20,8 +20,7 @@ class TransferUserInvoicesToTeam implements ShouldQueue
     public function __construct(
         private User $user,
         private Team $team,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.

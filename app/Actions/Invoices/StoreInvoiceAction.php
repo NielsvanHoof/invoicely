@@ -7,12 +7,9 @@ use App\Actions\Reminders\ScheduleRemindersAction;
 use App\Data\Invoices\StoreInvoiceData;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
-use App\Mail\Invoices\InvoiceReceivedMail;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\App;
-use Mail;
 
 class StoreInvoiceAction
 {
