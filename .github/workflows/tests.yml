@@ -25,6 +25,9 @@ jobs:
           tools: composer:v2
           coverage: xdebug
 
+      - name: Clear cache
+        run: php artisan optimize:clear
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
