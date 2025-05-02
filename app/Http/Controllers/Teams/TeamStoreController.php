@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\Teams;
 
 use App\Actions\Teams\StoreTeamAction;
-use App\Data\Team\TeamData;
+use App\Data\Team\CreateTeamData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Team\CreateTeamRequest;
 use App\Models\Team;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 
 class TeamStoreController extends Controller
 {
-    public function __invoke(CreateTeamRequest $request, StoreTeamAction $action): RedirectResponse
+    public function __invoke(CreateTeamData $data, StoreTeamAction $action): RedirectResponse
     {
         $this->authorize('create', Team::class);
 
         $user = Auth::user()->load('team');
-        $teamData = TeamData::from($request);
-        $createdTeam = $action->execute($user, $teamData);
+        $createdTeam = $action->execute($user, $data);
 
         if ($createdTeam) {
             return back()->with('success', 'Team created successfully.');

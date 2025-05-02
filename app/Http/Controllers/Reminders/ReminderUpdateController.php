@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Reminders;
 
+use App\Data\Reminders\UpdateReminderData;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Reminders\UpdateReminderRequest;
 use App\Models\Invoice;
 use App\Models\Reminder;
 use Illuminate\Http\RedirectResponse;
 
 class ReminderUpdateController extends Controller
 {
-    public function __invoke(UpdateReminderRequest $request, Invoice $invoice, Reminder $reminder): RedirectResponse
+    public function __invoke(UpdateReminderData $data, Invoice $invoice, Reminder $reminder): RedirectResponse
     {
         $this->authorize('update', $invoice);
 
@@ -21,9 +21,7 @@ class ReminderUpdateController extends Controller
                 ->with('error', 'Cannot update a reminder that has already been sent.');
         }
 
-        $validated = $request->validated();
-
-        $reminder->update($validated);
+        $reminder->update($data->toArray());
 
         InvalidateDashBoardCacheEvent::dispatch($invoice->user);
 

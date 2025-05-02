@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Teams;
 
 use App\Actions\Teams\RemoveUserFromTeamAction;
-use App\Data\Team\TeamMemberRemovalData;
+use App\Data\Team\RemoveTeamMemberData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Team\RemoveTeamMemberRequest;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
-use User;
 
 class TeamRemoveUserController extends Controller
 {
-    public function __invoke(RemoveTeamMemberRequest $request, RemoveUserFromTeamAction $removeUserFromTeamAction): RedirectResponse
+    public function __invoke(RemoveTeamMemberData $data, RemoveUserFromTeamAction $removeUserFromTeamAction): RedirectResponse
     {
         $user = Auth::user()->load('team');
 
@@ -22,9 +21,7 @@ class TeamRemoveUserController extends Controller
 
         $this->authorize('removeUser', $user->team);
 
-        $removalData = TeamMemberRemovalData::from($request);
-
-        $userToRemove = User::findOrFail($removalData->user_id);
+        $userToRemove = User::findOrFail($data->user_id);
 
         $result = $removeUserFromTeamAction->execute($user->team, $userToRemove);
 
