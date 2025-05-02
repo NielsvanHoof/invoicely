@@ -8,6 +8,7 @@ use App\Http\Controllers\Invoices\InvoiceEditController;
 use App\Http\Controllers\Invoices\InvoiceIndexController;
 use App\Http\Controllers\Invoices\InvoiceStoreController;
 use App\Http\Controllers\Invoices\InvoiceUpdateController;
+use App\Http\Controllers\Invoices\InvoiceShowController;
 
 Route::group([
     'prefix' => 'invoices',
