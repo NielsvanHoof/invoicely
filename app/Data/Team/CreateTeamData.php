@@ -11,6 +11,5 @@ class CreateTeamData extends Data
     public function __construct(
         #[Max(255), Unique('teams', 'name')]
         public string $name,
-    ) {
-    }
+    ) {}
 }

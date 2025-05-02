@@ -12,6 +12,5 @@ class UpdateReminderData extends Data
         #[After('today')]
         public string $scheduled_date,
         public null|Optional|string $message = null,
-    ) {
-    }
+    ) {}
 }

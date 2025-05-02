@@ -30,19 +30,13 @@ class StoreInvoiceAction
         }
 
         $invoice = Invoice::create([
-            ...$data->toArray(),
+            ...$data->except('file')->toArray(),
             'user_id' => $userId,
             'team_id' => $teamId,
             'file_path' => $filePath,
         ]);
 
-        // Schedule reminders for the new invoice
         $this->scheduleRemindersAction->execute($invoice);
-
-        // Send email notification if client email is provided and in local environment
-        if ($data->client_email && App::isLocal()) {
-            Mail::to($data->client_email)->send(new InvoiceReceivedMail($invoice));
-        }
 
         $user = User::find($userId);
 

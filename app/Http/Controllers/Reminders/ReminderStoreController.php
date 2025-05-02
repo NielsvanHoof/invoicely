@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Reminders;
 
+use App\Data\Reminders\StoreReminderData;
 use App\Enums\ReminderType;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Helpers\ReminderMessageFormatter;
 use App\Http\Controllers\Controller;
-use App\Data\Reminders\StoreReminderData;
 use App\Models\Invoice;
 use Illuminate\Http\RedirectResponse;
 
@@ -14,8 +14,7 @@ class ReminderStoreController extends Controller
 {
     public function __construct(
         private ReminderMessageFormatter $reminderMessageFormatter,
-    ) {
-    }
+    ) {}
 
     public function __invoke(StoreReminderData $data, Invoice $invoice): RedirectResponse
     {

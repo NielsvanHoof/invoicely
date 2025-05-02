@@ -7,18 +7,15 @@ use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\NotIn;
-use Spatie\LaravelData\Attributes\Validation\Required;
-use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
 
 class TeamInvitationData extends Data
 {
     public function __construct(
-        #[Email, Max(255), Exists('users', 'email'), NotIn(FromAuthenticatedUserProperty('email'))]
+        #[Email, Max(255), Exists('users', 'email'), NotIn(new FromAuthenticatedUserProperty('email'))]
         public string $email,
 
         #[Max(255)]
         public string $name,
-    ) {
-    }
+    ) {}
 }

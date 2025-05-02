@@ -17,7 +17,7 @@ class InvoiceStoreController extends Controller
 
         $user = Auth::user();
 
-        $invoice = $action->execute($data, $data->file, $user->id, $user->team_id);
+        $action->execute($data, $data->file, $user->id, $user->team_id);
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice created successfully.');

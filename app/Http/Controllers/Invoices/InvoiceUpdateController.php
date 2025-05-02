@@ -2,26 +2,19 @@
 
 namespace App\Http\Controllers\Invoices;
 
+use App\Actions\Invoices\UpdateInvoiceAction;
+use App\Data\Invoices\UpdateInvoiceData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use Illuminate\Http\RedirectResponse;
 
 class InvoiceUpdateController extends Controller
 {
-    public function __invoke(UpdateInvoiceRequest $request, Invoice $invoice): RedirectResponse
+    public function __invoke(UpdateInvoiceData $data, Invoice $invoice, UpdateInvoiceAction $action): RedirectResponse
     {
         $this->authorize('update', $invoice);
 
-        $validated = $request->except('file');
-
-        $this->invoiceService->updateInvoice(
-            $invoice,
-            $validated,
-            $request->file('file'),
-            $request->input('remove_file', false),
-            Auth::id()
-        );
+        $action->execute($invoice, $data);
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice updated successfully.');

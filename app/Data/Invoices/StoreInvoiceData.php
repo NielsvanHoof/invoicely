@@ -36,7 +36,7 @@ class StoreInvoiceData extends Data
         #[Date]
         public string $issue_date,
 
-        #[Date, AfterOrEqual(attribute: 'issue_date')]
+        #[Date, AfterOrEqual('issue_date')]
         public string $due_date,
 
         #[Enum(InvoiceStatus::class)]
@@ -47,5 +47,6 @@ class StoreInvoiceData extends Data
 
         #[File, Mimes(mimes: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']), Max(10240)]
         public ?UploadedFile $file = null,
-    ) {}
+    ) {
+    }
 }

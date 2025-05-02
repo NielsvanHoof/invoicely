@@ -3,6 +3,7 @@
 namespace App\Actions\Teams;
 
 use App\Data\Team\CreateTeamData;
+use App\Jobs\TransferUserInvoicesToTeam;
 use App\Models\Team;
 use App\Models\User;
 use Exception;
@@ -21,7 +22,13 @@ class StoreTeamAction
         ]);
 
         $user->team()->associate($team);
+        $saved = $user->save();
 
-        return $user->save();
+        if ($saved) {
+            // Dispatch job to transfer user's invoices to the team in the background
+            TransferUserInvoicesToTeam::dispatch($user, $team);
+        }
+
+        return $saved;
     }
 }

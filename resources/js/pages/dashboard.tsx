@@ -291,55 +291,67 @@ export default function Dashboard({ stats, latestInvoices, upcomingInvoices, rec
                     <div className="p-4">
                         <Deferred data="recentActivity" fallback={<Skeleton className="h-20 w-full" />}>
                             <div className="space-y-4">
-                                {recentActivity?.map((activity) => {
-                                    const ActivityIcon = getActivityIcon(activity.type, activity.status);
-                                    return (
-                                        <div
-                                            key={`${activity.id}-${activity.type}-${activity.timestamp}${activity.reminder_id ? `-${activity.reminder_id}` : ''}`}
-                                            className="flex items-start gap-3"
-                                        >
+                                {recentActivity?.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                                        <Activity className="mb-2 h-8 w-8 text-neutral-400" />
+                                        <p className="text-sm text-neutral-500">No recent activity to display</p>
+                                        <p className="mt-1 text-xs text-neutral-400">
+                                            Your activity feed will appear here as you create and manage invoices
+                                        </p>
+                                    </div>
+                                ) : (
+                                    recentActivity?.map((activity) => {
+                                        const ActivityIcon = getActivityIcon(activity.type, activity.status);
+                                        return (
                                             <div
-                                                className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
-                                                    activity.type === 'reminder'
-                                                        ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-500'
-                                                        : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-500'
-                                                }`}
+                                                key={`${activity.id}-${activity.type}-${activity.timestamp}${activity.reminder_id ? `-${activity.reminder_id}` : ''}`}
+                                                className="flex items-start gap-3"
                                             >
-                                                <ActivityIcon className="h-3.5 w-3.5" />
-                                            </div>
-                                            <div className="flex-1 space-y-1">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-medium">
-                                                        {getActivityDescription(activity.type, activity.status, activity.reminder_type)}
-                                                    </p>
-                                                    <span className="text-xs text-neutral-500">{formatRelativeTime(new Date(activity.date))}</span>
+                                                <div
+                                                    className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
+                                                        activity.type === 'reminder'
+                                                            ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-500'
+                                                            : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-500'
+                                                    }`}
+                                                >
+                                                    <ActivityIcon className="h-3.5 w-3.5" />
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <Link
-                                                        href={
-                                                            activity.type === 'reminder'
-                                                                ? route('reminders.index', activity.id)
-                                                                : route('invoices.show', activity.id)
-                                                        }
-                                                        className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"
-                                                    >
-                                                        {activity.invoice_number} - {activity.client_name}
-                                                    </Link>
-                                                    <span className="text-xs font-medium">{formatCurrency(activity.amount, userCurrency)}</span>
-                                                </div>
-                                                {activity.type === 'reminder' && activity.scheduled_date && (
+                                                <div className="flex-1 space-y-1">
                                                     <div className="flex items-center justify-between">
+                                                        <p className="text-sm font-medium">
+                                                            {getActivityDescription(activity.type, activity.status, activity.reminder_type)}
+                                                        </p>
                                                         <span className="text-xs text-neutral-500">
-                                                            {activity.sent_at
-                                                                ? `Sent: ${formatDate(activity.sent_at)}`
-                                                                : `Scheduled: ${formatDate(activity.scheduled_date)}`}
+                                                            {formatRelativeTime(new Date(activity.date))}
                                                         </span>
                                                     </div>
-                                                )}
+                                                    <div className="flex items-center justify-between">
+                                                        <Link
+                                                            href={
+                                                                activity.type === 'reminder'
+                                                                    ? route('reminders.index', activity.id)
+                                                                    : route('invoices.show', activity.id)
+                                                            }
+                                                            className="text-xs text-neutral-600 hover:underline dark:text-neutral-400"
+                                                        >
+                                                            {activity.invoice_number} - {activity.client_name}
+                                                        </Link>
+                                                        <span className="text-xs font-medium">{formatCurrency(activity.amount, userCurrency)}</span>
+                                                    </div>
+                                                    {activity.type === 'reminder' && activity.scheduled_date && (
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-xs text-neutral-500">
+                                                                {activity.sent_at
+                                                                    ? `Sent: ${formatDate(activity.sent_at)}`
+                                                                    : `Scheduled: ${formatDate(activity.scheduled_date)}`}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })
+                                )}
                             </div>
                         </Deferred>
                     </div>
