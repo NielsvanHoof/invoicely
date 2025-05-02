@@ -46,37 +46,44 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
         );
     };
 
+    const selectedCount = selectedInvoices.length;
+    const isPlural = selectedCount !== 1;
+
     return (
         <>
-            <div className="bg-background border-sidebar-border/70 dark:border-sidebar-border sticky bottom-4 z-10 flex items-center justify-between rounded-xl border p-2 shadow-md">
+            <div
+                className="bg-background border-sidebar-border/70 dark:border-sidebar-border sticky bottom-4 z-10 flex items-center justify-between rounded-xl border p-2 shadow-md"
+                role="toolbar"
+                aria-label="Bulk actions"
+            >
                 <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                        {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''} selected
+                    <span className="font-medium" aria-live="polite">
+                        {selectedCount} invoice{isPlural ? 's' : ''} selected
                     </span>
-                    <Button variant="ghost" size="sm" onClick={onClearSelection} className="text-xs">
+                    <Button variant="ghost" size="sm" onClick={onClearSelection} className="text-xs" aria-label="Clear selection">
                         Clear
                     </Button>
                 </div>
                 <div className="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="flex items-center gap-1">
-                                <BellIcon className="h-4 w-4" />
+                            <Button variant="outline" size="sm" className="flex items-center gap-1" aria-label="Reminder actions">
+                                <BellIcon className="h-4 w-4" aria-hidden="true" />
                                 <span>Reminders</span>
-                                <ChevronDown className="h-3 w-3 opacity-70" />
+                                <ChevronDown className="h-3 w-3 opacity-70" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleAction('create_reminder_upcoming')}>
-                                <ClockIcon className="mr-2 h-4 w-4 text-blue-500" />
+                            <DropdownMenuItem onClick={() => handleAction('create_reminder_upcoming')} className="flex items-center">
+                                <ClockIcon className="mr-2 h-4 w-4 text-blue-500" aria-hidden="true" />
                                 Send Upcoming Payment Reminder
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAction('create_reminder_overdue')}>
-                                <AlertCircle className="mr-2 h-4 w-4 text-red-500" />
+                            <DropdownMenuItem onClick={() => handleAction('create_reminder_overdue')} className="flex items-center">
+                                <AlertCircle className="mr-2 h-4 w-4 text-red-500" aria-hidden="true" />
                                 Send Overdue Payment Reminder
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleAction('create_reminder_thank_you')}>
-                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                            <DropdownMenuItem onClick={() => handleAction('create_reminder_thank_you')} className="flex items-center">
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" aria-hidden="true" />
                                 Send Thank You Reminder
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -84,9 +91,9 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            <Button variant="outline" size="sm" className="flex items-center gap-1" aria-label="Status actions">
                                 <span>Status</span>
-                                <ChevronDown className="h-3 w-3 opacity-70" />
+                                <ChevronDown className="h-3 w-3 opacity-70" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -96,8 +103,14 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="destructive" size="sm" className="flex items-center gap-1" onClick={() => setIsDeleteDialogOpen(true)}>
-                        <Trash2 className="h-4 w-4" />
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => setIsDeleteDialogOpen(true)}
+                        aria-label={`Delete ${selectedCount} invoice${isPlural ? 's' : ''}`}
+                    >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                         <span>Delete</span>
                     </Button>
                 </div>
@@ -108,15 +121,19 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
                     <DialogHeader>
                         <DialogTitle>Delete Invoices</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''}? This action
-                            cannot be undone.
+                            Are you sure you want to delete {selectedCount} invoice{isPlural ? 's' : ''}? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} aria-label="Cancel deletion">
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={() => handleAction('delete')} disabled={isSubmitting}>
+                        <Button
+                            variant="destructive"
+                            onClick={() => handleAction('delete')}
+                            disabled={isSubmitting}
+                            aria-label={isSubmitting ? 'Deleting invoices...' : 'Confirm deletion'}
+                        >
                             {isSubmitting ? 'Deleting...' : 'Delete'}
                         </Button>
                     </DialogFooter>

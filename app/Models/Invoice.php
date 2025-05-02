@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -18,7 +19,7 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 #[ScopedBy([InvoiceByTeamOrUserScope::class])]
 class Invoice extends Model implements AuditableContract
 {
-    use Auditable, Searchable;
+    use Auditable, Searchable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

@@ -20,7 +20,7 @@ class InvoiceDestroyController extends Controller
 
         if (! $deleted) {
             return redirect()->route('invoices.index')
-                ->with('error', 'Failed to delete invoice.');
+                ->with('error', 'Failed to delete invoice, the invoice is paid.');
         }
 
         return redirect()->route('invoices.index')

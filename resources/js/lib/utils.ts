@@ -71,9 +71,11 @@ export function getActiveFilters(
 ): Record<string, string> {
     if (!filters) return {};
 
+    // Only include filters that have non-empty values
     const activeFilters = Object.entries(filters).reduce(
         (acc, [key, value]) => {
-            if (value !== undefined && value !== '') {
+            // Check if value is not undefined, null, empty string, or whitespace
+            if (value !== undefined && value !== null && value.trim() !== '') {
                 acc[key] = value;
             }
             return acc;
@@ -81,7 +83,8 @@ export function getActiveFilters(
         {} as Record<string, string>,
     );
 
-    if (sort) {
+    // Only add sort parameters if they exist and are different from defaults
+    if (sort && (sort.field !== 'created_at' || sort.direction !== 'desc')) {
         activeFilters.sort_field = sort.field;
         activeFilters.sort_direction = sort.direction;
     }

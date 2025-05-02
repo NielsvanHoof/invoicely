@@ -64,16 +64,20 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
         }
     };
 
+    const hasErrors = Object.keys(errors).length > 0;
+    const formTitle = isEditing ? 'Edit Invoice' : 'Create Invoice';
+    const submitButtonText = processing ? (isEditing ? 'Updating...' : 'Creating...') : isEditing ? 'Update Invoice' : 'Create Invoice';
+
     return (
         <div className="flex h-full flex-1 flex-col gap-4 p-2 sm:p-4">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+            <header className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" asChild className="h-8 w-8" aria-label="Go back to invoices">
                     <Link href={route('invoices.index')}>
-                        <ArrowLeftIcon className="h-4 w-4" />
+                        <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
                     </Link>
                 </Button>
-                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{isEditing ? 'Edit Invoice' : 'Create Invoice'}</h1>
-            </div>
+                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{formTitle}</h1>
+            </header>
 
             {/* Mobile Preview Card - Shown only on small screens */}
             <div className="lg:hidden">
@@ -97,7 +101,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Main Form */}
                 <div className="lg:col-span-2">
-                    <form onSubmit={onSubmit}>
+                    <form onSubmit={onSubmit} noValidate aria-invalid={hasErrors}>
                         <Card>
                             <CardHeader>
                                 <CardTitle>Invoice Information</CardTitle>
@@ -108,7 +112,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <FileTextIcon className="h-4 w-4 text-neutral-500" />
+                                            <FileTextIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                             <Label htmlFor="invoice_number">Invoice Number</Label>
                                         </div>
                                         <Input
@@ -117,13 +121,24 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                             onChange={(e) => onDataChange('invoice_number', e.target.value)}
                                             placeholder="INV-0001"
                                             className={errors.invoice_number ? 'border-red-300' : ''}
+                                            aria-invalid={!!errors.invoice_number}
+                                            aria-describedby={errors.invoice_number ? 'invoice_number-error' : undefined}
                                         />
-                                        {errors.invoice_number && <p className="text-sm text-red-600">{errors.invoice_number}</p>}
+                                        {errors.invoice_number && (
+                                            <p id="invoice_number-error" className="text-sm text-red-600" role="alert">
+                                                {errors.invoice_number}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label htmlFor="status">Status</Label>
-                                        <Select defaultValue={data.status} onValueChange={(value) => onDataChange('status', value)}>
+                                        <Select
+                                            defaultValue={data.status}
+                                            onValueChange={(value) => onDataChange('status', value)}
+                                            aria-invalid={!!errors.status}
+                                            aria-describedby={errors.status ? 'status-error' : undefined}
+                                        >
                                             <SelectTrigger className={errors.status ? 'border-red-300' : ''}>
                                                 <SelectValue placeholder="Select status" />
                                             </SelectTrigger>
@@ -134,7 +149,11 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 <SelectItem value="overdue">Overdue</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        {errors.status && <p className="text-sm text-red-600">{errors.status}</p>}
+                                        {errors.status && (
+                                            <p id="status-error" className="text-sm text-red-600" role="alert">
+                                                {errors.status}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -144,7 +163,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <UserIcon className="h-4 w-4 text-neutral-500" />
+                                                <UserIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                 <Label htmlFor="client_name">Client Name</Label>
                                             </div>
                                             <Input
@@ -153,14 +172,20 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 onChange={(e) => onDataChange('client_name', e.target.value)}
                                                 placeholder="Client Name"
                                                 className={errors.client_name ? 'border-red-300' : ''}
+                                                aria-invalid={!!errors.client_name}
+                                                aria-describedby={errors.client_name ? 'client_name-error' : undefined}
                                             />
-                                            {errors.client_name && <p className="text-sm text-red-600">{errors.client_name}</p>}
+                                            {errors.client_name && (
+                                                <p id="client_name-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.client_name}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-2">
-                                                    <MailIcon className="h-4 w-4 text-neutral-500" />
+                                                    <MailIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                     <Label htmlFor="client_email">Client Email</Label>
                                                 </div>
                                                 <Input
@@ -170,13 +195,19 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                     onChange={(e) => onDataChange('client_email', e.target.value)}
                                                     placeholder="client@example.com"
                                                     className={errors.client_email ? 'border-red-300' : ''}
+                                                    aria-invalid={!!errors.client_email}
+                                                    aria-describedby={errors.client_email ? 'client_email-error' : undefined}
                                                 />
-                                                {errors.client_email && <p className="text-sm text-red-600">{errors.client_email}</p>}
+                                                {errors.client_email && (
+                                                    <p id="client_email-error" className="text-sm text-red-600" role="alert">
+                                                        {errors.client_email}
+                                                    </p>
+                                                )}
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-2">
-                                                    <CreditCardIcon className="h-4 w-4 text-neutral-500" />
+                                                    <CreditCardIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                     <Label htmlFor="amount">Amount</Label>
                                                 </div>
                                                 <Input
@@ -188,14 +219,20 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                     onChange={handleAmountChange}
                                                     placeholder="0.00"
                                                     className={errors.amount ? 'border-red-300' : ''}
+                                                    aria-invalid={!!errors.amount}
+                                                    aria-describedby={errors.amount ? 'amount-error' : undefined}
                                                 />
-                                                {errors.amount && <p className="text-sm text-red-600">{errors.amount}</p>}
+                                                {errors.amount && (
+                                                    <p id="amount-error" className="text-sm text-red-600" role="alert">
+                                                        {errors.amount}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <MapPinIcon className="h-4 w-4 text-neutral-500" />
+                                                <MapPinIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                 <Label htmlFor="client_address">Client Address</Label>
                                             </div>
                                             <Textarea
@@ -205,8 +242,14 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 placeholder="Client Address"
                                                 rows={3}
                                                 className={errors.client_address ? 'border-red-300' : ''}
+                                                aria-invalid={!!errors.client_address}
+                                                aria-describedby={errors.client_address ? 'client_address-error' : undefined}
                                             />
-                                            {errors.client_address && <p className="text-sm text-red-600">{errors.client_address}</p>}
+                                            {errors.client_address && (
+                                                <p id="client_address-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.client_address}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -217,7 +260,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <CalendarIcon className="h-4 w-4 text-neutral-500" />
+                                                <CalendarIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                 <Label htmlFor="issue_date">Issue Date</Label>
                                             </div>
                                             <Input
@@ -226,13 +269,19 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 value={data.issue_date}
                                                 onChange={(e) => onDataChange('issue_date', e.target.value)}
                                                 className={errors.issue_date ? 'border-red-300' : ''}
+                                                aria-invalid={!!errors.issue_date}
+                                                aria-describedby={errors.issue_date ? 'issue_date-error' : undefined}
                                             />
-                                            {errors.issue_date && <p className="text-sm text-red-600">{errors.issue_date}</p>}
+                                            {errors.issue_date && (
+                                                <p id="issue_date-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.issue_date}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <CalendarIcon className="h-4 w-4 text-neutral-500" />
+                                                <CalendarIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
                                                 <Label htmlFor="due_date">Due Date</Label>
                                             </div>
                                             <Input
@@ -241,8 +290,14 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 value={data.due_date}
                                                 onChange={(e) => onDataChange('due_date', e.target.value)}
                                                 className={errors.due_date ? 'border-red-300' : ''}
+                                                aria-invalid={!!errors.due_date}
+                                                aria-describedby={errors.due_date ? 'due_date-error' : undefined}
                                             />
-                                            {errors.due_date && <p className="text-sm text-red-600">{errors.due_date}</p>}
+                                            {errors.due_date && (
+                                                <p id="due_date-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.due_date}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -260,28 +315,47 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                 placeholder="Additional notes..."
                                                 rows={3}
                                                 className={errors.notes ? 'border-red-300' : ''}
+                                                aria-invalid={!!errors.notes}
+                                                aria-describedby={errors.notes ? 'notes-error' : undefined}
                                             />
-                                            {errors.notes && <p className="text-sm text-red-600">{errors.notes}</p>}
+                                            {errors.notes && (
+                                                <p id="notes-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.notes}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Attachment</Label>
+                                            <Label htmlFor="file">Attachment</Label>
                                             <FileUpload
                                                 onChange={(file) => onDataChange('file', file)}
                                                 accept="application/pdf,image/*,.doc,.docx"
                                                 maxSize={10}
+                                                aria-invalid={!!errors.file}
+                                                aria-describedby={errors.file ? 'file-error' : undefined}
                                             />
+                                            {errors.file && (
+                                                <p id="file-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.file}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </CardContent>
 
                             <CardFooter className="border-sidebar-border/70 dark:border-sidebar-border flex flex-col justify-end space-y-2 border-t pt-6 sm:flex-row sm:space-y-0 sm:space-x-2">
-                                <Button type="button" variant="outline" onClick={() => window.history.back()} className="w-full sm:w-auto">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => window.history.back()}
+                                    className="w-full sm:w-auto"
+                                    aria-label="Cancel and go back"
+                                >
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={processing} className="w-full sm:w-auto">
-                                    {processing ? (isEditing ? 'Updating...' : 'Creating...') : isEditing ? 'Update Invoice' : 'Create Invoice'}
+                                <Button type="submit" disabled={processing} className="w-full sm:w-auto" aria-label={submitButtonText}>
+                                    {submitButtonText}
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -332,6 +406,7 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
                                                     fill="none"
                                                     viewBox="0 0 24 24"
                                                     stroke="currentColor"
+                                                    aria-hidden="true"
                                                 >
                                                     <path
                                                         strokeLinecap="round"

@@ -90,33 +90,40 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
     };
 
     const isCustomSort = sort.field !== 'created_at' || sort.direction !== 'desc';
+    const hasActiveFilters = Object.values(filters).some(Boolean);
+    const showSearchAndFilters = invoices.total > 0 || search || hasActiveFilters || isCustomSort;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Invoices" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
-                    <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Invoices</h1>
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4" role="main">
+                {/* Header Section */}
+                <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Invoices</h1>
+                        <p className="text-muted-foreground mt-1 text-sm">Manage and track your invoices</p>
+                    </div>
                     <Link
                         href={route('invoices.create')}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium sm:w-auto"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors sm:w-auto"
+                        aria-label="Create new invoice"
                     >
-                        <PlusIcon className="mr-2 h-4 w-4" />
+                        <PlusIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                         New Invoice
                     </Link>
-                </div>
+                </header>
 
-                {/* Search and filters section - Always show if we have invoices or if we're searching */}
-                {(invoices.total > 0 || search || Object.values(filters).some(Boolean) || isCustomSort) && (
-                    <div className="flex flex-col gap-4">
+                {/* Search and Filters Section */}
+                {showSearchAndFilters && (
+                    <section aria-label="Search and filters" className="flex flex-col gap-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="w-full">
-                                <SearchBar initialValue={search} placeholder="Search invoices..." />
+                                <SearchBar initialValue={search} placeholder="Search invoices..." aria-label="Search invoices" />
                             </div>
                             {isCustomSort && (
-                                <Button variant="outline" size="sm" onClick={handleResetSort} className="w-full sm:w-auto">
-                                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                                <Button variant="outline" size="sm" onClick={handleResetSort} className="w-full sm:w-auto" aria-label="Reset sorting">
+                                    <ArrowUpDown className="mr-2 h-4 w-4" aria-hidden="true" />
                                     Reset Sort
                                 </Button>
                             )}
@@ -124,12 +131,12 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                         <div className="w-full">
                             <FilterBar filters={filters} />
                         </div>
-                    </div>
+                    </section>
                 )}
 
-                {/* Search results info */}
-                {(search || Object.values(filters).some(Boolean) || isCustomSort) && (
-                    <div className="text-muted-foreground text-sm">
+                {/* Search Results Info */}
+                {(search || hasActiveFilters || isCustomSort) && (
+                    <div className="text-muted-foreground text-sm" role="status" aria-live="polite">
                         {invoices.total === 0 ? (
                             <p>No results found</p>
                         ) : (
@@ -141,22 +148,25 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                     </div>
                 )}
 
+                {/* Main Content */}
                 {invoices.total === 0 ? (
-                    <EmptyState isSearchResult={!!search} searchTerm={search} hasFilters={Object.values(filters).some(Boolean)} />
+                    <EmptyState isSearchResult={!!search} searchTerm={search} hasFilters={hasActiveFilters} />
                 ) : (
-                    <>
+                    <section aria-label="Invoice list">
                         {/* Desktop view - Table */}
-                        <InvoiceTable
-                            invoices={invoices.data}
-                            selectedInvoices={selectedInvoices}
-                            onSelectInvoice={handleSelectInvoice}
-                            onSelectAll={handleSelectAll}
-                            sort={sort}
-                            onSort={handleSort}
-                        />
+                        <div className="hidden md:block">
+                            <InvoiceTable
+                                invoices={invoices.data}
+                                selectedInvoices={selectedInvoices}
+                                onSelectInvoice={handleSelectInvoice}
+                                onSelectAll={handleSelectAll}
+                                sort={sort}
+                                onSort={handleSort}
+                            />
+                        </div>
 
                         {/* Mobile view - Cards */}
-                        <div className="space-y-4 md:hidden">
+                        <div className="space-y-4 md:hidden" role="list">
                             {invoices.data.map((invoice) => (
                                 <InvoiceCard
                                     key={invoice.id}
@@ -180,8 +190,8 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                         </div>
 
                         {/* Bulk Actions Bar */}
-                        <BulkActionsBar selectedInvoices={selectedInvoices} onClearSelection={clearSelection} />
-                    </>
+                        {selectedInvoices.length > 0 && <BulkActionsBar selectedInvoices={selectedInvoices} onClearSelection={clearSelection} />}
+                    </section>
                 )}
             </div>
         </AppLayout>

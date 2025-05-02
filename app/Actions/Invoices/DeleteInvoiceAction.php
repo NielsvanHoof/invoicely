@@ -3,6 +3,7 @@
 namespace App\Actions\Invoices;
 
 use App\Actions\Files\DeleteFileAction;
+use App\Enums\InvoiceStatus;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Models\Invoice;
@@ -18,6 +19,10 @@ class DeleteInvoiceAction
     {
         if ($invoice->file_path) {
             $this->deleteFileAction->execute($invoice->file_path);
+        }
+
+        if ($invoice->status === InvoiceStatus::PAID) {
+            return false;
         }
 
         $deleted = $invoice->delete();
