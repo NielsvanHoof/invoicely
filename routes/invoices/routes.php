@@ -23,6 +23,9 @@ Route::group([
     // POST /invoices - Store a new invoice
     Route::post('/', InvoiceStoreController::class)->name('store');
 
+    // GET /invoices/{invoice} - Show a specific invoice
+    Route::get('/{invoice}', InvoiceShowController::class)->name('show');
+
     // GET /invoices/{invoice}/edit - Show invoice edit form
     Route::get('/{invoice}/edit', InvoiceEditController::class)->name('edit');
 
