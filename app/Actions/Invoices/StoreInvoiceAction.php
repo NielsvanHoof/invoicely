@@ -4,6 +4,7 @@ namespace App\Actions\Invoices;
 
 use App\Actions\Files\StoreFileAction;
 use App\Actions\Reminders\ScheduleRemindersAction;
+use App\Data\Invoices\StoreInvoiceData;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Mail\Invoices\InvoiceReceivedMail;
@@ -20,7 +21,7 @@ class StoreInvoiceAction
         protected ScheduleRemindersAction $scheduleRemindersAction,
     ) {}
 
-    public function execute(array $data, ?UploadedFile $file, int $userId, ?int $teamId): Invoice
+    public function execute(StoreInvoiceData $data, ?UploadedFile $file, int $userId, ?int $teamId): Invoice
     {
         $filePath = null;
 
@@ -29,7 +30,7 @@ class StoreInvoiceAction
         }
 
         $invoice = Invoice::create([
-            ...$data,
+            ...$data->toArray(),
             'user_id' => $userId,
             'team_id' => $teamId,
             'file_path' => $filePath,
@@ -39,11 +40,12 @@ class StoreInvoiceAction
         $this->scheduleRemindersAction->execute($invoice);
 
         // Send email notification if client email is provided and in local environment
-        if (isset($data['client_email']) && $data['client_email'] && App::isLocal()) {
-            Mail::to($data['client_email'])->send(new InvoiceReceivedMail($invoice));
+        if ($data->client_email && App::isLocal()) {
+            Mail::to($data->client_email)->send(new InvoiceReceivedMail($invoice));
         }
 
         $user = User::find($userId);
+
         InvalidateDashBoardCacheEvent::dispatch($user);
         InvalidateAnalyticsCacheEvent::dispatch($user);
 

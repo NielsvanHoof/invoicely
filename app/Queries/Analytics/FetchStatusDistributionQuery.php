@@ -13,7 +13,7 @@ class FetchStatusDistributionQuery extends BaseQuery
     /**
      * Get invoice status distribution.
      *
-     * @return array<int, array<string, int>>
+     * @return non-empty-list<array{name: non-falsy-string, value: int}>
      */
     public function execute(User $user): array
     {

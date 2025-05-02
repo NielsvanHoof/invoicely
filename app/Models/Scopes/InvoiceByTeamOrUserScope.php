@@ -2,6 +2,7 @@
 
 namespace App\Models\Scopes;
 
+use App\Models\Invoice;
 use Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,8 +13,8 @@ class InvoiceByTeamOrUserScope implements Scope
     /**
      * Apply the scope to a given Eloquent query builder.
      *
-     * @param  Builder<Model>  $builder
-     * @param  Model<Model>  $model
+     * @param  Builder<Invoice>  $builder
+     * @param  Invoice  $model
      */
     public function apply(Builder $builder, Model $model): void
     {

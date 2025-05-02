@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teams;
 
 use App\Actions\Teams\RemoveUserFromTeamAction;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 
@@ -11,6 +12,7 @@ class TeamLeaveController extends Controller
 {
     public function __invoke(RemoveUserFromTeamAction $removeUserFromTeamAction): RedirectResponse
     {
+        /** @var User $user */
         $user = Auth::user()->loadExists('team');
 
         if (! $user->team) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teams;
 
 use App\Http\Controllers\Controller;
 use App\Models\Team;
+use App\Models\User;
 use Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +15,7 @@ class TeamIndexController extends Controller
     {
         $this->authorize('viewAny', Team::class);
 
+        /** @var User $user */
         $user = Auth::user()->load('team');
         $teamMembers = [];
         $isTeamOwner = false;

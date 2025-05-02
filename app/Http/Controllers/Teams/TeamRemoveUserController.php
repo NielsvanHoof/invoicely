@@ -6,14 +6,15 @@ use App\Actions\Teams\RemoveUserFromTeamAction;
 use App\Data\Team\TeamMemberRemovalData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\RemoveTeamMemberRequest;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
-use User;
 
 class TeamRemoveUserController extends Controller
 {
     public function __invoke(RemoveTeamMemberRequest $request, RemoveUserFromTeamAction $removeUserFromTeamAction): RedirectResponse
     {
+        /** @var User $user */
         $user = Auth::user()->load('team');
 
         if (! $user->team) {

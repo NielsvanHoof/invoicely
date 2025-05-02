@@ -7,6 +7,7 @@ use App\Data\Team\TeamData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\CreateTeamRequest;
 use App\Models\Team;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 
@@ -16,6 +17,7 @@ class TeamStoreController extends Controller
     {
         $this->authorize('create', Team::class);
 
+        /** @var User $user */
         $user = Auth::user()->load('team');
         $teamData = TeamData::from($request);
         $createdTeam = $action->execute($user, $teamData);

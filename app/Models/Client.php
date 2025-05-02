@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,12 +9,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Client extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -29,7 +28,7 @@ class Client extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -49,7 +48,7 @@ class Client extends Authenticatable
     /**
      * Get the invoices for the client.
      *
-     * @return HasMany<Invoice, Client>
+     * @return HasMany<Invoice, covariant Client>
      */
     public function invoices(): HasMany
     {
