@@ -9,8 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
 {
+    /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'owner_id',
@@ -19,7 +25,7 @@ class Team extends Model
     /**
      * Get the users for the team.
      *
-     * @return HasMany<User, Team>
+     * @return HasMany<User, covariant Team>
      */
     public function users(): HasMany
     {
@@ -29,7 +35,7 @@ class Team extends Model
     /**
      * Get the invoices for the team.
      *
-     * @return HasMany<Invoice, Team>
+     * @return HasMany<Invoice, covariant Team>
      */
     public function invoices(): HasMany
     {
@@ -39,7 +45,7 @@ class Team extends Model
     /**
      * Get the owner of the team.
      *
-     * @return BelongsTo<User, Team>
+     * @return BelongsTo<User, covariant Team>
      */
     public function owner(): BelongsTo
     {

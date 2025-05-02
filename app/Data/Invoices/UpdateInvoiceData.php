@@ -14,38 +14,42 @@ use Spatie\LaravelData\Attributes\Validation\Mimes;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Unique;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Optional;
+use Spatie\LaravelData\Support\Validation\References\RouteParameterReference;
 
-class StoreInvoiceData extends Data
+class UpdateInvoiceData extends Data
 {
     public function __construct(
-        #[Unique(table: 'invoices', column: 'invoice_number')]
-        public string $invoice_number,
+        #[Unique(table: 'invoices', column: 'invoice_number', ignore: new RouteParameterReference('invoice'))]
+        public string|Optional|null $invoice_number = null,
 
         #[Max(255)]
-        public string $client_name,
+        public string|Optional|null $client_name = null,
 
         #[Email, Max(255)]
-        public string $client_email,
+        public string|Optional|null $client_email = null,
 
         #[Max(255)]
-        public ?string $client_address,
+        public string|Optional|null $client_address = null,
 
         #[Min(0)]
-        public float $amount,
+        public float|Optional|null $amount = null,
 
         #[Date]
-        public string $issue_date,
+        public string|Optional|null $issue_date = null,
 
         #[Date, AfterOrEqual(attribute: 'issue_date')]
-        public string $due_date,
+        public string|Optional|null $due_date = null,
 
         #[Enum(InvoiceStatus::class)]
-        public InvoiceStatus $status,
+        public InvoiceStatus|Optional|null $status = null,
 
         #[Max(255)]
-        public ?string $notes = null,
+        public string|Optional|null $notes = null,
 
         #[File, Mimes(mimes: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']), Max(10240)]
-        public ?UploadedFile $file = null,
+        public UploadedFile|Optional|null $file = null,
+
+        public bool|Optional|null $remove_file = null,
     ) {}
 }

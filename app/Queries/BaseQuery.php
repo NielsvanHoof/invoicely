@@ -25,6 +25,11 @@ abstract class BaseQuery
 
     /**
      * Get cached data or compute it if not cached.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $compute
+     * @return T
      */
     protected function getCachedData(User $user, string $type, Closure $compute): mixed
     {

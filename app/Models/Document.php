@@ -10,6 +10,11 @@ class Document extends Model
 {
     use SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'size',
@@ -21,9 +26,18 @@ class Document extends Model
     ];
 
     /**
-     * The invoice that the document belongs to.
+     * The attributes that should be cast.
      *
-     * @return BelongsTo<Invoice, Document>
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'size' => 'integer',
+    ];
+
+    /**
+     * Get the invoice that owns the document.
+     *
+     * @return BelongsTo<Invoice, covariant Document>
      */
     public function invoice(): BelongsTo
     {

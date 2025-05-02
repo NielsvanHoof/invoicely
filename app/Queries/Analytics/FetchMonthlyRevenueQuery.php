@@ -15,7 +15,7 @@ class FetchMonthlyRevenueQuery extends BaseQuery
     /**
      * Get monthly revenue data for the last 6 months.
      *
-     * @return array<int, FetchMonthlyRevenueData>
+     * @return non-empty-list<array{month: non-falsy-string, revenue: int|float}>
      */
     public function execute(User $user): array
     {

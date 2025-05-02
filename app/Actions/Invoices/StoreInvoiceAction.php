@@ -40,11 +40,12 @@ class StoreInvoiceAction
         $this->scheduleRemindersAction->execute($invoice);
 
         // Send email notification if client email is provided and in local environment
-        if (isset($data->client_email) && $data->client_email && App::isLocal()) {
+        if ($data->client_email && App::isLocal()) {
             Mail::to($data->client_email)->send(new InvoiceReceivedMail($invoice));
         }
 
         $user = User::find($userId);
+
         InvalidateDashBoardCacheEvent::dispatch($user);
         InvalidateAnalyticsCacheEvent::dispatch($user);
 

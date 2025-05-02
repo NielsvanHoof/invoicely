@@ -8,7 +8,6 @@ use App\Models\Scopes\InvoiceByTeamOrUserScope;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,12 +18,12 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 #[ScopedBy([InvoiceByTeamOrUserScope::class])]
 class Invoice extends Model implements AuditableContract
 {
-    use Auditable, HasFactory, Searchable;
+    use Auditable, Searchable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -71,34 +70,47 @@ class Invoice extends Model implements AuditableContract
         return $array;
     }
 
-    #[Scope]
-    public function ByTeam(Builder $query, ?int $teamId): void
+    /**
+     * Scope a query to filter by team.
+     *
+     * @param  Builder<Invoice>  $query
+     */
+    private function ByTeam(Builder $query, ?int $teamId): void
     {
         if ($teamId) {
             $query->where('team_id', $teamId);
         }
     }
 
-    #[Scope]
-    public function ByUser(Builder $query, int $userId): void
+    /**
+     * Scope a query to filter by user.
+     *
+     * @param  Builder<Invoice>  $query
+     */
+    private function ByUser(Builder $query, int $userId): void
     {
         $query->where('user_id', $userId);
     }
 
+    /**
+     * Scope a query to filter by user and team.
+     *
+     * @param  Builder<Invoice>  $query
+     */
     #[Scope]
     public function ForUser(Builder $query, User $user): void
     {
         if ($user->team_id) {
-            $query->ByTeam($user->team_id);
+            $this->ByTeam($query, $user->team_id);
         }
 
-        $query->ByUser($user->id);
+        $this->ByUser($query, $user->id);
     }
 
     /**
      * Get the user that owns the invoice.
      *
-     * @return BelongsTo<User, Invoice>
+     * @return BelongsTo<User, covariant Invoice>
      */
     public function user(): BelongsTo
     {
@@ -108,7 +120,7 @@ class Invoice extends Model implements AuditableContract
     /**
      * Get the team that owns the invoice.
      *
-     * @return BelongsTo<Team, Invoice>
+     * @return BelongsTo<Team, covariant Invoice>
      */
     public function team(): BelongsTo
     {
@@ -118,7 +130,7 @@ class Invoice extends Model implements AuditableContract
     /**
      * Get the reminders for the invoice.
      *
-     * @return HasMany<Reminder, Invoice>
+     * @return HasMany<Reminder, covariant Invoice>
      */
     public function reminders(): HasMany
     {
@@ -128,7 +140,7 @@ class Invoice extends Model implements AuditableContract
     /**
      * Get the client that owns the invoice.
      *
-     * @return BelongsTo<Client, Invoice>
+     * @return BelongsTo<Client, covariant Invoice>
      */
     public function client(): BelongsTo
     {
@@ -138,7 +150,7 @@ class Invoice extends Model implements AuditableContract
     /**
      * Get the documents for the invoice.
      *
-     * @return HasMany<Document, Invoice>
+     * @return HasMany<Document, covariant Invoice>
      */
     public function documents(): HasMany
     {

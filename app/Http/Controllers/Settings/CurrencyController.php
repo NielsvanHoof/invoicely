@@ -6,6 +6,7 @@ use App\Enums\CurrencyType;
 use App\Events\InvalidateAnalyticsCacheEvent;
 use App\Events\InvalidateDashBoardCacheEvent;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class CurrencyController extends Controller
             'currency' => ['required', 'string', 'max:3'],
         ]);
 
+        /** @var User $user */
         $user = Auth::user();
         $user->currency = $validated['currency'];
         $user->save();
