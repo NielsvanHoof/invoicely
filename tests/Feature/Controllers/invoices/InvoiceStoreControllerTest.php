@@ -23,7 +23,6 @@ test('A user can create an invoice', function () {
         $mock->shouldReceive('create')->andReturn(true);
     });
 
-
     $team = Team::factory()->create();
     $this->user->team()->associate($team);
     $this->user->save();
@@ -58,7 +57,6 @@ test('A user can create an invoice with a file', function () {
     $team = Team::factory()->create();
     $this->user->team()->associate($team);
     $this->user->save();
-
 
     $data = [
         'invoice_number' => 'INV-123',
