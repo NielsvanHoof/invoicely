@@ -11,6 +11,5 @@ class RemoveTeamMemberData extends Data
     public function __construct(
         #[Exists('users', 'id'), NotIn(FromAuthenticatedUserProperty('id'))]
         public int $user_id,
-    ) {
-    }
+    ) {}
 }

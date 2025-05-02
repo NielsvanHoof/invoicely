@@ -7,8 +7,6 @@ use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\NotIn;
-use Spatie\LaravelData\Attributes\Validation\Required;
-use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
 
 class TeamInvitationData extends Data
@@ -19,6 +17,5 @@ class TeamInvitationData extends Data
 
         #[Max(255)]
         public string $name,
-    ) {
-    }
+    ) {}
 }
