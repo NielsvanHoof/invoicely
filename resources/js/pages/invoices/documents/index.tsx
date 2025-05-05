@@ -4,24 +4,28 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SearchBar } from '@/components/ui/search-bar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatFileSize } from '@/lib/utils';
-import { type BreadcrumbItem, type Document, type Invoice } from '@/types';
+import { type BreadcrumbItem, type Document, type Invoice, type PaginatedData } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { FileIcon, FilterIcon, PlusIcon, SearchIcon, TrashIcon, UploadIcon } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import { FileIcon, FilterIcon, PlusIcon, TrashIcon, UploadIcon } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface DocumentsIndexProps {
     invoice: Invoice;
+    documents: PaginatedData<Document>;
+    search?: string;
+    filters: {
+        category?: string;
+    };
 }
 
-export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
+export default function DocumentsIndex({ invoice, documents, search = '', filters = {} }: DocumentsIndexProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -48,17 +52,6 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
         category: 'other',
     });
 
-    // Filter documents based on search and category
-    const filteredDocuments = useMemo(() => {
-        return (
-            invoice.documents?.filter((doc) => {
-                const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-                return matchesSearch && matchesCategory;
-            }) || []
-        );
-    }, [invoice.documents, searchQuery, selectedCategory]);
-
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         form.post(route('documents.store', invoice.id), {
@@ -83,6 +76,21 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                 setSelectedDocument(null);
             },
         });
+    }
+
+    function handleCategoryChange(value: string) {
+        router.get(
+            route('documents.index', invoice.id),
+            {
+                search,
+                category: value === 'all' ? '' : value,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['documents', 'filters'],
+            },
+        );
     }
 
     return (
@@ -148,17 +156,18 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                 {/* Search and Filter Section */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <div className="relative flex-1">
-                        <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                        <Input
+                        <SearchBar
+                            initialValue={search}
                             placeholder="Search documents..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9"
+                            aria-label="Search documents"
+                            routeName="documents.index"
+                            routeParams={{ invoice: invoice.id }}
+                            only={['documents', 'search']}
                         />
                     </div>
                     <div className="flex items-center gap-2">
                         <FilterIcon className="text-muted-foreground h-4 w-4" />
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <Select value={filters.category || 'all'} onValueChange={handleCategoryChange}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Filter by category" />
                             </SelectTrigger>
@@ -174,7 +183,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                 </div>
 
                 <div className="grid gap-4">
-                    {filteredDocuments.map((document) => (
+                    {documents.data.map((document) => (
                         <Card key={document.id} className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border">
                             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-center gap-4">
@@ -215,7 +224,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                         </Card>
                     ))}
 
-                    {filteredDocuments.length === 0 && (
+                    {documents.data.length === 0 && (
                         <Card className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border">
                             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
@@ -223,7 +232,7 @@ export default function DocumentsIndex({ invoice }: DocumentsIndexProps) {
                                 </div>
                                 <h3 className="mt-4 text-lg font-medium">No documents found</h3>
                                 <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-                                    {searchQuery || selectedCategory !== 'all'
+                                    {search || filters.category
                                         ? 'Try adjusting your search or filter criteria'
                                         : 'Upload documents related to this invoice, such as contracts, receipts, or additional supporting materials.'}
                                 </p>

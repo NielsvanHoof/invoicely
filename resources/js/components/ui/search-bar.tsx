@@ -11,19 +11,34 @@ interface SearchBarProps {
     onSearch?: (value: string) => void;
     placeholder?: string;
     routeName?: string;
+    routeParams?: Record<string, string | number>;
     className?: string;
+    preserveFilters?: boolean;
+    preserveScroll?: boolean;
+    only?: string[];
 }
 
-export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search...', routeName = 'invoices.index', className = '' }: SearchBarProps) {
-    const [searchTerm, setSearchTerm] = useState(initialValue);
+export function SearchBar({
+    initialValue = '',
+    onSearch,
+    placeholder = 'Search...',
+    routeName,
+    routeParams,
+    className = '',
+    preserveFilters = true,
+    preserveScroll = true,
+    only = [],
+}: SearchBarProps) {
+    // Ensure we always have a string value, never undefined or null
+    const [searchTerm, setSearchTerm] = useState<string>(initialValue ?? '');
     const [isSearching, setIsSearching] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const { filters, sort } = usePage().props as { filters?: Record<string, string>; sort?: Record<string, string> };
 
-    // Update searchTerm when initialValue changes
+    // Update searchTerm when initialValue changes, ensuring it's always a string
     useEffect(() => {
-        setSearchTerm(initialValue);
+        setSearchTerm(initialValue ?? '');
     }, [initialValue]);
 
     const debouncedSearch = debounce((value: string) => {
@@ -35,20 +50,25 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
             return;
         }
 
+        if (!routeName) {
+            console.warn('SearchBar: routeName is required when onSearch is not provided');
+            setIsSearching(false);
+            return;
+        }
+
         // Get only the active filters using the utility function
-        const activeFilters = getActiveFilters(filters, sort);
+        const activeFilters = preserveFilters ? getActiveFilters(filters, sort) : {};
 
         router.get(
-            route(routeName),
+            route(routeName, routeParams),
             {
                 search: value,
-                // Preserve only active filters
                 ...activeFilters,
             },
             {
                 preserveState: true,
-                preserveScroll: true,
-                only: ['invoices', 'search'],
+                preserveScroll,
+                only,
                 onFinish: () => setIsSearching(false),
             },
         );
@@ -70,20 +90,25 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
             return;
         }
 
+        if (!routeName) {
+            console.warn('SearchBar: routeName is required when onSearch is not provided');
+            setIsSearching(false);
+            return;
+        }
+
         // Get only the active filters using the utility function
-        const activeFilters = getActiveFilters(filters, sort);
+        const activeFilters = preserveFilters ? getActiveFilters(filters, sort) : {};
 
         router.get(
-            route(routeName),
+            route(routeName, routeParams),
             {
                 search: '',
-                // Preserve only active filters
                 ...activeFilters,
             },
             {
                 preserveState: true,
-                preserveScroll: true,
-                only: ['invoices', 'search'],
+                preserveScroll,
+                only,
                 onFinish: () => setIsSearching(false),
             },
         );
@@ -143,4 +168,4 @@ export function SearchBar({ initialValue = '', onSearch, placeholder = 'Search..
             )}
         </div>
     );
-}
+} 

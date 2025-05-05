@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Queries\Teams;
+namespace App\Queries\Invoices;
 
 use App\Data\Invoices\FetchInvoicesData;
 use App\Models\Invoice;

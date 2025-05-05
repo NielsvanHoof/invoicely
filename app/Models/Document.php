@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Document extends Model
 {
-    use SoftDeletes;
+    use Searchable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +25,16 @@ class Document extends Model
         'category',
         'invoice_id',
     ];
+
+    public function toSearchableArray(): array
+    {
+        $array = $this->toArray();
+
+        $array['name'] = $this->name;
+        $array['category'] = $this->category;
+
+        return $array;
+    }
 
     /**
      * The attributes that should be cast.

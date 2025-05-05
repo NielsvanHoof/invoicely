@@ -16,7 +16,7 @@ class ReminderIndexController extends Controller
 
         $invoice->load('reminders');
 
-        return Inertia::render('reminders/index', [
+        return Inertia::render('invoices/reminders/index', [
             'invoice' => $invoice,
             'types' => ReminderType::getReminderTypes(),
         ]);

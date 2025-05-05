@@ -1,6 +1,7 @@
-import { BulkActionsBar, EmptyState, FilterBar, InvoiceCard, InvoiceTable, SearchBar } from '@/components/invoices';
+import { BulkActionsBar, EmptyState, FilterBar, InvoiceCard, InvoiceTable } from '@/components/invoices';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/ui/pagination';
+import { SearchBar } from '@/components/ui/search-bar';
 import AppLayout from '@/layouts/app-layout';
 import { getActiveFilters } from '@/lib/utils';
 import { type BreadcrumbItem, type Invoice, type PaginatedData } from '@/types';
@@ -119,7 +120,13 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                     <section aria-label="Search and filters" className="flex flex-col gap-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="w-full">
-                                <SearchBar initialValue={search} placeholder="Search invoices..." aria-label="Search invoices" />
+                                <SearchBar 
+                                    initialValue={search} 
+                                    placeholder="Search invoices..." 
+                                    aria-label="Search invoices"
+                                    routeName="invoices.index"
+                                    only={['invoices', 'search']}
+                                />
                             </div>
                             {isCustomSort && (
                                 <Button variant="outline" size="sm" onClick={handleResetSort} className="w-full sm:w-auto" aria-label="Reset sorting">
