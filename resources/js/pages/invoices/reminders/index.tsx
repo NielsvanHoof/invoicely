@@ -112,11 +112,11 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
     function getReminderStatusBadge(reminder: Reminder) {
         if (reminder.sent_at) {
             return (
-                <span 
+                <span
                     className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300"
                     role="status"
                     aria-label="Reminder sent"
-                >   
+                >
                     Sent
                 </span>
             );
@@ -127,7 +127,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
 
         if (scheduledDate < now) {
             return (
-                <span 
+                <span
                     className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                     role="status"
                     aria-label="Reminder due"
@@ -138,7 +138,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
         }
 
         return (
-            <span 
+            <span
                 className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                 role="status"
                 aria-label="Reminder scheduled"
@@ -156,13 +156,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                 {/* Header Section */}
                 <header className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                     <div className="flex items-center gap-4">
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            asChild 
-                            className="h-8 w-8"
-                            aria-label="Go back to invoice"
-                        >
+                        <Button variant="ghost" size="icon" asChild className="h-8 w-8" aria-label="Go back to invoice">
                             <Link href={route('invoices.show', invoice.id)}>
                                 <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
                             </Link>
@@ -173,12 +167,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        <Button 
-                            variant="outline" 
-                            onClick={handleScheduleDefaults} 
-                            className="flex-shrink-0"
-                            aria-label="Schedule default reminders"
-                        >
+                        <Button variant="outline" onClick={handleScheduleDefaults} className="flex-shrink-0" aria-label="Schedule default reminders">
                             <RefreshCwIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                             <span>Schedule Defaults</span>
                         </Button>
@@ -199,8 +188,8 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                         <Label htmlFor="type" className="text-sm font-medium">
                                             Reminder Type
                                         </Label>
-                                        <Select 
-                                            value={form.data.type} 
+                                        <Select
+                                            value={form.data.type}
                                             onValueChange={(value) => form.setData('type', value)}
                                             aria-label="Select reminder type"
                                         >
@@ -227,8 +216,8 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                             Scheduled Date
                                         </Label>
                                         <div className="relative">
-                                            <CalendarIcon 
-                                                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" 
+                                            <CalendarIcon
+                                                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                                                 aria-hidden="true"
                                             />
                                             <Input
@@ -267,8 +256,8 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                     </div>
 
                                     <DialogFooter className="mt-6">
-                                        <Button 
-                                            type="submit" 
+                                        <Button
+                                            type="submit"
                                             disabled={form.processing}
                                             aria-label={form.processing ? 'Scheduling reminder...' : 'Schedule reminder'}
                                         >
@@ -285,7 +274,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                 {invoice.reminders?.length === 0 ? (
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border">
                         <CardContent className="pt-6">
-                            <div 
+                            <div
                                 className="flex flex-col items-center justify-center py-12 text-center"
                                 role="status"
                                 aria-label="No reminders available"
@@ -297,10 +286,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                 <p className="text-muted-foreground mb-6 max-w-md">
                                     No reminders have been scheduled for this invoice. Create your first reminder to help ensure timely payment.
                                 </p>
-                                <Button 
-                                    onClick={() => setIsAddDialogOpen(true)}
-                                    aria-label="Add your first reminder"
-                                >
+                                <Button onClick={() => setIsAddDialogOpen(true)} aria-label="Add your first reminder">
                                     <PlusIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                                     Add Your First Reminder
                                 </Button>
@@ -310,8 +296,8 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                 ) : (
                     <div className="space-y-4" role="list" aria-label="Reminders list">
                         {invoice.reminders?.map((reminder) => (
-                            <Card 
-                                key={reminder.id} 
+                            <Card
+                                key={reminder.id}
                                 className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border"
                                 role="listitem"
                             >
@@ -332,10 +318,10 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                         <div className="mt-2 flex gap-2 sm:mt-0">
                                             {!reminder.sent_at && (
                                                 <>
-                                                    <Button 
-                                                        variant="outline" 
-                                                        size="sm" 
-                                                        onClick={() => handleEditClick(reminder)} 
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEditClick(reminder)}
                                                         className="h-8"
                                                         aria-label={`Edit reminder scheduled for ${formatDate(reminder.scheduled_date)}`}
                                                     >
@@ -358,7 +344,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <div 
+                                    <div
                                         className="border-muted bg-muted/20 rounded-r-sm border-l-4 py-2 pl-4 text-sm italic"
                                         role="article"
                                         aria-label="Reminder message"
@@ -367,10 +353,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                     </div>
                                     {reminder.sent_at && (
                                         <div className="text-muted-foreground mt-4 flex items-center text-xs">
-                                            <span 
-                                                className="mr-2 inline-block h-2 w-2 rounded-full bg-green-500"
-                                                aria-hidden="true"
-                                            ></span>
+                                            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true"></span>
                                             Sent on {formatDate(reminder.sent_at)}
                                         </div>
                                     )}
@@ -394,10 +377,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                 Scheduled Date
                             </Label>
                             <div className="relative">
-                                <CalendarIcon 
-                                    className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" 
-                                    aria-hidden="true"
-                                />
+                                <CalendarIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" aria-hidden="true" />
                                 <Input
                                     id="edit_scheduled_date"
                                     type="date"
@@ -433,8 +413,8 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                         </div>
 
                         <DialogFooter className="mt-6">
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 disabled={editForm.processing}
                                 aria-label={editForm.processing ? 'Updating reminder...' : 'Update reminder'}
                             >
@@ -456,18 +436,10 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                         <DialogDescription>Are you sure you want to delete this reminder? This action cannot be undone.</DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4">
-                        <Button 
-                            variant="outline" 
-                            onClick={() => setIsDeleteDialogOpen(false)}
-                            aria-label="Cancel deletion"
-                        >
+                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} aria-label="Cancel deletion">
                             Cancel
                         </Button>
-                        <Button 
-                            variant="destructive" 
-                            onClick={confirmDelete}
-                            aria-label="Confirm deletion"
-                        >
+                        <Button variant="destructive" onClick={confirmDelete} aria-label="Confirm deletion">
                             Delete
                         </Button>
                     </DialogFooter>
@@ -484,17 +456,10 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4">
-                        <Button 
-                            variant="outline" 
-                            onClick={() => setIsScheduleDefaultsDialogOpen(false)}
-                            aria-label="Cancel scheduling defaults"
-                        >
+                        <Button variant="outline" onClick={() => setIsScheduleDefaultsDialogOpen(false)} aria-label="Cancel scheduling defaults">
                             Cancel
                         </Button>
-                        <Button 
-                            onClick={confirmScheduleDefaults}
-                            aria-label="Confirm scheduling defaults"
-                        >
+                        <Button onClick={confirmScheduleDefaults} aria-label="Confirm scheduling defaults">
                             Schedule Defaults
                         </Button>
                     </DialogFooter>

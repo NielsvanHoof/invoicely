@@ -120,9 +120,9 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                     <section aria-label="Search and filters" className="flex flex-col gap-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="w-full">
-                                <SearchBar 
-                                    initialValue={search} 
-                                    placeholder="Search invoices..." 
+                                <SearchBar
+                                    initialValue={search}
+                                    placeholder="Search invoices..."
                                     aria-label="Search invoices"
                                     routeName="invoices.index"
                                     only={['invoices', 'search']}
