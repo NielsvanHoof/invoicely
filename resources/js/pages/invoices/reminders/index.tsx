@@ -7,17 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/utils';
-import { type BreadcrumbItem, type Invoice, type Reminder, type ReminderType } from '@/types';
+import { type BreadcrumbItem, type Invoice, type Reminder } from '@/types';
+import { ReminderType, StoreReminderData, UpdateReminderData } from '@/types/generated';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { AlertTriangleIcon, ArrowLeftIcon, BellIcon, CalendarIcon, PencilIcon, PlusIcon, RefreshCwIcon, TrashIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface RemindersIndexProps {
     invoice: Invoice;
-    types: ReminderType[];
 }
 
-export default function RemindersIndex({ invoice, types }: RemindersIndexProps) {
+export default function RemindersIndex({ invoice }: RemindersIndexProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -43,13 +43,13 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
         },
     ];
 
-    const form = useForm({
-        type: '',
+    const form = useForm<StoreReminderData>({
+        type: ReminderType.UPCOMING,
         scheduled_date: new Date().toISOString().split('T')[0],
         message: '',
     });
 
-    const editForm = useForm({
+    const editForm = useForm<UpdateReminderData>({
         scheduled_date: '',
         message: '',
     });
@@ -190,16 +190,16 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                         </Label>
                                         <Select
                                             value={form.data.type}
-                                            onValueChange={(value) => form.setData('type', value)}
+                                            onValueChange={(value) => form.setData('type', value as ReminderType)}
                                             aria-label="Select reminder type"
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select a reminder type" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {types.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
+                                                {Object.values(ReminderType).map((type) => (
+                                                    <SelectItem key={type} value={type}>
+                                                        {type}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -306,7 +306,7 @@ export default function RemindersIndex({ invoice, types }: RemindersIndexProps) 
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <CardTitle className="text-lg">
-                                                    {types.find((t) => t.value === reminder.type)?.label || reminder.type}
+                                                    {reminder.type}
                                                 </CardTitle>
                                                 {getReminderStatusBadge(reminder)}
                                             </div>

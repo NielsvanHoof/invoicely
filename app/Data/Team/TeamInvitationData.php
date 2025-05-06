@@ -9,8 +9,10 @@ use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[MergeValidationRules]
+#[TypeScript]
 class TeamInvitationData extends Data
 {
     public function __construct(

@@ -11,6 +11,8 @@ class DocumentDownloadController extends Controller
 {
     public function __invoke(Document $document, GetTemporaryUrlAction $action): RedirectResponse
     {
+        $this->authorize('download', $document);
+
         $url = $action->execute($document->url);
 
         if (! $url) {

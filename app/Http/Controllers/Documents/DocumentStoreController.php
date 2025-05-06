@@ -14,6 +14,8 @@ class DocumentStoreController extends Controller
 {
     public function __invoke(StoreDocumentData $data, Invoice $invoice, StoreFileAction $storeFileAction): RedirectResponse
     {
+        $this->authorize('create', Document::class);
+
         $filePath = $storeFileAction->execute(
             $data->file,
             Auth::id(),

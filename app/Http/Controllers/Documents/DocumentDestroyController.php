@@ -11,6 +11,8 @@ class DocumentDestroyController extends Controller
 {
     public function __invoke(Document $document, DeleteFileAction $action): RedirectResponse
     {
+        $this->authorize('delete', $document);
+
         $action->execute($document->url);
 
         $document->delete();

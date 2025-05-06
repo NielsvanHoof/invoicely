@@ -12,7 +12,7 @@ class ReminderDestroyController extends Controller
 {
     public function __invoke(Invoice $invoice, Reminder $reminder): RedirectResponse
     {
-        $this->authorize('update', $invoice);
+        $this->authorize('delete', $reminder);
 
         // Don't allow deleting reminders that have already been sent
         if ($reminder->sent_at) {

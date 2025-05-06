@@ -13,7 +13,7 @@ class ReminderUpdateController extends Controller
 {
     public function __invoke(UpdateReminderData $data, Invoice $invoice, Reminder $reminder): RedirectResponse
     {
-        $this->authorize('update', $invoice);
+        $this->authorize('update', $reminder);
 
         // Don't allow updating reminders that have already been sent
         if ($reminder->sent_at) {

@@ -8,47 +8,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData } from '@/types';
+import { StoreInvoiceData } from '@/types/generated';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, CalendarIcon, CreditCardIcon, FileTextIcon, MailIcon, MapPinIcon, UserIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
-export interface InvoiceFormData {
-    invoice_number: string;
-    client_name: string;
-    client_email: string;
-    client_address: string;
-    amount: string;
-    issue_date: string;
-    due_date: string;
-    status: string;
-    notes: string;
-    file: File | null;
-}
-
-export interface InvoiceFormErrors {
-    invoice_number?: string;
-    client_name?: string;
-    client_email?: string;
-    client_address?: string;
-    amount?: string;
-    issue_date?: string;
-    due_date?: string;
-    status?: string;
-    notes?: string;
-    file?: string;
-}
-
-interface InvoiceFormProps {
-    data: InvoiceFormData;
-    errors: InvoiceFormErrors;
+interface InvoiceFormProps<T extends StoreInvoiceData> {
+    data: T;
+    errors: Partial<Record<keyof T, string>>;
     processing: boolean;
     isEditing?: boolean;
-    onDataChange: (key: keyof InvoiceFormData, value: string | File | null) => void;
+    onDataChange: (key: keyof T, value: string | File | null) => void;
     onSubmit: (e: React.FormEvent) => void;
 }
 
-export function InvoiceForm({ data, errors, processing, isEditing = false, onDataChange, onSubmit }: InvoiceFormProps) {
-    const [previewAmount, setPreviewAmount] = useState<string>(data.amount || '0.00');
+export function InvoiceForm<T extends StoreInvoiceData>({
+    data,
+    errors,
+    processing,
+    isEditing = false,
+    onDataChange,
+    onSubmit,
+}: InvoiceFormProps<T>) {
+    const [previewAmount, setPreviewAmount] = useState<string>(data.amount.toString() || '0.00');
     const { auth } = usePage<SharedData>().props;
     const userCurrency = auth?.user?.currency || 'USD';
 
@@ -56,7 +38,6 @@ export function InvoiceForm({ data, errors, processing, isEditing = false, onDat
         const value = e.target.value;
         onDataChange('amount', value);
 
-        // Update preview amount
         if (value && !isNaN(parseFloat(value))) {
             setPreviewAmount(parseFloat(value).toFixed(2));
         } else {

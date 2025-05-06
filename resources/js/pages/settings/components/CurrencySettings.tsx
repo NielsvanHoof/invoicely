@@ -5,14 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency } from '@/lib/utils';
-import { Currency } from '@/types';
+import { CurrencyType } from '@/types/generated';
 
 interface CurrencySettingsProps {
-    currencies: Currency[];
     userCurrency: string;
 }
 
-export function CurrencySettings({ currencies, userCurrency }: CurrencySettingsProps) {
+export function CurrencySettings({ userCurrency }: CurrencySettingsProps) {
     const form = useForm({
         currency: userCurrency,
     });
@@ -50,9 +49,9 @@ export function CurrencySettings({ currencies, userCurrency }: CurrencySettingsP
                                 <SelectValue placeholder="Select a currency" />
                             </SelectTrigger>
                             <SelectContent>
-                                {currencies.map((currency) => (
-                                    <SelectItem key={currency.value} value={currency.value}>
-                                        {currency.label}
+                                {Object.values(CurrencyType).map((currency) => (
+                                    <SelectItem key={currency} value={currency}>
+                                        {currency}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

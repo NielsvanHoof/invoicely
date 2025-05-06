@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { type Invoice } from '@/types';
+import { BulkInvoiceData } from '@/types/generated';
 import { router } from '@inertiajs/react';
 import { AlertCircle, BellIcon, CheckCircle, ChevronDown, ClockIcon, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -27,7 +28,7 @@ export function BulkActionsBar({ selectedInvoices, onClearSelection }: BulkActio
 
         const invoiceIds = selectedInvoices.map((invoice) => invoice.id);
 
-        router.post(
+        router.post<BulkInvoiceData>(
             route('invoices.bulk-action'),
             {
                 action,

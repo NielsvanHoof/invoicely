@@ -10,6 +10,7 @@ use App\Models\User;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,7 +22,6 @@ class CurrencyController extends Controller
     public function index(): Response
     {
         return Inertia::render('settings/currency', [
-            'currencies' => CurrencyType::options(),
             'userCurrency' => auth()->user()->currency,
         ]);
     }
@@ -32,7 +32,7 @@ class CurrencyController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'currency' => ['required', 'string', 'max:3'],
+            'currency' => ['required', 'string', 'max:3', Rule::enum(CurrencyType::class)],
         ]);
 
         /** @var User $user */

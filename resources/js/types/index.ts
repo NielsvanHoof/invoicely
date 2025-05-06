@@ -102,16 +102,6 @@ export interface Reminder {
     updated_at: string;
 }
 
-export interface ReminderType {
-    value: string;
-    label: string;
-}
-
-export interface Currency {
-    value: string;
-    label: string;
-}
-
 export interface Document {
     id: number;
     invoice_id: number;

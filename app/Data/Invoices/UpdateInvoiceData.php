@@ -9,6 +9,7 @@ use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Enum;
 use Spatie\LaravelData\Attributes\Validation\File;
+use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Mimes;
 use Spatie\LaravelData\Attributes\Validation\Min;
@@ -16,7 +17,9 @@ use Spatie\LaravelData\Attributes\Validation\Unique;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 use Spatie\LaravelData\Support\Validation\References\RouteParameterReference;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class UpdateInvoiceData extends Data
 {
     public function __construct(
@@ -41,7 +44,7 @@ class UpdateInvoiceData extends Data
         #[Date, AfterOrEqual(attribute: 'issue_date')]
         public string|Optional|null $due_date = null,
 
-        #[Enum(InvoiceStatus::class)]
+        #[Enum(InvoiceStatus::class), In(InvoiceStatus::class)]
         public InvoiceStatus|Optional|null $status = null,
 
         #[Max(255)]

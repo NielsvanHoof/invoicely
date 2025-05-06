@@ -8,6 +8,7 @@ use App\Events\InvalidateDashBoardCacheEvent;
 use App\Helpers\ReminderMessageFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Reminder;
 use Illuminate\Http\RedirectResponse;
 
 class ReminderStoreController extends Controller
@@ -18,7 +19,7 @@ class ReminderStoreController extends Controller
 
     public function __invoke(StoreReminderData $data, Invoice $invoice): RedirectResponse
     {
-        $this->authorize('update', $invoice);
+        $this->authorize('create', Reminder::class);
 
         // Get the default message if none provided
         if (empty($data->message)) {

@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SearchBar } from '@/components/ui/search-bar';
@@ -9,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatFileSize } from '@/lib/utils';
 import { type BreadcrumbItem, type Document, type Invoice, type PaginatedData } from '@/types';
-import { Head, router, useForm } from '@inertiajs/react';
-import { FileIcon, FilterIcon, PlusIcon, TrashIcon, UploadIcon } from 'lucide-react';
+import { DocumentType, StoreDocumentData } from '@/types/generated';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeftIcon, FileIcon, FilterIcon, PlusIcon, TrashIcon, UploadIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface DocumentsIndexProps {
@@ -46,10 +48,10 @@ export default function DocumentsIndex({ invoice, documents, search = '', filter
         },
     ];
 
-    const form = useForm({
+    const form = useForm<StoreDocumentData>({
         file: null as File | null,
         name: '',
-        category: 'other',
+        category: DocumentType.OTHER,
     });
 
     function onSubmit(e: React.FormEvent) {
@@ -99,9 +101,16 @@ export default function DocumentsIndex({ invoice, documents, search = '', filter
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4">
                 <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                    <div>
-                        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Documents</h1>
-                        <p className="text-muted-foreground mt-1">Manage documents for Invoice #{invoice.invoice_number}</p>
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" asChild className="h-8 w-8" aria-label="Go back to invoice">
+                            <Link href={route('invoices.show', invoice.id)}>
+                                <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Documents</h1>
+                            <p className="text-muted-foreground mt-1">Manage documents for Invoice #{invoice.invoice_number}</p>
+                        </div>
                     </div>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
@@ -123,25 +132,49 @@ export default function DocumentsIndex({ invoice, documents, search = '', filter
                                         value={form.data.name}
                                         onChange={(e) => form.setData('name', e.target.value)}
                                         placeholder="Enter document name"
+                                        className={form.errors.name ? 'border-red-300' : ''}
+                                        aria-invalid={!!form.errors.name}
+                                        aria-describedby={form.errors.name ? 'name-error' : undefined}
                                     />
+                                    {form.errors.name && (
+                                        <p id="name-error" className="text-sm text-red-600" role="alert">
+                                            {form.errors.name}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="category">Category</Label>
-                                    <Select value={form.data.category} onValueChange={(value) => form.setData('category', value)}>
-                                        <SelectTrigger>
+                                    <Select value={form.data.category} onValueChange={(value) => form.setData('category', value as DocumentType)}>
+                                        <SelectTrigger className={form.errors.category ? 'border-red-300' : ''}>
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="contract">Contract</SelectItem>
-                                            <SelectItem value="invoice">Invoice</SelectItem>
-                                            <SelectItem value="receipt">Receipt</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value={DocumentType.CONTRACT}>Contract</SelectItem>
+                                            <SelectItem value={DocumentType.INVOICE}>Invoice</SelectItem>
+                                            <SelectItem value={DocumentType.RECEIPT}>Receipt</SelectItem>
+                                            <SelectItem value={DocumentType.OTHER}>Other</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {form.errors.category && (
+                                        <p className="text-sm text-red-600" role="alert">
+                                            {form.errors.category}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="file">File</Label>
-                                    <Input id="file" type="file" onChange={(e) => form.setData('file', e.target.files?.[0] || null)} />
+                                    <FileUpload
+                                        onChange={(file) => form.setData('file', file)}
+                                        accept="application/pdf,image/*,.doc,.docx"
+                                        maxSize={2} // 2MB limit
+                                        aria-invalid={!!form.errors.file}
+                                        aria-describedby={form.errors.file ? 'file-error' : undefined}
+                                    />
+                                    {form.errors.file && (
+                                        <p id="file-error" className="text-sm text-red-600" role="alert">
+                                            {form.errors.file}
+                                        </p>
+                                    )}
                                 </div>
                                 <DialogFooter>
                                     <Button type="submit" disabled={form.processing}>

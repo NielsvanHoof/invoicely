@@ -7,6 +7,7 @@ use App\Queries\Analytics\FetchFinancialMetricsQuery;
 use App\Queries\Analytics\FetchMonthlyRevenueQuery;
 use App\Queries\Analytics\FetchStatusDistributionQuery;
 use App\Queries\Analytics\FetchTopClientsQuery;
+use Gate;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +24,10 @@ class AnalyticsIndexController extends Controller
     public function __invoke(): Response
     {
         $user = Auth::user();
+
+        if (! Gate::allows('view-analytics', $user)) {
+            return redirect()->route('dashboard');
+        }
 
         $financialMetrics = $this->fetchFinancialMetricsQuery->execute($user);
         $statusDistribution = $this->fetchStatusDistributionQuery->execute($user);

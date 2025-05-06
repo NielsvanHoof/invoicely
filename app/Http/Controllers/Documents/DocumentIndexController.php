@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Documents;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Queries\Documents\FetchDocumentsQuery;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class DocumentIndexController extends Controller
 
     public function __invoke(Request $request, Invoice $invoice): Response
     {
-        $this->authorize('view', $invoice);
+        $this->authorize('viewAny', Document::class);
 
         $documents = $this->fetchDocumentsQuery->execute(
             invoice: $invoice,

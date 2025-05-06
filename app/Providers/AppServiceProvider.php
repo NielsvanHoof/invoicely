@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Gate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
@@ -23,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
         Model::automaticallyEagerLoadRelationships();
 
         Inertia::encryptHistory(true);
+
+        Gate::define('view-analytics', function (User $user) {
+            return $user->hasRole('invoicer') || $user->hasRole('admin');
+        });
     }
 
     /**

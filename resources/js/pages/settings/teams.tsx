@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Team, User, type BreadcrumbItem } from '@/types';
+import { CreateTeamData, TeamInvitationData, UpdateTeamData } from '@/types/generated';
 import { Head, router, useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2, PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
@@ -52,7 +53,7 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         errors: teamErrors,
         reset: resetTeamForm,
         clearErrors: clearTeamErrors,
-    } = useForm({
+    } = useForm<UpdateTeamData>({
         name: team?.name || '',
     });
 
@@ -64,7 +65,7 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         errors: createTeamErrors,
         reset: resetCreateTeamForm,
         clearErrors: clearCreateTeamErrors,
-    } = useForm({
+    } = useForm<CreateTeamData>({
         name: '',
     });
 
@@ -76,7 +77,7 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         errors: inviteErrors,
         reset: resetInviteForm,
         clearErrors: clearInviteErrors,
-    } = useForm({
+    } = useForm<TeamInvitationData>({
         name: '',
         email: '',
     });
@@ -86,10 +87,6 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         clearTeamErrors();
 
         if (!team) return;
-        if (!teamData.name.trim()) {
-            setTeamData('name', '');
-            return;
-        }
 
         setIsSubmitting(true);
         updateTeam(route('teams.update', { team: team.id }), {
@@ -108,11 +105,6 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
         e.preventDefault();
         clearCreateTeamErrors();
 
-        if (!createTeamData.name.trim()) {
-            setCreateTeamData('name', '');
-            return;
-        }
-
         setIsSubmitting(true);
         createTeam(route('teams.store'), {
             onSuccess: () => {
@@ -129,12 +121,6 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
     const submitInvite: FormEventHandler = (e) => {
         e.preventDefault();
         clearInviteErrors();
-
-        if (!inviteData.email.trim() || !inviteData.name.trim()) {
-            if (!inviteData.email.trim()) setInviteData('email', '');
-            if (!inviteData.name.trim()) setInviteData('name', '');
-            return;
-        }
 
         setIsSubmitting(true);
         sendInvite(route('teams.members.invite', { team: team?.id }), {
@@ -226,7 +212,6 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
             <SettingsLayout>
                 <div className="space-y-6">
                     {team === null ? (
-                        // No Team View
                         <Card>
                             <CardHeader>
                                 <CardTitle>Create a Team</CardTitle>
