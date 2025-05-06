@@ -2,23 +2,29 @@
 
 namespace App\Models;
 
-use App\Builders\Invoice\InvoiceBuilder;
 use App\Enums\InvoiceStatus;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\PaymentMethod;
+use App\Models\Scopes\InvoiceByTeamOrUserScope;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Invoice extends Model
+#[ScopedBy([InvoiceByTeamOrUserScope::class])]
+class Invoice extends Model implements AuditableContract
 {
-    use HasFactory, HasUlids, Searchable;
+    use Auditable, Searchable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -33,6 +39,7 @@ class Invoice extends Model
         'notes',
         'file_path',
         'team_id',
+        'client_id',
     ];
 
     /**
@@ -45,12 +52,9 @@ class Invoice extends Model
         'due_date' => 'date',
         'amount' => 'decimal:2',
         'status' => InvoiceStatus::class,
+        'payment_method' => PaymentMethod::class,
+        'paid_at' => 'datetime',
     ];
-
-    public function newEloquentBuilder($query): InvoiceBuilder
-    {
-        return new InvoiceBuilder($query);
-    }
 
     /**
      * Get the searchable array for the invoice.
@@ -68,9 +72,46 @@ class Invoice extends Model
     }
 
     /**
+     * Scope a query to filter by team.
+     *
+     * @param  Builder<Invoice>  $query
+     */
+    private function ByTeam(Builder $query, ?int $teamId): void
+    {
+        if ($teamId) {
+            $query->where('team_id', $teamId);
+        }
+    }
+
+    /**
+     * Scope a query to filter by user.
+     *
+     * @param  Builder<Invoice>  $query
+     */
+    private function ByUser(Builder $query, int $userId): void
+    {
+        $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope a query to filter by user and team.
+     *
+     * @param  Builder<Invoice>  $query
+     */
+    #[Scope]
+    public function ForUser(Builder $query, User $user): void
+    {
+        if ($user->team_id) {
+            $this->ByTeam($query, $user->team_id);
+        }
+
+        $this->ByUser($query, $user->id);
+    }
+
+    /**
      * Get the user that owns the invoice.
      *
-     * @return BelongsTo<User, Invoice>
+     * @return BelongsTo<User, covariant Invoice>
      */
     public function user(): BelongsTo
     {
@@ -80,7 +121,7 @@ class Invoice extends Model
     /**
      * Get the team that owns the invoice.
      *
-     * @return BelongsTo<Team, Invoice>
+     * @return BelongsTo<Team, covariant Invoice>
      */
     public function team(): BelongsTo
     {
@@ -90,10 +131,30 @@ class Invoice extends Model
     /**
      * Get the reminders for the invoice.
      *
-     * @return HasMany<Reminder, Invoice>
+     * @return HasMany<Reminder, covariant Invoice>
      */
     public function reminders(): HasMany
     {
         return $this->hasMany(Reminder::class);
+    }
+
+    /**
+     * Get the client that owns the invoice.
+     *
+     * @return BelongsTo<Client, covariant Invoice>
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the documents for the invoice.
+     *
+     * @return HasMany<Document, covariant Invoice>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
     }
 }

@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { cn, formatCurrency } from '@/lib/utils';
-import { SharedData } from '@/types';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, TrendingUpIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -34,6 +34,13 @@ export default function Analytics({ financialMetrics, statusDistribution, monthl
     const { auth } = usePage<SharedData>().props;
     const userCurrency = auth?.user?.currency || 'USD';
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Analytics',
+            href: route('analytics.index'),
+        },
+    ];
+
     // Helper to determine if a metric is positive/negative
     const getTrendIndicator = (value: number, isInverse: boolean = false) => {
         if (value === 0) return null;
@@ -48,7 +55,7 @@ export default function Analytics({ financialMetrics, statusDistribution, monthl
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analytics Dashboard" />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4">

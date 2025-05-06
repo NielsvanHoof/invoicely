@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
-import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, TrashIcon } from 'lucide-react';
+import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, FileIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface ShowInvoiceProps {
@@ -26,7 +26,6 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
             const response = await axios.get(route('invoices.download', invoice.id));
 
             if (response.data.url) {
-                // Open the temporary URL in a new tab
                 window.open(response.data.url, '_blank');
             } else {
                 throw new Error('No download URL returned');
@@ -59,22 +58,23 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
             <Head title={`Invoice ${invoice.invoice_number}`} />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+                <header className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" asChild className="h-8 w-8" aria-label="Go back to invoices">
                         <Link href={route('invoices.index')}>
-                            <ArrowLeftIcon className="h-4 w-4" />
+                            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
                         </Link>
                     </Button>
                     <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Invoice {invoice.invoice_number}</h1>
-                </div>
+                </header>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
                     <Link
                         as="button"
                         href={route('invoices.edit', invoice.id)}
                         className="ring-offset-background focus-visible:ring-ring border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 items-center justify-center rounded-md border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                        aria-label="Edit invoice"
                     >
-                        <FileEditIcon className="mr-2 h-4 w-4" />
+                        <FileEditIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                         Edit
                     </Link>
                     <Link
@@ -82,24 +82,25 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                         method="delete"
                         as="button"
                         className="ring-offset-background focus-visible:ring-ring border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 items-center justify-center rounded-md border px-4 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:text-red-400 dark:hover:bg-red-950/50 dark:hover:text-red-300"
+                        aria-label="Delete invoice"
                     >
-                        <TrashIcon className="mr-2 h-4 w-4" />
+                        <TrashIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                         Delete
                     </Link>
                 </div>
 
-                <div className="mt-4 flex gap-2">
-                    <Link href={route('invoices.index')}>
-                        <Button variant="outline">
-                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                            Back to Invoices
+                <div className="mt-4 flex flex-wrap gap-2">
+                    <Link href={route('reminders.index', invoice.id)}>
+                        <Button variant="outline" aria-label="Manage invoice reminders">
+                            <BellIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Manage Reminders
                         </Button>
                     </Link>
 
-                    <Link href={route('reminders.index', invoice.id)}>
-                        <Button variant="outline">
-                            <BellIcon className="mr-2 h-4 w-4" />
-                            Manage Reminders
+                    <Link href={route('documents.index', invoice.id)}>
+                        <Button variant="outline" aria-label="Manage invoice documents">
+                            <FileIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Manage Documents
                         </Button>
                     </Link>
                 </div>
@@ -138,7 +139,17 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                                 <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Client Information</h3>
                                 <div className="mt-1 space-y-1">
                                     <p className="font-medium">{invoice.client_name}</p>
-                                    {invoice.client_email && <p className="break-words">{invoice.client_email}</p>}
+                                    {invoice.client_email && (
+                                        <p className="break-words">
+                                            <a
+                                                href={`mailto:${invoice.client_email}`}
+                                                className="text-primary hover:underline"
+                                                aria-label={`Send email to ${invoice.client_name}`}
+                                            >
+                                                {invoice.client_email}
+                                            </a>
+                                        </p>
+                                    )}
                                     {invoice.client_address && <p className="text-sm whitespace-pre-line">{invoice.client_address}</p>}
                                 </div>
                             </div>
@@ -159,7 +170,11 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                         <CardContent>
                             {invoice.file_path ? (
                                 <div className="flex flex-col items-center justify-center space-y-4">
-                                    <div className="border-sidebar-border/70 dark:border-sidebar-border flex h-32 w-full items-center justify-center rounded-lg border bg-neutral-50 dark:bg-neutral-900">
+                                    <div
+                                        className="border-sidebar-border/70 dark:border-sidebar-border flex h-32 w-full items-center justify-center rounded-lg border bg-neutral-50 dark:bg-neutral-900"
+                                        role="img"
+                                        aria-label="Document preview"
+                                    >
                                         <div className="flex flex-col items-center justify-center">
                                             <svg
                                                 className="h-12 w-12 text-neutral-400"
@@ -167,6 +182,7 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
+                                                aria-hidden="true"
                                             >
                                                 <path
                                                     strokeLinecap="round"
@@ -180,29 +196,29 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-6 text-center text-neutral-500">
+                                <div
+                                    className="flex flex-col items-center justify-center py-6 text-center text-neutral-500"
+                                    role="status"
+                                    aria-label="No attachment available"
+                                >
                                     <p>No attachment</p>
                                 </div>
                             )}
                         </CardContent>
                         {invoice.file_path && (
                             <CardFooter>
-                                <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                                    <DownloadIcon className="mr-2 h-4 w-4" />
+                                <Button
+                                    onClick={handleDownload}
+                                    className="flex w-full items-center justify-center"
+                                    disabled={isDownloading}
+                                    aria-label={isDownloading ? 'Generating download link...' : 'Download attachment'}
+                                >
+                                    <DownloadIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                                     {isDownloading ? 'Generating link...' : 'Download'}
                                 </Button>
                             </CardFooter>
                         )}
                     </Card>
-                </div>
-
-                <div className="mt-2 flex flex-col gap-2 md:hidden">
-                    {invoice.file_path && (
-                        <Button onClick={handleDownload} className="flex w-full items-center justify-center" disabled={isDownloading}>
-                            <DownloadIcon className="mr-2 h-4 w-4" />
-                            {isDownloading ? 'Generating link...' : 'Download Attachment'}
-                        </Button>
-                    )}
                 </div>
             </div>
         </AppLayout>

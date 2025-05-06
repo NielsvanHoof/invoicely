@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
-use App\Builders\Reminder\ReminderBuilder;
 use App\Enums\ReminderType;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reminder extends Model
 {
-    use HasFactory;
-
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'invoice_id',
@@ -36,15 +34,23 @@ class Reminder extends Model
         'type' => ReminderType::class,
     ];
 
-    public function newEloquentBuilder($query): ReminderBuilder
+    /**
+     * Scope a query to only include due reminders.
+     *
+     * @param  Builder<Reminder>  $query
+     * @return Builder<Reminder>
+     */
+    #[Scope]
+    public function scopeDue(Builder $query): Builder
     {
-        return new ReminderBuilder($query);
+        return $query->whereNull('sent_at')
+            ->where('scheduled_date', '<=', now());
     }
 
     /**
      * Get the invoice that owns the reminder.
      *
-     * @return BelongsTo<Invoice, Reminder>
+     * @return BelongsTo<Invoice, covariant Reminder>
      */
     public function invoice(): BelongsTo
     {

@@ -14,8 +14,7 @@ class InvoiceSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get the first user or create one if none exists
-        $user = User::first() ?? User::factory()->create();
+        $user = User::first();
 
         // Sample statuses
         $statuses = ['draft', 'sent', 'paid', 'overdue'];

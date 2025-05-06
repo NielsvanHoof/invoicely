@@ -60,3 +60,42 @@ export function formatRelativeTime(date: Date): string {
     // Default to formatted date
     return formatDate(date.toISOString());
 }
+
+/**
+ * Filter an object to only include properties with non-empty values
+ * Useful for filtering out empty params in API requests
+ */
+export function getActiveFilters(
+    filters: Record<string, string | undefined> | undefined,
+    sort: Record<string, string> | undefined,
+): Record<string, string> {
+    if (!filters) return {};
+
+    // Only include filters that have non-empty values
+    const activeFilters = Object.entries(filters).reduce(
+        (acc, [key, value]) => {
+            // Check if value is not undefined, null, empty string, or whitespace
+            if (value !== undefined && value !== null && value.trim() !== '') {
+                acc[key] = value;
+            }
+            return acc;
+        },
+        {} as Record<string, string>,
+    );
+
+    // Only add sort parameters if they exist and are different from defaults
+    if (sort && (sort.field !== 'created_at' || sort.direction !== 'desc')) {
+        activeFilters.sort_field = sort.field;
+        activeFilters.sort_direction = sort.direction;
+    }
+
+    return activeFilters;
+}
+
+export function formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}

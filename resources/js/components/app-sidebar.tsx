@@ -19,7 +19,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Analytics',
-        url: route('analytics'),
+        url: route('analytics.index'),
         icon: TrendingUp,
     },
 ];

@@ -18,4 +18,10 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    resolve: {
+        alias: {
+            '@resources': './resources',
+            '@types': './resources/js/types',
+        },
+    },
 });

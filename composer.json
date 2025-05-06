@@ -18,15 +18,19 @@
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",
         "meilisearch/meilisearch-php": "*",
+        "owen-it/laravel-auditing": "^14.0",
         "spatie/laravel-backup": "^9.2",
         "spatie/laravel-data": "^4.13",
         "spatie/laravel-health": "^1.32",
+        "spatie/laravel-permission": "^6.16",
+        "spatie/laravel-typescript-transformer": "^2.5",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",
@@ -68,6 +72,15 @@
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+        ],
+        "generate-ide-helpers": [
+            "@php artisan ide-helper:generate",
+            "@php artisan ide-helper:meta",
+            "@php artisan ide-helper:models -N",
+            "@php artisan ide-helper:eloquent"
+        ],
+        "static-analysis": [
+            "phpstan analyse --memory-limit=2G"
         ]
     },
     "extra": {

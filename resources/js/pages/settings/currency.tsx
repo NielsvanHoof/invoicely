@@ -1,14 +1,13 @@
 import { Head } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem, type Currency } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { CurrencySettings } from './components/CurrencySettings';
 
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
 interface CurrencySettingsPageProps {
-    currencies: Currency[];
     userCurrency: string;
 }
 
@@ -19,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Currency({ currencies, userCurrency }: CurrencySettingsPageProps) {
+export default function Currency({ userCurrency }: CurrencySettingsPageProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Currency settings" />
@@ -27,7 +26,7 @@ export default function Currency({ currencies, userCurrency }: CurrencySettingsP
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall title="Currency settings" description="Update your preferred currency for displaying monetary values" />
-                    <CurrencySettings currencies={currencies} userCurrency={userCurrency} />
+                    <CurrencySettings userCurrency={userCurrency} />
                 </div>
             </SettingsLayout>
         </AppLayout>
