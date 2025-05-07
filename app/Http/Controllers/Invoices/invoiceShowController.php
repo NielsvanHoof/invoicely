@@ -14,7 +14,7 @@ class InvoiceShowController extends Controller
 
         $invoice->load('reminders');
 
-        return Inertia::render('invoices/show', [
+        return Inertia::render('invoices/invoice.show', [
             'invoice' => $invoice,
         ]);
     }

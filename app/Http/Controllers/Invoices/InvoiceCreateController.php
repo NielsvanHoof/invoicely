@@ -13,6 +13,6 @@ class InvoiceCreateController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
-        return Inertia::render('invoices/create');
+        return Inertia::render('invoices/invoice.create');
     }
 }

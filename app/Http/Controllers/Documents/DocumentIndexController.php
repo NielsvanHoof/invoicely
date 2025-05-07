@@ -26,7 +26,7 @@ class DocumentIndexController extends Controller
             category: $request->input('category')
         )->latest()->paginate(10);
 
-        return Inertia::render('invoices/documents/index', [
+        return Inertia::render('invoices/documents/document.index', [
             'invoice' => $invoice,
             'documents' => $documents,
             'search' => $request->input('search'),

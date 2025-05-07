@@ -20,7 +20,7 @@ class InvoiceIndexController extends Controller
 
         $invoices = $fetchInvoicesQuery->execute($user, $data)->paginate(10);
 
-        return Inertia::render('invoices/index', [
+        return Inertia::render('invoices/invoice.index', [
             'invoices' => Inertia::merge($invoices),
             'search' => $data->search,
             'filters' => $data->except('search')->toArray(),
