@@ -12,15 +12,11 @@ use Inertia\Response;
 
 class DocumentIndexController extends Controller
 {
-    public function __construct(
-        private readonly FetchDocumentsQuery $fetchDocumentsQuery
-    ) {}
-
-    public function __invoke(Request $request, Invoice $invoice): Response
+    public function __invoke(Request $request, Invoice $invoice, FetchDocumentsQuery $fetchDocumentsQuery): Response
     {
         $this->authorize('viewAny', Document::class);
 
-        $documents = $this->fetchDocumentsQuery->execute(
+        $documents = $fetchDocumentsQuery->execute(
             invoice: $invoice,
             search: $request->input('search'),
             category: $request->input('category')

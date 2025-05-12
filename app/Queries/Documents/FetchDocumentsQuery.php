@@ -11,16 +11,10 @@ class FetchDocumentsQuery
 {
     /**
      * Fetch documents for an invoice with filtering.
-     * @return Builder<Document>
+     * @return HasMany<Document, covariant Invoice>
      */
-    public function execute(Invoice $invoice, ?string $search = null, ?string $category = null): Builder
+    public function execute(Invoice $invoice, ?string $search = null, ?string $category = null): HasMany
     {
-        return $invoice->documents()
-            ->when($search, function (Builder $query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->when($category && $category !== 'all', function (Builder $query) use ($category) {
-                $query->where('category', $category);
-            });
+       return $invoice->documents();
     }
 }
