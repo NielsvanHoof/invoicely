@@ -1,7 +1,8 @@
 import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type Invoice } from '@/types';
+import { Invoice } from '@/types/models';
 import { Link } from '@inertiajs/react';
 import { Clock } from 'lucide-react';
 
@@ -25,27 +26,31 @@ export function UpcomingInvoices({ invoices, userCurrency }: UpcomingInvoicesPro
 
             {/* Desktop Table View */}
             <div className="hidden sm:block">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead scope="col">Invoice #</TableHead>
-                            <TableHead scope="col">Client</TableHead>
-                            <TableHead scope="col">Amount</TableHead>
-                            <TableHead scope="col" className="hidden md:table-cell">
-                                Due Date
-                            </TableHead>
-                            <TableHead scope="col">Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {invoices.length === 0 ? (
+                {invoices.length === 0 ? (
+                    <div className="p-4">
+                        <EmptyState
+                            type="default"
+                            icon={Clock}
+                            title="No upcoming invoices"
+                            description="You don't have any upcoming invoices scheduled"
+                            className="h-[300px]"
+                        />
+                    </div>
+                ) : (
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={5} className="py-8 text-center text-neutral-500">
-                                    No upcoming invoices found.
-                                </TableCell>
+                                <TableHead scope="col">Invoice #</TableHead>
+                                <TableHead scope="col">Client</TableHead>
+                                <TableHead scope="col">Amount</TableHead>
+                                <TableHead scope="col" className="hidden md:table-cell">
+                                    Due Date
+                                </TableHead>
+                                <TableHead scope="col">Status</TableHead>
                             </TableRow>
-                        ) : (
-                            invoices.map((invoice) => (
+                        </TableHeader>
+                        <TableBody>
+                            {invoices.map((invoice) => (
                                 <TableRow key={`${invoice.id}-${invoice.invoice_number}`}>
                                     <TableCell className="font-medium">
                                         <Link
@@ -63,16 +68,29 @@ export function UpcomingInvoices({ invoices, userCurrency }: UpcomingInvoicesPro
                                         <InvoiceStatusBadge status={invoice.status} />
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </div>
 
             {/* Mobile Card View */}
             <div className="sm:hidden">
                 {invoices.length === 0 ? (
-                    <div className="py-8 text-center text-sm text-neutral-500">No upcoming invoices found.</div>
+                    <div className="p-4">
+                        <EmptyState
+                            type="default"
+                            icon={Clock}
+                            title="No upcoming invoices"
+                            description="You don't have any upcoming invoices scheduled"
+                            primaryAction={{
+                                label: 'Create Invoice',
+                                href: route('invoices.create'),
+                                variant: 'primary',
+                            }}
+                            className="h-[300px]"
+                        />
+                    </div>
                 ) : (
                     <div className="divide-sidebar-border/70 dark:divide-sidebar-border divide-y">
                         {invoices.map((invoice) => (

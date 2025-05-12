@@ -8,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData } from '@/types';
-import { StoreInvoiceData } from '@/types/generated';
+import { StoreInvoiceData, UpdateInvoiceData } from '@/types/generated';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, CalendarIcon, CreditCardIcon, FileTextIcon, MailIcon, MapPinIcon, UserIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
-interface InvoiceFormProps<T extends StoreInvoiceData> {
+interface InvoiceFormProps<T extends StoreInvoiceData | UpdateInvoiceData> {
     data: T;
     errors: Partial<Record<keyof T, string>>;
     processing: boolean;
@@ -22,7 +22,7 @@ interface InvoiceFormProps<T extends StoreInvoiceData> {
     onSubmit: (e: React.FormEvent) => void;
 }
 
-export function InvoiceForm<T extends StoreInvoiceData>({
+export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
     data,
     errors,
     processing,
@@ -149,7 +149,7 @@ export function InvoiceForm<T extends StoreInvoiceData>({
                                             </div>
                                             <Input
                                                 id="client_name"
-                                                value={data.client_name}
+                                                value={data.client_name || ''}
                                                 onChange={(e) => onDataChange('client_name', e.target.value)}
                                                 placeholder="Client Name"
                                                 className={errors.client_name ? 'border-red-300' : ''}

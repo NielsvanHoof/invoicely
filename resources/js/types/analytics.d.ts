@@ -1,26 +1,26 @@
-interface FinancialMetrics {
+export interface FinancialMetrics {
     totalOutstanding: number;
     avgTimeToPayment: number;
     overduePercentage: number;
     totalRevenue: number;
 }
 
-interface StatusDistributionItem {
+export interface StatusDistributionItem {
     name: string;
     value: number;
 }
 
-interface MonthlyRevenueItem {
+export interface MonthlyRevenueItem {
     month: string;
     revenue: number;
 }
 
-interface TopClientItem {
+export interface TopClientItem {
     client: string;
     revenue: number;
 }
 
-interface AnalyticsPageProps {
+export interface AnalyticsPageProps {
     financialMetrics: FinancialMetrics;
     statusDistribution: StatusDistributionItem[];
     monthlyRevenue: MonthlyRevenueItem[];

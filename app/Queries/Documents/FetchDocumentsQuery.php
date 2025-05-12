@@ -11,10 +11,9 @@ class FetchDocumentsQuery
 {
     /**
      * Fetch documents for an invoice with filtering.
-     *
-     * @return HasMany<Document>
+     * @return Builder<Document>
      */
-    public function execute(Invoice $invoice, ?string $search = null, ?string $category = null): HasMany
+    public function execute(Invoice $invoice, ?string $search = null, ?string $category = null): Builder
     {
         return $invoice->documents()
             ->when($search, function (Builder $query) use ($search) {

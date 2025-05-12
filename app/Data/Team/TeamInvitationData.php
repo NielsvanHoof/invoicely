@@ -3,32 +3,50 @@
 namespace App\Data\Team;
 
 use Illuminate\Support\Facades\Auth;
-use Spatie\LaravelData\Attributes\MergeValidationRules;
-use Spatie\LaravelData\Attributes\Validation\Email;
-use Spatie\LaravelData\Attributes\Validation\Exists;
-use Spatie\LaravelData\Attributes\Validation\Max;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-#[MergeValidationRules]
 #[TypeScript]
 class TeamInvitationData extends Data
 {
     public function __construct(
-        #[Email, Max(255), Exists('users', 'email')]
         public string $email,
 
-        #[Max(255)]
         public string $name,
-    ) {}
+    ) {
+    }
 
+    /**
+     * Get the validation rules for the data.
+     *
+     * @param  ValidationContext  $context
+     * @return array<string, array<int, mixed>>
+     */
     public static function rules(ValidationContext $context): array
     {
         return [
             'email' => [
-                'not_in:'.(string) Auth::user()?->email,
+                'required',
+                'email',
+                'max:255',
+                Rule::exists('users', 'email'),
             ],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('users', 'name'),
+            ],
+        ];
+    }
+
+    public static function messages(...$args): array
+    {
+        return [
+            'email.exists' => 'The email address does not exist.',
+            'name.exists' => 'The name does not exist.',
         ];
     }
 }

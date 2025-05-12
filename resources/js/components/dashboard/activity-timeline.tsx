@@ -2,6 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils';
 import { Deferred, Link } from '@inertiajs/react';
 import { Activity, BellIcon, CheckCircle, PlusCircle, RefreshCw } from 'lucide-react';
+import { EmptyState } from '../ui/empty-state';
 
 interface ActivityItem {
     id: string;
@@ -60,11 +61,13 @@ export function ActivityTimeline({ activities, userCurrency }: ActivityTimelineP
                 <Deferred data="recentActivity" fallback={<Skeleton className="h-20 w-full" />}>
                     <div className="space-y-4">
                         {activities?.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <Activity className="mb-2 h-8 w-8 text-neutral-400" aria-hidden="true" />
-                                <p className="text-sm text-neutral-500">No recent activity to display</p>
-                                <p className="mt-1 text-xs text-neutral-400">Your activity feed will appear here as you create and manage invoices</p>
-                            </div>
+                            <EmptyState
+                                title="No recent activity"
+                                description="Your activity feed will appear here as you create and manage invoices"
+                                type="default"
+                                icon={Activity}
+                                className="h-[300px]"
+                            />
                         ) : (
                             activities?.map((activity) => {
                                 const ActivityIcon = getActivityIcon(activity.type, activity.status);

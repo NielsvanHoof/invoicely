@@ -1,6 +1,5 @@
-export { BulkActionsBar } from './BulkActionsBar';
-export { EmptyState } from './EmptyState';
-export { FilterBar } from './FilterBar';
-export { InvoiceCard } from './InvoiceCard';
-export { InvoiceForm } from './InvoiceForm';
-export { InvoiceTable } from './InvoiceTable';
+export { BulkActionsBar } from './bulk-action-bar';
+export { FilterBar } from './filter-bar';
+export { InvoiceCard } from './invoice-card';
+export { InvoiceForm } from './invoice-form';
+export { InvoiceTable } from './invoice-table';

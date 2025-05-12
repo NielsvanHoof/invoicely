@@ -9,7 +9,6 @@ use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Enum;
 use Spatie\LaravelData\Attributes\Validation\File;
-use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Mimes;
 use Spatie\LaravelData\Attributes\Validation\Min;
@@ -42,7 +41,7 @@ class StoreInvoiceData extends Data
         #[Date, AfterOrEqual('issue_date')]
         public string $due_date,
 
-        #[Enum(InvoiceStatus::class), In(InvoiceStatus::class)]
+        #[Enum(InvoiceStatus::class)]
         public InvoiceStatus $status,
 
         #[Max(255)]
