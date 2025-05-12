@@ -43,6 +43,13 @@ export enum ReminderType {
 export type RemoveTeamMemberData = {
     user_id: number;
 };
+export type StoreClientData = {
+    name: string;
+    email: string;
+    company_name: string;
+    phone: string;
+    address: string;
+};
 export type StoreDocumentData = {
     name: string;
     category: DocumentType;
@@ -74,7 +81,7 @@ export type TeamMemberRemovalData = {
 };
 export type UpdateInvoiceData = {
     invoice_number: any | string | null;
-    client_name: string | null;
+    client_name: any | string | null;
     client_email: any | string | null;
     client_address: any | string | null;
     amount: any | number | null;

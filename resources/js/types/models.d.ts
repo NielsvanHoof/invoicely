@@ -64,3 +64,14 @@ export interface Document {
     updated_at: string;
     deleted_at: string | null;
 }
+
+export interface Client {
+    id: number;
+    name: string;
+    email: string;
+    address: string | null;
+    phone: string | null;
+    company_name: string | null;
+    created_at: string;
+    updated_at: string;
+}

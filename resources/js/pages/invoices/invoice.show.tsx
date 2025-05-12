@@ -41,10 +41,6 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Dashboard',
-            href: route('dashboard'),
-        },
-        {
             title: 'Invoices',
             href: route('invoices.index'),
         },

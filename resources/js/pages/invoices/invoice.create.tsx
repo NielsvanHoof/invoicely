@@ -6,10 +6,6 @@ import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: route('dashboard'),
-    },
-    {
         title: 'Invoices',
         href: route('invoices.index'),
     },

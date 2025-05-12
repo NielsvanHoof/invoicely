@@ -12,10 +12,6 @@ interface EditInvoiceProps {
 export default function EditInvoice({ invoice }: EditInvoiceProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Dashboard',
-            href: route('dashboard'),
-        },
-        {
             title: 'Invoices',
             href: route('invoices.index'),
         },
