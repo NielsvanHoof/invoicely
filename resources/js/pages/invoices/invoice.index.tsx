@@ -21,10 +21,8 @@ interface InvoicesIndexProps {
         amount_from?: string;
         amount_to?: string;
     };
-    sort?: {
-        field: string;
-        direction: 'asc' | 'desc';
-    };
+    sort_field?: string;
+    sort_direction?: string;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -34,7 +32,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function InvoicesIndex({ invoices, search, filters = {}, sort = { field: 'created_at', direction: 'desc' } }: InvoicesIndexProps) {
+export default function InvoicesIndex({ invoices, search, filters = {}, sort_field = 'created_at', sort_direction = 'desc' }: InvoicesIndexProps) {
     const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
 
     const handleSelectInvoice = (invoice: Invoice, isSelected: boolean) => {
@@ -60,11 +58,11 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
     };
 
     const handleSort = (field: string) => {
-        const newDirection = sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc';
+        const newDirection = sort_field === field && sort_direction === 'asc' ? 'desc' : 'asc';
 
         // Only include active filters and sort parameters
         const params = {
-            ...getActiveFilters(filters, { field, direction: newDirection }),
+            ...getActiveFilters(filters, { field: sort_field, direction: sort_direction }),
             ...(search ? { search } : {}),
             ...(field !== 'created_at' ? { sort_field: field, sort_direction: newDirection } : {}),
         };
@@ -88,7 +86,7 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
         });
     };
 
-    const isCustomSort = sort.field !== 'created_at' || sort.direction !== 'desc';
+    const isCustomSort = sort_field !== 'created_at' || sort_direction !== 'desc';
     const hasActiveFilters = Object.values(filters).some(Boolean);
     const showSearchAndFilters = invoices.total > 0 || search || hasActiveFilters || isCustomSort;
 
@@ -123,7 +121,6 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                                     placeholder="Search invoices..."
                                     aria-label="Search invoices"
                                     routeName="invoices.index"
-                                    only={['invoices', 'search']}
                                 />
                             </div>
                             {isCustomSort && (
@@ -182,7 +179,8 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort = {
                                 selectedInvoices={selectedInvoices}
                                 onSelectInvoice={handleSelectInvoice}
                                 onSelectAll={handleSelectAll}
-                                sort={sort}
+                                sort_field={sort_field}
+                                sort_direction={sort_direction}
                                 onSort={handleSort}
                             />
                         </div>
