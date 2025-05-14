@@ -50,3 +50,4 @@ class TeamIndexController extends Controller
         ]);
     }
 }
+ 
