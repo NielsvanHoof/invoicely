@@ -6,7 +6,6 @@ use App\Http\Controllers\Invoices\InvoiceDestroyController;
 use App\Http\Controllers\Invoices\InvoiceDownloadFileController;
 use App\Http\Controllers\Invoices\InvoiceEditController;
 use App\Http\Controllers\Invoices\InvoiceIndexController;
-use App\Http\Controllers\Invoices\InvoiceShowController;
 use App\Http\Controllers\Invoices\InvoiceStoreController;
 use App\Http\Controllers\Invoices\InvoiceUpdateController;
 
@@ -24,7 +23,7 @@ Route::group([
     Route::post('/', InvoiceStoreController::class)->name('store');
 
     // GET /invoices/{invoice} - Show a specific invoice
-    Route::get('/{invoice}', InvoiceShowController::class)->name('show');
+    // Route::get('/{invoice}', action: InvoiceShowController::class)->name('show');
 
     // GET /invoices/{invoice}/edit - Show invoice edit form
     Route::get('/{invoice}/edit', InvoiceEditController::class)->name('edit');
