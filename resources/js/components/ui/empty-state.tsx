@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { LucideIcon, SearchIcon, FilterIcon } from 'lucide-react';
-import { ReactNode } from 'react';
 import React from 'react';
 
 interface ActionButton {
