@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { type Reminder } from '@/types';
 import { router } from '@inertiajs/react';
 import { AlertTriangleIcon } from 'lucide-react';
-import React from 'react';
 
 interface DeleteReminderDialogProps {
     isOpen: boolean;
@@ -40,4 +39,4 @@ export function DeleteReminderDialog({ isOpen, onOpenChange, reminder, invoiceId
             </DialogContent>
         </Dialog>
     );
-} 
+}

@@ -26,4 +26,4 @@ export function DocumentHeader({ invoiceNumber, invoiceId, children }: DocumentH
             {children}
         </div>
     );
-} 
+}

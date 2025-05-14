@@ -42,4 +42,4 @@ export function MetricsCard({ title, value, description, trend, isInverse = fals
             </CardContent>
         </Card>
     );
-} 
+}

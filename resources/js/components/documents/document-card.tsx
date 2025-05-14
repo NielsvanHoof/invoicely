@@ -52,4 +52,4 @@ export function DocumentCard({ document, invoiceId, onDeleteClick }: DocumentCar
             </CardHeader>
         </Card>
     );
-} 
+}

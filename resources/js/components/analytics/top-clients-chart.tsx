@@ -2,11 +2,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { formatCurrency } from '@/lib/utils';
 import { TopClientItem } from '@/types/analytics';
 import { TrendingUpIcon } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 // Colors that match the application's design system
 const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#10b981'];
-
 
 interface TopClientsChartProps {
     data: TopClientItem[];
@@ -60,10 +59,8 @@ export function TopClientsChart({ data, currency }: TopClientsChartProps) {
             </CardContent>
             <CardFooter className="border-sidebar-border/70 dark:border-sidebar-border text-muted-foreground border-t p-3 text-sm sm:p-4">
                 <TrendingUpIcon className="mr-2 h-4 w-4" />
-                {data.length === 0
-                    ? 'Start creating invoices to see your top clients'
-                    : `Showing top ${data.length} clients by revenue`}
+                {data.length === 0 ? 'Start creating invoices to see your top clients' : `Showing top ${data.length} clients by revenue`}
             </CardFooter>
         </Card>
     );
-} 
+}

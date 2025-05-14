@@ -2,7 +2,6 @@
 
 namespace App\Data\Invoices;
 
-use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 
 class FetchInvoicesData extends Data

@@ -45,4 +45,4 @@ export function AnalyticsHeader({ timeRange, onTimeRangeChange }: AnalyticsHeade
             </div>
         </div>
     );
-} 
+}

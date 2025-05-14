@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Actions\Clients\StoreClientAction;
 use App\Data\Clients\StoreClientData;
 use App\Http\Controllers\Controller;
-use App\Actions\Clients\StoreClientAction;
 use Illuminate\Http\RedirectResponse;
 
 class ClientStoreController extends Controller

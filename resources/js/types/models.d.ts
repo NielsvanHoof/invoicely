@@ -9,7 +9,6 @@ export interface User {
     updated_at: string;
 }
 
-
 export interface Invoice {
     id: number;
     user_id: number;
@@ -38,7 +37,6 @@ export interface Team {
     updated_at: string;
     owner_id: number;
 }
-
 
 export interface Reminder {
     id: number;

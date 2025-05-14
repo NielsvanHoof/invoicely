@@ -18,7 +18,7 @@ class FetchInvoicesQuery
     public function execute(User $user, FetchInvoicesData $data): ScoutBuilder
     {
         return Invoice::search($data->search)
-            ->query(function (Builder $query) use ($user, $data) {
+            ->query(function (Builder $query) use ($data) {
                 return $query
                     ->withCount('reminders')
                     ->when($data->status ?? null, function ($query) use ($data) {

@@ -40,4 +40,4 @@ export function MetricsGrid({ metrics, currency }: MetricsGridProps) {
             />
         </div>
     );
-} 
+}

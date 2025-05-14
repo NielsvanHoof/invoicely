@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import React from 'react';
 
 interface ScheduleDefaultsDialogProps {
     isOpen: boolean;
@@ -35,4 +34,4 @@ export function ScheduleDefaultsDialog({ isOpen, onOpenChange, invoiceId }: Sche
             </DialogContent>
         </Dialog>
     );
-} 
+}

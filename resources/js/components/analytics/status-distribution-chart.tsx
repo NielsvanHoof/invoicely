@@ -1,10 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusDistributionItem } from '@/types/analytics';
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Cell, Legend, Pie, PieChart, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 // Colors that match the application's design system
 const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#10b981'];
-
 
 interface StatusDistributionChartProps {
     data: StatusDistributionItem[];
@@ -52,4 +51,4 @@ export function StatusDistributionChart({ data }: StatusDistributionChartProps) 
             </CardContent>
         </Card>
     );
-} 
+}

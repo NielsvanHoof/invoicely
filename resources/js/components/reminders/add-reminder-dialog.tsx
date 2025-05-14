@@ -78,10 +78,7 @@ export function AddReminderDialog({ isOpen, onOpenChange, invoiceId }: AddRemind
                             Scheduled Date
                         </Label>
                         <div className="relative">
-                            <CalendarIcon
-                                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                                aria-hidden="true"
-                            />
+                            <CalendarIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" aria-hidden="true" />
                             <Input
                                 id="scheduled_date"
                                 type="date"
@@ -130,4 +127,4 @@ export function AddReminderDialog({ isOpen, onOpenChange, invoiceId }: AddRemind
             </DialogContent>
         </Dialog>
     );
-} 
+}

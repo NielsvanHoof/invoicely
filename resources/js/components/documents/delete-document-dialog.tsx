@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { type Document } from '@/types';
 import { router } from '@inertiajs/react';
-import React from 'react';
 
 interface DeleteDocumentDialogProps {
     isOpen: boolean;
@@ -40,4 +39,4 @@ export function DeleteDocumentDialog({ isOpen, onOpenChange, document, invoiceId
             </DialogContent>
         </Dialog>
     );
-} 
+}

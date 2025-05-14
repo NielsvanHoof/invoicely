@@ -5,7 +5,6 @@ use App\Http\Controllers\Clients\ClientIndexController;
 use App\Http\Controllers\Clients\ClientStoreController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::group([
     'prefix' => 'clients',
     'as' => 'clients.',

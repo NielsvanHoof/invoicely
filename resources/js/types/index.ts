@@ -32,7 +32,6 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
-
 export interface PaginatedData<T> {
     data: T[];
     current_page: number;

@@ -24,6 +24,5 @@ class StoreClientData extends Data
 
         #[Max(255)]
         public string $address,
-    ) {
-    }
+    ) {}
 }

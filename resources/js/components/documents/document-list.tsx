@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/ui/empty-state';
 import { type Document } from '@/types';
 import { FileIcon } from 'lucide-react';
-import React from 'react';
 import { DocumentCard } from './document-card';
 
 interface DocumentListProps {
@@ -14,12 +13,7 @@ export function DocumentList({ documents, invoiceId, onDeleteClick }: DocumentLi
     return (
         <div className="grid gap-4">
             {documents.map((document) => (
-                <DocumentCard
-                    key={document.id}
-                    document={document}
-                    invoiceId={invoiceId}
-                    onDeleteClick={onDeleteClick}
-                />
+                <DocumentCard key={document.id} document={document} invoiceId={invoiceId} onDeleteClick={onDeleteClick} />
             ))}
 
             {documents.length === 0 && (
@@ -33,4 +27,4 @@ export function DocumentList({ documents, invoiceId, onDeleteClick }: DocumentLi
             )}
         </div>
     );
-} 
+}

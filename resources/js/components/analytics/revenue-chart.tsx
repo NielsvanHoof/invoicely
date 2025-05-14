@@ -2,21 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { MonthlyRevenueItem } from '@/types/analytics';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip as RechartsTooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 // Colors that match the application's design system
 const CHART_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#10b981'];
-
 
 interface RevenueChartProps {
     data: MonthlyRevenueItem[];
@@ -88,4 +77,4 @@ export function RevenueChart({ data, currency, chartView, onChartViewChange }: R
             </CardContent>
         </Card>
     );
-} 
+}

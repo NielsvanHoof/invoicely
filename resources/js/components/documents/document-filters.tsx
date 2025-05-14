@@ -1,7 +1,6 @@
 import { SearchBar } from '@/components/ui/search-bar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FilterIcon } from 'lucide-react';
-import React from 'react';
 
 interface DocumentFiltersProps {
     search: string;
@@ -40,4 +39,4 @@ export function DocumentFilters({ search, category, invoiceId, onCategoryChange 
             </div>
         </div>
     );
-} 
+}

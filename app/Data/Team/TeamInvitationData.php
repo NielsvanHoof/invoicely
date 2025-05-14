@@ -2,7 +2,6 @@
 
 namespace App\Data\Team;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
@@ -15,13 +14,11 @@ class TeamInvitationData extends Data
         public string $email,
 
         public string $name,
-    ) {
-    }
+    ) {}
 
     /**
      * Get the validation rules for the data.
      *
-     * @param  ValidationContext  $context
      * @return array<string, array<int, mixed>>
      */
     public static function rules(ValidationContext $context): array

@@ -54,6 +54,5 @@ class UpdateInvoiceData extends Data
         public UploadedFile|Optional|null $file = null,
 
         public bool|Optional|null $remove_file = null,
-    ) {
-    }
+    ) {}
 }

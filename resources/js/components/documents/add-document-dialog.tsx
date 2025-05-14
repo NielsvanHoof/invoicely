@@ -106,4 +106,4 @@ export function AddDocumentDialog({ isOpen, onOpenChange, invoiceId }: AddDocume
             </DialogContent>
         </Dialog>
     );
-} 
+}

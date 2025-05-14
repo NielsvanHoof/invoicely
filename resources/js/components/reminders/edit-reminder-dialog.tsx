@@ -83,11 +83,7 @@ export function EditReminderDialog({ isOpen, onOpenChange, reminder, invoiceId }
                     </div>
 
                     <DialogFooter className="mt-6">
-                        <Button
-                            type="submit"
-                            disabled={form.processing}
-                            aria-label={form.processing ? 'Updating reminder...' : 'Update reminder'}
-                        >
+                        <Button type="submit" disabled={form.processing} aria-label={form.processing ? 'Updating reminder...' : 'Update reminder'}>
                             {form.processing ? 'Updating...' : 'Update Reminder'}
                         </Button>
                     </DialogFooter>
@@ -95,4 +91,4 @@ export function EditReminderDialog({ isOpen, onOpenChange, reminder, invoiceId }
             </DialogContent>
         </Dialog>
     );
-} 
+}

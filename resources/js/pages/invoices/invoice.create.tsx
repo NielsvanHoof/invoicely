@@ -45,13 +45,7 @@ export default function CreateInvoice() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Invoice" />
-            <InvoiceForm
-                data={data}
-                errors={errors}
-                processing={processing}
-                onDataChange={handleDataChange}
-                onSubmit={handleSubmit}
-            />
+            <InvoiceForm data={data} errors={errors} processing={processing} onDataChange={handleDataChange} onSubmit={handleSubmit} />
         </AppLayout>
     );
 }

@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
 import { type Reminder } from '@/types';
 import { CalendarIcon, PencilIcon, TrashIcon } from 'lucide-react';
-import React from 'react';
 
 interface ReminderCardProps {
     reminder: Reminder;
@@ -110,4 +109,4 @@ export function ReminderCard({ reminder, onEditClick, onDeleteClick }: ReminderC
             </CardContent>
         </Card>
     );
-} 
+}
