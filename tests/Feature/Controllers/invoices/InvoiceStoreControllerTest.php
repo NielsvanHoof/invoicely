@@ -3,7 +3,6 @@
 namespace Tests\Feature\Controllers\Invoices;
 
 use App\Enums\InvoiceStatus;
-use App\Models\Invoice;
 use App\Models\Team;
 use App\Models\User;
 use App\Policies\InvoicePolicy;
