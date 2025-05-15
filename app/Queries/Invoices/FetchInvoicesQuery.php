@@ -15,7 +15,7 @@ class FetchInvoicesQuery
      *
      * @return ScoutBuilder<Invoice>
      */
-    public function execute(User $user, FetchInvoicesData $data): ScoutBuilder
+    public function execute(FetchInvoicesData $data): ScoutBuilder
     {
         return Invoice::search($data->search)
             ->query(function (Builder $query) use ($data) {

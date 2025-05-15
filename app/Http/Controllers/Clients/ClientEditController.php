@@ -11,6 +11,8 @@ class ClientEditController extends Controller
 {
     public function __invoke(Client $client): Response
     {
+        $this->authorize('update', $client);
+
         return Inertia::render('clients/client.edit', [
             'client' => $client,
         ]);

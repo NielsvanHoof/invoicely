@@ -19,16 +19,6 @@ test('it shows the invoice page for a logged in user', function () {
         $mock->shouldReceive('viewAny')->andReturn(true);
     });
 
-    $response = actingAs($this->user)->get(route('invoices.index'));
-
-    $response->assertOk();
-});
-
-test('it shows the invoice page for a logged in user with a team', function () {
-    $this->partialMock(InvoicePolicy::class, function (MockInterface $mock) {
-        $mock->shouldReceive('viewAny')->andReturn(true);
-    });
-
     $team = Team::factory()->create();
     $this->user->team()->associate($team);
     $this->user->save();

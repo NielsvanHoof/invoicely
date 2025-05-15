@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Clients;
 use App\Actions\Clients\StoreClientAction;
 use App\Data\Clients\StoreClientData;
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 
 class ClientStoreController extends Controller
 {
     public function __invoke(StoreClientData $data, StoreClientAction $action): RedirectResponse
     {
+        $this->authorize('create', Client::class);
+
         $action->execute($data);
 
         return redirect()->route('clients.index')->with('success', 'Client created successfully');

@@ -11,6 +11,8 @@ class ClientIndexController extends Controller
 {
     public function __invoke(): Response
     {
+        $this->authorize('viewAny', Client::class);
+
         $clients = Client::query()->get();
 
         return Inertia::render('clients/client.index', [

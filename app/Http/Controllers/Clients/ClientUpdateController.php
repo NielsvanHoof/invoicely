@@ -12,6 +12,8 @@ class ClientUpdateController extends Controller
 {
     public function __invoke(Client $client, UpdateClientAction $action, UpdateClientData $data): RedirectResponse
     {
+        $this->authorize('update', $client);
+
         $result = $action->execute($client, $data);
 
         if ($result) {

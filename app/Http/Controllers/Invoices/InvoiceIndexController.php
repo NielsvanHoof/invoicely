@@ -6,7 +6,6 @@ use App\Data\Invoices\FetchInvoicesData;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Queries\Invoices\FetchInvoicesQuery;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,9 +15,7 @@ class InvoiceIndexController extends Controller
     {
         $this->authorize('viewAny', Invoice::class);
 
-        $user = Auth::user();
-
-        $invoices = $fetchInvoicesQuery->execute($user, $data)->paginate(10);
+        $invoices = $fetchInvoicesQuery->execute($data)->paginate(10);
 
         return Inertia::render('invoices/invoice.index', [
             'invoices' => Inertia::merge($invoices),
