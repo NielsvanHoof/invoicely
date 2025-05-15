@@ -19,10 +19,10 @@ class FetchFinancialMetricsQuery extends BaseQuery
             $invoices = Invoice::query()->get();
 
             $totalOutstanding = $invoices
-                ->whereIn('status', [InvoiceStatus::SENT->value, InvoiceStatus::OVERDUE->value])
+                ->whereIn('status', [InvoiceStatus::SENT, InvoiceStatus::OVERDUE])
                 ->sum('amount');
 
-            $paidInvoices = $invoices->where('status', InvoiceStatus::PAID->value);
+            $paidInvoices = $invoices->where('status', InvoiceStatus::PAID);
 
             // Calculate average time to payment in days for paid invoices
             $avgTimeToPayment = 0;
@@ -39,7 +39,7 @@ class FetchFinancialMetricsQuery extends BaseQuery
 
             $overduePercentage = 0;
             if ($invoices->count() > 0) {
-                $overdueCount = $invoices->where('status', InvoiceStatus::OVERDUE->value)->count();
+                $overdueCount = $invoices->where('status', InvoiceStatus::OVERDUE)->count();
                 $overduePercentage = ($overdueCount / $invoices->count()) * 100;
             }
 

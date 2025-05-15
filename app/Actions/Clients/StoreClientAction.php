@@ -11,9 +11,17 @@ class StoreClientAction
 {
     public function execute(StoreClientData $storeClientData): Client
     {
-        return Client::create([
+        $password = Str::random(10);
+
+        // TODO: Send email to client with password
+
+        $client = Client::create([
             ...$storeClientData->toArray(),
-            'password' => Hash::make(Str::random(10)),
+            'password' => Hash::make($password),
         ]);
+
+        $client->assignRole('client');
+
+        return $client;
     }
 }

@@ -8,7 +8,6 @@ use App\Queries\Analytics\FetchFinancialMetricsQuery;
 use App\Queries\Analytics\FetchMonthlyRevenueQuery;
 use App\Queries\Analytics\FetchStatusDistributionQuery;
 use App\Queries\Analytics\FetchTopClientsQuery;
-use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -28,9 +27,7 @@ class AnalyticsIndexController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if (! Gate::allows('view-analytics', $user)) {
-            return redirect()->route('dashboard');
-        }
+        $this->authorize('vew-analytics', $user);
 
         $financialMetrics = $this->fetchFinancialMetricsQuery->execute($user);
         $statusDistribution = $this->fetchStatusDistributionQuery->execute($user);

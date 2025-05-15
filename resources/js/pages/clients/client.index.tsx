@@ -1,11 +1,12 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Client } from '@/types/models';
 import { Head, Link } from '@inertiajs/react';
-import { PlusIcon, Users } from 'lucide-react';
+import { Building2, Mail, MapPin, Phone, PlusIcon, Users } from 'lucide-react';
 
 interface ClientIndexProps {
     clients: Client[];
@@ -23,10 +24,13 @@ export default function ClientIndex({ clients }: ClientIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Clients" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-2 sm:p-4" role="main">
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 sm:p-6" role="main">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Clients</h1>
-                    <Button asChild>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Clients</h1>
+                        <p className="text-muted-foreground mt-1 text-sm">Manage your client relationships and information</p>
+                    </div>
+                    <Button asChild className="shadow-sm transition-all duration-200 hover:shadow-md">
                         <Link href={route('clients.create')}>
                             <PlusIcon className="mr-2 h-4 w-4" />
                             Add Client
@@ -41,45 +45,61 @@ export default function ClientIndex({ clients }: ClientIndexProps) {
                         description="Get started by adding your first client. You can add their contact information, company details, and more."
                         primaryAction={{
                             label: 'Add Client',
-                            href: route('clients.index'),
+                            href: route('clients.create'),
                             variant: 'primary',
                             ariaLabel: 'Add your first client',
                         }}
                     />
                 ) : (
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border rounded-xl border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Company</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Phone</TableHead>
-                                    <TableHead>Address</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {clients.map((client) => (
-                                    <TableRow key={client.id}>
-                                        <TableCell className="font-medium">
-                                            {/* <Link href={route('clients.show', client.id)} className="hover:underline">
-                                                {client.name}
-                                            </Link> */}
-                                        </TableCell>
-                                        <TableCell>{client.company_name || '-'}</TableCell>
-                                        <TableCell>{client.email}</TableCell>
-                                        <TableCell>{client.phone || '-'}</TableCell>
-                                        <TableCell>{client.address || '-'}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" asChild>
-                                                {/* <Link href={route('clients.edit', client.id)}>Edit</Link> */}
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {clients.map((client) => (
+                            <Card key={client.id} className="p-4 transition-all duration-200 hover:shadow-lg">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-semibold">{client.name}</h3>
+                                        {client.company_name && (
+                                            <div className="text-muted-foreground mt-1 flex items-center gap-1 text-sm">
+                                                <Building2 className="h-4 w-4" />
+                                                <span>{client.company_name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <Badge variant="outline" className="ml-2">
+                                        Active
+                                    </Badge>
+                                </div>
+
+                                <div className="mt-4 space-y-2">
+                                    {client.email && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Mail className="text-muted-foreground h-4 w-4" />
+                                            <span>{client.email}</span>
+                                        </div>
+                                    )}
+                                    {client.phone && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Phone className="text-muted-foreground h-4 w-4" />
+                                            <span>{client.phone}</span>
+                                        </div>
+                                    )}
+                                    {client.address && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <MapPin className="text-muted-foreground h-4 w-4" />
+                                            <span>{client.address}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 flex justify-end gap-2">
+                                    <Button variant="outline" size="sm" asChild>
+                                        View
+                                    </Button>
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href={route('clients.edit', client.id)}>Edit</Link>
+                                    </Button>
+                                </div>
+                            </Card>
+                        ))}
                     </div>
                 )}
             </div>

@@ -9,7 +9,7 @@ use App\Http\Controllers\Teams\TeamStoreController;
 use App\Http\Controllers\Teams\TeamUpdateController;
 
 Route::group([
-    'prefix' => 'teams',
+    'prefix' => 'settings/teams',
     'as' => 'teams.',
 ], function () {
     // GET /teams - List all teams

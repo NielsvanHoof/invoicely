@@ -39,7 +39,12 @@ class TeamInvitationData extends Data
         ];
     }
 
-    public static function messages(...$args): array
+    /**
+     * Get the validation messages for the data.
+     *
+     * @return array<string, string>
+     */
+    public static function messages(): array
     {
         return [
             'email.exists' => 'The email address does not exist.',
