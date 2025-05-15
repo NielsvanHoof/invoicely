@@ -5,9 +5,7 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Scopes\InvoiceByTeamOrUserScope;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -69,43 +67,6 @@ class Invoice extends Model implements AuditableContract
         $array['invoice_number'] = $this->invoice_number;
 
         return $array;
-    }
-
-    /**
-     * Scope a query to filter by team.
-     *
-     * @param  Builder<Invoice>  $query
-     */
-    private function ByTeam(Builder $query, ?int $teamId): void
-    {
-        if ($teamId) {
-            $query->where('team_id', $teamId);
-        }
-    }
-
-    /**
-     * Scope a query to filter by user.
-     *
-     * @param  Builder<Invoice>  $query
-     */
-    private function ByUser(Builder $query, int $userId): void
-    {
-        $query->where('user_id', $userId);
-    }
-
-    /**
-     * Scope a query to filter by user and team.
-     *
-     * @param  Builder<Invoice>  $query
-     */
-    #[Scope]
-    public function ForUser(Builder $query, User $user): void
-    {
-        if ($user->team_id) {
-            $this->ByTeam($query, $user->team_id);
-        }
-
-        $this->ByUser($query, $user->id);
     }
 
     /**

@@ -41,7 +41,7 @@ class UpdateInvoiceData extends Data
         #[Date]
         public string|Optional|null $issue_date = null,
 
-        #[Date, AfterOrEqual(attribute: 'issue_date')]
+        #[Date, AfterOrEqual('issue_date')]
         public string|Optional|null $due_date = null,
 
         #[Enum(InvoiceStatus::class), In(InvoiceStatus::class)]

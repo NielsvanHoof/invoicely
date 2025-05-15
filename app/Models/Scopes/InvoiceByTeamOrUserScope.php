@@ -22,11 +22,13 @@ class InvoiceByTeamOrUserScope implements Scope
             return;
         }
 
-        $builder->when($model->team_id, function (Builder $query) use ($model) {
-            $query->where('team_id', $model->team_id);
+        $user = Auth::user();
+
+        $builder->when($user->team_id, function (Builder $query) use ($user) {
+            $query->where('team_id', $user->team_id);
         })
-            ->when(! $model->team_id, function (Builder $query) {
-                $query->where('user_id', Auth::id());
+            ->when(! $user->team_id, function (Builder $query) use ($user) {
+                $query->where('user_id', $user->id);
             });
     }
 }

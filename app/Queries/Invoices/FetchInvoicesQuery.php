@@ -18,29 +18,26 @@ class FetchInvoicesQuery
     public function execute(User $user, FetchInvoicesData $data): ScoutBuilder
     {
         return Invoice::search($data->search)
-            ->query(function (Builder $query) use ($user, $data) {
+            ->query(function (Builder $query) use ($data) {
                 return $query
                     ->withCount('reminders')
-                    ->when(! empty($user->team_id ?? null), function ($query) use ($user) {
-                        $query->where('team_id', $user->team_id);
-                    })
-                    ->when(empty($user->team_id ?? null), function ($query) use ($user) {
-                        $query->where('user_id', $user->id);
-                    })
                     ->when($data->status ?? null, function ($query) use ($data) {
                         $query->where('status', $data->status);
                     })
-                    ->when($data->dateFrom ?? null, function ($query) use ($data) {
-                        $query->whereDate('created_at', '>=', $data->dateFrom);
+                    ->when($data->date_from ?? null, function ($query) use ($data) {
+                        $query->whereDate('created_at', '>=', $data->date_from);
                     })
-                    ->when($data->dateTo ?? null, function ($query) use ($data) {
-                        $query->whereDate('created_at', '<=', $data->dateTo);
+                    ->when($data->date_to ?? null, function ($query) use ($data) {
+                        $query->whereDate('created_at', '<=', $data->date_to);
                     })
-                    ->when($data->amountFrom ?? null, function ($query) use ($data) {
-                        $query->where('amount', '>=', $data->amountFrom);
+                    ->when($data->amount_from ?? null, function ($query) use ($data) {
+                        $query->where('amount', '>=', $data->amount_from);
                     })
-                    ->when($data->amountTo ?? null, function ($query) use ($data) {
-                        $query->where('amount', '<=', $data->amountTo);
+                    ->when($data->amount_to ?? null, function ($query) use ($data) {
+                        $query->where('amount', '<=', $data->amount_to);
+                    })
+                    ->when($data->sort_field ?? null, function ($query) use ($data) {
+                        $query->orderBy($data->sort_field, $data->sort_direction);
                     });
             });
     }

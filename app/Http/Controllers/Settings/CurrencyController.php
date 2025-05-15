@@ -37,8 +37,10 @@ class CurrencyController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $user->currency = $validated['currency'];
-        $user->save();
+
+        $user->update([
+            'currency' => $validated['currency'],
+        ]);
 
         InvalidateDashBoardCacheEvent::dispatch($user);
         InvalidateAnalyticsCacheEvent::dispatch($user);

@@ -4,39 +4,9 @@ import { StatsOverview } from '@/components/dashboard/stats-overview';
 import { UpcomingInvoices } from '@/components/dashboard/upcoming-invoices';
 import { InvoiceStatisticsWidget } from '@/components/invoice-statistics-widget';
 import AppLayout from '@/layouts/app-layout';
-import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
+import { SharedData, type BreadcrumbItem } from '@/types';
+import { DashboardProps } from '@/types/dashboard';
 import { Head, usePage } from '@inertiajs/react';
-
-interface ActivityItem {
-    id: string;
-    type: 'created' | 'updated' | 'reminder';
-    invoice_number: string;
-    client_name: string;
-    amount: number;
-    status: string;
-    date: string;
-    reminder_type?: string;
-    reminder_id?: string;
-    sent_at?: string;
-    scheduled_date?: string;
-    timestamp: string;
-}
-
-interface DashboardProps {
-    stats: {
-        totalInvoices: number;
-        totalPaid: number;
-        totalOverdue: number;
-        totalPending: number;
-        totalOutstanding: number;
-        overdueCount: number;
-        upcomingCount: number;
-        averageDaysOverdue: number;
-    };
-    latestInvoices: Invoice[];
-    upcomingInvoices: Invoice[];
-    recentActivity: ActivityItem[];
-}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -1,7 +1,8 @@
 import { InvoiceForm } from '@/components/invoices';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Invoice } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { UpdateInvoiceData } from '@/types/generated';
+import { Invoice } from '@/types/models';
 import { Head, useForm } from '@inertiajs/react';
 
 interface EditInvoiceProps {
@@ -10,10 +11,6 @@ interface EditInvoiceProps {
 
 export default function EditInvoice({ invoice }: EditInvoiceProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Dashboard',
-            href: route('dashboard'),
-        },
         {
             title: 'Invoices',
             href: route('invoices.index'),

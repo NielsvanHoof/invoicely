@@ -23,7 +23,7 @@ class ReminderStoreController extends Controller
 
         // Get the default message if none provided
         if (empty($data->message)) {
-            $reminderType = ReminderType::from($data->type);
+            $reminderType = ReminderType::from($data->type->value);
             $data->message = $this->reminderMessageFormatter->format($reminderType, $invoice);
         }
 

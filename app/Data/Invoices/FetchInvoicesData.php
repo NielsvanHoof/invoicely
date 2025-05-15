@@ -2,7 +2,6 @@
 
 namespace App\Data\Invoices;
 
-use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 
 class FetchInvoicesData extends Data
@@ -10,18 +9,18 @@ class FetchInvoicesData extends Data
     public function __construct(
         public ?string $search = null,
 
+        public ?string $sort_field = 'created_at',
+
+        public ?string $sort_direction = 'desc',
+
         public ?string $status = null,
 
-        #[MapInputName('date_from')]
-        public ?string $dateFrom = null,
+        public ?string $date_from = null,
 
-        #[MapInputName('date_to')]
-        public ?string $dateTo = null,
+        public ?string $date_to = null,
 
-        #[MapInputName('amount_from')]
-        public ?float $amountFrom = null,
+        public ?float $amount_from = null,
 
-        #[MapInputName('amount_to')]
-        public ?float $amountTo = null,
+        public ?float $amount_to = null,
     ) {}
 }

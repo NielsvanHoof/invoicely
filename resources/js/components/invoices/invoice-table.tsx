@@ -5,7 +5,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { SharedData, type Invoice } from '@/types';
+import { SharedData } from '@/types';
+import { Invoice } from '@/types/models';
 import { Link, usePage } from '@inertiajs/react';
 import {
     ArrowUpDown,
@@ -25,14 +26,12 @@ interface InvoiceTableProps {
     selectedInvoices: Invoice[];
     onSelectInvoice: (invoice: Invoice, isSelected: boolean) => void;
     onSelectAll: (isSelected: boolean) => void;
-    sort: {
-        field: string;
-        direction: 'asc' | 'desc';
-    };
+    sort_field: string;
+    sort_direction: string;
     onSort: (field: string) => void;
 }
 
-export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSelectAll, sort, onSort }: InvoiceTableProps) {
+export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSelectAll, sort_field, sort_direction, onSort }: InvoiceTableProps) {
     const { auth } = usePage<SharedData>().props;
     const userCurrency = auth?.user?.currency || 'USD';
 
@@ -65,18 +64,18 @@ export function InvoiceTable({ invoices, selectedInvoices, onSelectInvoice, onSe
             onKeyDown={(e) => handleKeyDown(e, field)}
             tabIndex={0}
             role="button"
-            aria-sort={sort.field === field ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+            aria-sort={sort_field === field ? (sort_direction === 'asc' ? 'ascending' : 'descending') : 'none'}
         >
             <div className="flex items-center gap-1">
                 {children}
-                {sort.field === field ? (
+                {sort_field === field ? (
                     <ArrowUpDown className="h-4 w-4" aria-hidden="true" />
                 ) : (
                     <ArrowUpDown className="text-muted-foreground/50 h-4 w-4" aria-hidden="true" />
                 )}
-                {sort.field === field && (
+                {sort_field === field && (
                     <span className="text-muted-foreground ml-1 text-xs" aria-hidden="true">
-                        {sort.direction === 'asc' ? '↑' : '↓'}
+                        {sort_direction === 'asc' ? '↑' : '↓'}
                     </span>
                 )}
             </div>

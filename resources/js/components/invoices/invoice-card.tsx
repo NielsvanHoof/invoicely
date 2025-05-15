@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { SharedData, type Invoice } from '@/types';
+import { SharedData } from '@/types';
+import { Invoice } from '@/types/models';
 import { Link, usePage } from '@inertiajs/react';
 import { BellIcon, EyeIcon, FileEditIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 

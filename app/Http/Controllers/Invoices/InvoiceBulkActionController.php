@@ -19,7 +19,7 @@ class InvoiceBulkActionController extends Controller
 
         $result = $action->execute($data, $user);
 
-        if (is_array($result)) {
+        if (isset($result['error'])) {
             return back()->with('error', $result['error']);
         }
 

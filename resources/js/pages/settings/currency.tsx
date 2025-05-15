@@ -2,8 +2,8 @@ import { Head } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
-import { CurrencySettings } from './components/CurrencySettings';
 
+import { CurrencySettings } from '@/components/settings/currency-settings';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 

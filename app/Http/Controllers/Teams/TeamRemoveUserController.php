@@ -13,6 +13,7 @@ class TeamRemoveUserController extends Controller
 {
     public function __invoke(RemoveTeamMemberData $data, RemoveUserFromTeamAction $removeUserFromTeamAction): RedirectResponse
     {
+        /** @var User $user */
         $user = Auth::user()->load('team');
 
         if (! $user->team) {

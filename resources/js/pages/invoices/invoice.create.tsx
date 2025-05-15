@@ -6,10 +6,6 @@ import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: route('dashboard'),
-    },
-    {
         title: 'Invoices',
         href: route('invoices.index'),
     },
@@ -49,13 +45,7 @@ export default function CreateInvoice() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Invoice" />
-            <InvoiceForm
-                data={data}
-                errors={errors}
-                processing={processing}
-                onDataChange={handleDataChange}
-                onSubmit={handleSubmit}
-            />
+            <InvoiceForm data={data} errors={errors} processing={processing} onDataChange={handleDataChange} onSubmit={handleSubmit} />
         </AppLayout>
     );
 }

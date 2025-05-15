@@ -19,58 +19,105 @@ class BulkInvoiceAction
      * Execute a bulk action on multiple invoices.
      *
      * @return array{
-     *     deletedCount: int,
-     *     failedCount: int,
+     *     success: bool,
+     *     count?: int,
+     *     deletedCount?: int,
+     *     failedCount?: int,
      *     error?: string,
-     * }|int
+     *     message?: string
+     * }
      */
-    public function execute(BulkInvoiceData $data, User $user): array|int
+    public function execute(BulkInvoiceData $data, User $user): array
     {
-        switch ($data->action) {
-            case 'mark_as_sent':
-                $count = $this->bulkUpdateInvoiceStatusAction->execute($data, InvoiceStatus::SENT, $user);
+        return match ($data->action) {
+            'mark_as_sent' => $this->handleStatusUpdate($data, InvoiceStatus::SENT, $user),
+            'mark_as_paid' => $this->handleStatusUpdate($data, InvoiceStatus::PAID, $user),
+            'mark_as_overdue' => $this->handleStatusUpdate($data, InvoiceStatus::OVERDUE, $user),
+            'create_reminder_upcoming' => $this->handleReminderCreation($data, ReminderType::UPCOMING, $user),
+            'create_reminder_overdue' => $this->handleReminderCreation($data, ReminderType::OVERDUE, $user),
+            'create_reminder_thank_you' => $this->handleReminderCreation($data, ReminderType::THANK_YOU, $user),
+            'delete' => $this->handleDeletion($data, $user),
+            default => [
+                'success' => false,
+                'error' => 'Unsupported bulk action specified.',
+            ]
+        };
+    }
 
-                return $count;
+    /**
+     * Handle status update operations
+     *
+     * @return array{
+     *     success: bool,
+     *     count?: int,
+     *     error?: string,
+     *     message?: string
+     * }
+     */
+    private function handleStatusUpdate(BulkInvoiceData $data, InvoiceStatus $status, User $user): array
+    {
+        $count = $this->bulkUpdateInvoiceStatusAction->execute($data, $status, $user);
 
-            case 'mark_as_paid':
-                $count = $this->bulkUpdateInvoiceStatusAction->execute($data, InvoiceStatus::PAID, $user);
+        return [
+            'success' => true,
+            'count' => $count,
+            'message' => "Successfully updated {$count} invoice(s) to {$status->value} status.",
+        ];
+    }
 
-                return $count;
+    /**
+     * Handle reminder creation operations
+     *
+     * @return array{
+     *     success: bool,
+     *     count?: int,
+     *     error?: string,
+     *     message?: string
+     * }
+     */
+    private function handleReminderCreation(BulkInvoiceData $data, ReminderType $type, User $user): array
+    {
+        $count = $this->bulkCreateInvoiceRemindersAction->execute($data, $type, $user);
 
-            case 'mark_as_overdue':
-                $count = $this->bulkUpdateInvoiceStatusAction->execute($data, InvoiceStatus::OVERDUE, $user);
+        return [
+            'success' => true,
+            'count' => $count,
+            'message' => "Successfully created {$count} {$type->value} reminder(s).",
+        ];
+    }
 
-                return $count;
+    /**
+     * Handle invoice deletion operations
+     *
+     * @return array{
+     *     success: bool,
+     *     deletedCount?: int,
+     *     failedCount?: int,
+     *     error?: string,
+     *     message?: string
+     * }
+     */
+    private function handleDeletion(BulkInvoiceData $data, User $user): array
+    {
+        $result = $this->bulkDeleteInvoicesAction->execute($data, $user);
 
-            case 'create_reminder_upcoming':
-                $count = $this->bulkCreateInvoiceRemindersAction->execute($data, ReminderType::UPCOMING, $user);
-
-                return $count;
-
-            case 'create_reminder_overdue':
-                $count = $this->bulkCreateInvoiceRemindersAction->execute($data, ReminderType::OVERDUE, $user);
-
-                return $count;
-
-            case 'create_reminder_thank_you':
-                $count = $this->bulkCreateInvoiceRemindersAction->execute($data, ReminderType::THANK_YOU, $user);
-
-                return $count;
-
-            case 'delete':
-                $result = $this->bulkDeleteInvoicesAction->execute($data, $user);
-                $successMessage = $result['deletedCount'].' invoice(s) deleted.';
-                if ($result['failedCount'] > 0) {
-                    $successMessage .= ' ('.$result['failedCount'].' could not be deleted, possibly because they were already paid).';
-                }
-                if ($result['deletedCount'] === 0 && $result['failedCount'] > 0) {
-                    return ['error' => 'None of the selected invoices could be deleted, possibly because they were already paid.'];
-                }
-
-                return $result;
-
-            default:
-                return ['error' => 'Unsupported bulk action specified.'];
+        if ($result['deletedCount'] === 0 && $result['failedCount'] > 0) {
+            return [
+                'success' => false,
+                'error' => 'None of the selected invoices could be deleted, possibly because they were already paid.',
+            ];
         }
+
+        $message = "{$result['deletedCount']} invoice(s) deleted.";
+        if ($result['failedCount'] > 0) {
+            $message .= " ({$result['failedCount']} could not be deleted, possibly because they were already paid).";
+        }
+
+        return [
+            'success' => true,
+            'deletedCount' => $result['deletedCount'],
+            'failedCount' => $result['failedCount'],
+            'message' => $message,
+        ];
     }
 }

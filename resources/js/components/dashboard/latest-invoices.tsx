@@ -1,8 +1,10 @@
 import { InvoiceStatusBadge } from '@/components/invoice-status-badge';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { type Invoice } from '@/types';
+import { Invoice } from '@/types/models';
 import { Link } from '@inertiajs/react';
+import { FileTextIcon } from 'lucide-react';
 
 interface LatestInvoicesProps {
     invoices: Invoice[];
@@ -23,27 +25,25 @@ export function LatestInvoices({ invoices, userCurrency }: LatestInvoicesProps) 
 
             {/* Desktop Table View */}
             <div className="hidden sm:block">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead scope="col">Invoice #</TableHead>
-                            <TableHead scope="col">Client</TableHead>
-                            <TableHead scope="col">Amount</TableHead>
-                            <TableHead scope="col" className="hidden md:table-cell">
-                                Date
-                            </TableHead>
-                            <TableHead scope="col">Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {invoices.length === 0 ? (
+                {invoices.length === 0 ? (
+                    <div className="p-4">
+                        <EmptyState type="default" icon={FileTextIcon} className="h-[300px]" />
+                    </div>
+                ) : (
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={5} className="py-8 text-center text-neutral-500">
-                                    No invoices found. Create your first invoice to get started.
-                                </TableCell>
+                                <TableHead scope="col">Invoice #</TableHead>
+                                <TableHead scope="col">Client</TableHead>
+                                <TableHead scope="col">Amount</TableHead>
+                                <TableHead scope="col" className="hidden md:table-cell">
+                                    Date
+                                </TableHead>
+                                <TableHead scope="col">Status</TableHead>
                             </TableRow>
-                        ) : (
-                            invoices.map((invoice) => (
+                        </TableHeader>
+                        <TableBody>
+                            {invoices.map((invoice) => (
                                 <TableRow key={`${invoice.id}-${invoice.invoice_number}`}>
                                     <TableCell className="font-medium">
                                         <Link
@@ -61,16 +61,27 @@ export function LatestInvoices({ invoices, userCurrency }: LatestInvoicesProps) 
                                         <InvoiceStatusBadge status={invoice.status} />
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </div>
 
             {/* Mobile Card View */}
             <div className="sm:hidden">
                 {invoices.length === 0 ? (
-                    <div className="py-8 text-center text-sm text-neutral-500">No invoices found. Create your first invoice to get started.</div>
+                    <div className="p-4">
+                        <EmptyState
+                            type="default"
+                            icon={FileTextIcon}
+                            primaryAction={{
+                                label: 'Create Invoice',
+                                href: route('invoices.create'),
+                                variant: 'primary',
+                            }}
+                            className="h-[300px]"
+                        />
+                    </div>
                 ) : (
                     <div className="divide-sidebar-border/70 dark:divide-sidebar-border divide-y">
                         {invoices.map((invoice) => (

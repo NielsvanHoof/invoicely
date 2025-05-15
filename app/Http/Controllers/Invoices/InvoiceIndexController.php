@@ -23,7 +23,9 @@ class InvoiceIndexController extends Controller
         return Inertia::render('invoices/invoice.index', [
             'invoices' => Inertia::merge($invoices),
             'search' => $data->search,
-            'filters' => $data->except('search')->toArray(),
+            'filters' => $data->except('search', 'sort_field', 'sort_direction')->toArray(),
+            'sort_field' => $data->sort_field,
+            'sort_direction' => $data->sort_direction,
         ]);
     }
 }

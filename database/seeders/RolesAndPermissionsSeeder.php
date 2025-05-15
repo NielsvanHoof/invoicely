@@ -19,32 +19,37 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        Permission::create(['name' => 'view invoices']);
-        Permission::create(['name' => 'create invoices']);
-        Permission::create(['name' => 'edit invoices']);
-        Permission::create(['name' => 'delete invoices']);
-        Permission::create(['name' => 'download invoices']);
-        Permission::create(['name' => 'send invoices']);
+        // Create permissions for web guard (users)
+        Permission::create(['name' => 'view invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'download invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'send invoices', 'guard_name' => 'web']);
 
-        Permission::create(['name' => 'view own invoices']);
-        Permission::create(['name' => 'pay invoices']);
-        Permission::create(['name' => 'download own invoices']);
+        // Create permissions for client guard
+        Permission::create(['name' => 'view invoices', 'guard_name' => 'client']);
+        Permission::create(['name' => 'pay invoices', 'guard_name' => 'client']);
+        Permission::create(['name' => 'download invoices', 'guard_name' => 'client']);
+        Permission::create(['name' => 'manage team', 'guard_name' => 'client']);
+        Permission::create(['name' => 'invite team members', 'guard_name' => 'client']);
+        Permission::create(['name' => 'remove team members', 'guard_name' => 'client']);
 
-        // Create permissions for teams
-        Permission::create(['name' => 'manage team']);
-        Permission::create(['name' => 'invite team members']);
-        Permission::create(['name' => 'remove team members']);
+        // Create permissions for teams (web guard)
+        Permission::create(['name' => 'manage team', 'guard_name' => 'web']);
+        Permission::create(['name' => 'invite team members', 'guard_name' => 'web']);
+        Permission::create(['name' => 'remove team members', 'guard_name' => 'web']);
 
-        Permission::create(['name' => 'view analytics']);
-        Permission::create(['name' => 'export analytics']);
+        Permission::create(['name' => 'view analytics', 'guard_name' => 'web']);
+        Permission::create(['name' => 'export analytics', 'guard_name' => 'web']);
 
-        Permission::create(['name' => 'manage settings']);
-        Permission::create(['name' => 'manage users']);
-        Permission::create(['name' => 'manage teams']);
+        Permission::create(['name' => 'manage settings', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage users', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage teams', 'guard_name' => 'web']);
 
         // Admin role - has all permissions
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->givePermissionTo(Permission::where('guard_name', 'web')->get());
 
         // Invoicer role - can manage invoices and view analytics
         $invoicerRole = Role::create(['name' => 'invoicer', 'guard_name' => 'web']);
@@ -76,11 +81,11 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Client role - can only view and pay their own invoices
-        $clientRole = Role::create(['name' => 'client', 'guard_name' => 'web']);
+        $clientRole = Role::create(['name' => 'client', 'guard_name' => 'client']);
         $clientRole->givePermissionTo([
-            'view own invoices',
+            'view invoices',
             'pay invoices',
-            'download own invoices',
+            'download invoices',
             'manage team',
             'invite team members',
             'remove team members',

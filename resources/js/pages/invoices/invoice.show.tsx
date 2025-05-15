@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { SharedData, type BreadcrumbItem, type Invoice } from '@/types';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Invoice } from '@/types/models';
 import { Head, Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeftIcon, BellIcon, DownloadIcon, FileEditIcon, FileIcon, TrashIcon } from 'lucide-react';
@@ -39,10 +40,6 @@ export default function ShowInvoice({ invoice }: ShowInvoiceProps) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Dashboard',
-            href: route('dashboard'),
-        },
         {
             title: 'Invoices',
             href: route('invoices.index'),

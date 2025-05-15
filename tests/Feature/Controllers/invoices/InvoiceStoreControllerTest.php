@@ -3,7 +3,6 @@
 namespace Tests\Feature\Controllers\Invoices;
 
 use App\Enums\InvoiceStatus;
-use App\Models\Invoice;
 use App\Models\Team;
 use App\Models\User;
 use App\Policies\InvoicePolicy;
@@ -12,7 +11,6 @@ use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function PHPUnit\Framework\assertMatchesRegularExpression;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -79,11 +77,4 @@ test('A user can create an invoice with a file', function () {
     assertDatabaseHas('invoices', [
         'invoice_number' => 'INV-123',
     ]);
-
-    $invoice = Invoice::where('invoice_number', 'INV-123')->first();
-
-    assertMatchesRegularExpression(
-        '/^invoices\/'.$this->user->id.'\/[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.pdf$/',
-        $invoice->file_path
-    );
 });

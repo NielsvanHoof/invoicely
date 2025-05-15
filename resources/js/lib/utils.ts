@@ -75,7 +75,7 @@ export function getActiveFilters(
     const activeFilters = Object.entries(filters).reduce(
         (acc, [key, value]) => {
             // Check if value is not undefined, null, empty string, or whitespace
-            if (value !== undefined && value !== null && value.trim() !== '') {
+            if (value !== undefined && value !== null && value !== '') {
                 acc[key] = value;
             }
             return acc;

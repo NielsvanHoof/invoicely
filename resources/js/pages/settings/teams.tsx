@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { Team, User, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { CreateTeamData, TeamInvitationData, UpdateTeamData } from '@/types/generated';
+import { Team, User } from '@/types/models';
 import { Head, router, useForm } from '@inertiajs/react';
 import { AlertCircle, Loader2, PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';

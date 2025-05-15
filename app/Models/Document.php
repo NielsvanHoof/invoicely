@@ -26,6 +26,11 @@ class Document extends Model
         'invoice_id',
     ];
 
+    /**
+     * Get the searchable array for the model.
+     *
+     * @return array<string, mixed>
+     */
     public function toSearchableArray(): array
     {
         $array = $this->toArray();
