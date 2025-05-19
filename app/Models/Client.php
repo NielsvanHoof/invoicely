@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ClientByTeamOrUserScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
+#[ScopedBy(ClientByTeamOrUserScope::class)]
 class Client extends Authenticatable
 {
     use HasRoles, Notifiable;
@@ -23,6 +27,8 @@ class Client extends Authenticatable
         'address',
         'phone',
         'company_name',
+        'user_id',
+        'team_id',
     ];
 
     /**
@@ -53,5 +59,25 @@ class Client extends Authenticatable
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get the team that the client belongs to.
+     *
+     * @return BelongsTo<Team, covariant Client>
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get the user that the client belongs to.
+     *
+     * @return BelongsTo<User, covariant Client>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

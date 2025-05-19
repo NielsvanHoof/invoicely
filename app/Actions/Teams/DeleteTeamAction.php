@@ -2,6 +2,8 @@
 
 namespace App\Actions\Teams;
 
+use App\Jobs\Teams\TransferClientsToUserJob;
+use App\Jobs\Teams\TransferInvoicesToUserJob;
 use App\Models\Team;
 
 class DeleteTeamAction
@@ -22,6 +24,9 @@ class DeleteTeamAction
         }
 
         // Delete the team
+        TransferClientsToUserJob::dispatch($team->owner, $team);
+        TransferInvoicesToUserJob::dispatch($team->owner, $team);
+
         return $team->delete();
     }
 }

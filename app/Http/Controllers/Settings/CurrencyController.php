@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Enums\CurrencyType;
-use App\Events\InvalidateAnalyticsCacheEvent;
-use App\Events\InvalidateDashBoardCacheEvent;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Auth;
+use Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -42,8 +41,7 @@ class CurrencyController extends Controller
             'currency' => $validated['currency'],
         ]);
 
-        InvalidateDashBoardCacheEvent::dispatch($user);
-        InvalidateAnalyticsCacheEvent::dispatch($user);
+        Cache::flush();
 
         return redirect()->back()->with('success', 'Currency updated successfully.');
     }

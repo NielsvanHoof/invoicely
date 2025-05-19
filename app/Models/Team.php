@@ -51,4 +51,14 @@ class Team extends Model
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
+
+    /**
+     * Get the clients for the team.
+     *
+     * @return HasMany<Client, covariant Team>
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }

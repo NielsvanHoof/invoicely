@@ -8,6 +8,7 @@ use Spatie\LaravelData\Attributes\Validation\AfterOrEqual;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Enum;
+use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\File;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Mimes;
@@ -24,13 +25,16 @@ class StoreInvoiceData extends Data
         public string $invoice_number,
 
         #[Max(255)]
-        public string $client_name,
+        public ?string $client_name,
 
         #[Email, Max(255)]
-        public string $client_email,
+        public ?string $client_email,
 
         #[Max(255)]
         public ?string $client_address,
+
+        #[Exists(table: 'clients', column: 'id')]
+        public int $client_id,
 
         #[Min(0)]
         public float $amount,

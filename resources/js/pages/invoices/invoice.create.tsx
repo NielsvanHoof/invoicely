@@ -2,6 +2,7 @@ import { InvoiceForm } from '@/components/invoices';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { InvoiceStatus, StoreInvoiceData } from '@/types/generated';
+import { Client } from '@/types/models';
 import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -15,9 +16,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function CreateInvoice() {
+interface Props {
+    clients: Client[];
+}
+
+export default function CreateInvoice({ clients }: Props) {
     const { data, setData, post, processing, errors } = useForm<StoreInvoiceData>({
         invoice_number: '',
+        client_id: 0,
         client_name: '',
         client_email: '',
         client_address: '',
@@ -31,7 +37,7 @@ export default function CreateInvoice() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/invoices');
+        post(route('invoices.store'));
     };
 
     const handleDataChange = (key: keyof StoreInvoiceData, value: string | File | null) => {
@@ -45,7 +51,14 @@ export default function CreateInvoice() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Invoice" />
-            <InvoiceForm data={data} errors={errors} processing={processing} onDataChange={handleDataChange} onSubmit={handleSubmit} />
+            <InvoiceForm 
+                data={data} 
+                errors={errors} 
+                processing={processing} 
+                onDataChange={handleDataChange} 
+                onSubmit={handleSubmit}
+                clients={clients}
+            />
         </AppLayout>
     );
 }

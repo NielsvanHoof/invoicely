@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SharedData } from '@/types';
 import { StoreInvoiceData, UpdateInvoiceData } from '@/types/generated';
+import { Client } from '@/types/models';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, CalendarIcon, CreditCardIcon, FileTextIcon, MailIcon, MapPinIcon, UserIcon } from 'lucide-react';
 import React, { useState } from 'react';
@@ -20,6 +21,7 @@ interface InvoiceFormProps<T extends StoreInvoiceData | UpdateInvoiceData> {
     isEditing?: boolean;
     onDataChange: (key: keyof T, value: string | File | null) => void;
     onSubmit: (e: React.FormEvent) => void;
+    clients: Client[];
 }
 
 export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
@@ -29,6 +31,7 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
     isEditing = false,
     onDataChange,
     onSubmit,
+    clients,
 }: InvoiceFormProps<T>) {
     const [previewAmount, setPreviewAmount] = useState<string>(data.amount.toString() || '0.00');
     const { auth } = usePage<SharedData>().props;
@@ -42,6 +45,16 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
             setPreviewAmount(parseFloat(value).toFixed(2));
         } else {
             setPreviewAmount('0.00');
+        }
+    };
+
+    const handleClientChange = (clientId: string) => {
+        const selectedClient = clients.find(client => client.id.toString() === clientId);
+        if (selectedClient) {
+            onDataChange('client_id', clientId);
+            onDataChange('client_name', selectedClient.name);
+            onDataChange('client_email', selectedClient.email || '');
+            onDataChange('client_address', selectedClient.address || '');
         }
     };
 
@@ -140,25 +153,32 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
 
                                 <div className="border-sidebar-border/70 dark:border-sidebar-border border-t pt-6">
                                     <h3 className="mb-4 text-sm font-medium text-neutral-500">Client Information</h3>
-
                                     <div className="space-y-4">
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 w-full">
                                             <div className="flex items-center gap-2">
                                                 <UserIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                                <Label htmlFor="client_name">Client Name</Label>
+                                                <Label htmlFor="client_id">Select Client</Label>
                                             </div>
-                                            <Input
-                                                id="client_name"
-                                                value={data.client_name || ''}
-                                                onChange={(e) => onDataChange('client_name', e.target.value)}
-                                                placeholder="Client Name"
-                                                className={errors.client_name ? 'border-red-300' : ''}
-                                                aria-invalid={!!errors.client_name}
-                                                aria-describedby={errors.client_name ? 'client_name-error' : undefined}
-                                            />
-                                            {errors.client_name && (
-                                                <p id="client_name-error" className="text-sm text-red-600" role="alert">
-                                                    {errors.client_name}
+                                            <Select
+                                                value={data.client_id?.toString()}
+                                                onValueChange={handleClientChange}
+                                                aria-invalid={!!errors.client_id}
+                                                aria-describedby={errors.client_id ? 'client_id-error' : undefined}
+                                            >
+                                                <SelectTrigger className={`w-full ${errors.client_id ? 'border-red-300' : ''}`}>
+                                                    <SelectValue placeholder="Select a client" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {clients.map((client) => (
+                                                        <SelectItem key={client.id} value={client.id.toString()}>
+                                                            {client.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.client_id && (
+                                                <p id="client_id-error" className="text-sm text-red-600" role="alert">
+                                                    {errors.client_id}
                                                 </p>
                                             )}
                                         </div>

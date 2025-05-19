@@ -8,6 +8,7 @@ use Spatie\LaravelData\Attributes\Validation\AfterOrEqual;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Email;
 use Spatie\LaravelData\Attributes\Validation\Enum;
+use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\File;
 use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
@@ -34,6 +35,9 @@ class UpdateInvoiceData extends Data
 
         #[Max(255)]
         public string|Optional|null $client_address = null,
+
+        #[Exists(table: 'clients', column: 'id')]
+        public int|Optional|null $client_id = null,
 
         #[Min(0)]
         public float|Optional|null $amount = null,

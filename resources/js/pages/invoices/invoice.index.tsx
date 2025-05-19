@@ -1,13 +1,15 @@
-import { BulkActionsBar, FilterBar, InvoiceCard, InvoiceTable } from '@/components/invoices';
+import { BulkActionsBar, FilterBar, InvoiceCard } from '@/components/invoices';
+import { columns } from '@/components/invoices/columns';
+import { DataTable } from '@/components/invoices/data-table';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { SearchBar } from '@/components/ui/search-bar';
 import AppLayout from '@/layouts/app-layout';
 import { getActiveFilters } from '@/lib/utils';
-import { BreadcrumbItem, PaginatedData } from '@/types';
+import { BreadcrumbItem, PaginatedData, SharedData } from '@/types';
 import { Invoice } from '@/types/models';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowUpDown, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -43,14 +45,6 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort_fie
                 return prev.filter((i) => i.id !== invoice.id);
             }
         });
-    };
-
-    const handleSelectAll = (isSelected: boolean) => {
-        if (isSelected) {
-            setSelectedInvoices(invoices.data);
-        } else {
-            setSelectedInvoices([]);
-        }
     };
 
     const clearSelection = () => {
@@ -89,6 +83,10 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort_fie
     const isCustomSort = sort_field !== 'created_at' || sort_direction !== 'desc';
     const hasActiveFilters = Object.values(filters).some(Boolean);
     const showSearchAndFilters = invoices.total > 0 || search || hasActiveFilters || isCustomSort;
+
+    const { auth } = usePage<SharedData>().props;
+    const userCurrency = auth?.user?.currency || 'USD';
+    const tableColumns = columns(userCurrency);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -174,14 +172,14 @@ export default function InvoicesIndex({ invoices, search, filters = {}, sort_fie
                     <section aria-label="Invoice list">
                         {/* Desktop view - Table */}
                         <div className="hidden md:block">
-                            <InvoiceTable
-                                invoices={invoices.data}
-                                selectedInvoices={selectedInvoices}
-                                onSelectInvoice={handleSelectInvoice}
-                                onSelectAll={handleSelectAll}
+                            <DataTable
+                                columns={tableColumns}
+                                data={invoices.data}
+                                onSort={handleSort}
                                 sort_field={sort_field}
                                 sort_direction={sort_direction}
-                                onSort={handleSort}
+                                selectedInvoices={selectedInvoices}
+                                onSelectedInvoicesChange={setSelectedInvoices}
                             />
                         </div>
 

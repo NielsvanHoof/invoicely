@@ -84,6 +84,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the clients for the user.
+     *
+     * @return HasMany<Client, covariant User>
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    /**
      * Check if user is the owner of their team.
      */
     public function isTeamOwner(): bool

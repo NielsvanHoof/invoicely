@@ -20,6 +20,7 @@ class StoreClientData extends Data
         #[Unique(table: 'clients', column: 'company_name')]
         public string $company_name,
 
+        #[Max(255)]
         public string $phone,
 
         #[Max(255)]

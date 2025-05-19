@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Teams;
 
 use App\Models\Team;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class TransferUserInvoicesToTeam implements ShouldQueue
+class TransferClientsToTeamJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,8 +27,11 @@ class TransferUserInvoicesToTeam implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->user->invoices()
-            ->whereNull('team_id')
-            ->update(['team_id' => $this->team->id]);
+        $this->user->clients()
+            ->where('team_id', $this->team->id)
+            ->update([
+                'team_id' => $this->team->id,
+                'user_id' => null,
+            ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Invoices;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Invoice;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,6 +14,10 @@ class InvoiceCreateController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
-        return Inertia::render('invoices/invoice.create');
+        $clients = Client::query()->get();
+
+        return Inertia::render('invoices/invoice.create', [
+            'clients' => $clients,
+        ]);
     }
 }
