@@ -1,6 +1,6 @@
 // Components
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, Mail } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
@@ -10,54 +10,70 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
+type ForgotPasswordFormData = {
+    email: string;
+};
+
 export default function ForgotPassword({ status }: { status?: string }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<ForgotPasswordFormData>({
         email: '',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         post(route('password.email'));
     };
 
     return (
-        <AuthLayout title="Forgot password" description="Enter your email to receive a password reset link">
+        <AuthLayout title="Forgot your password?" description="No worries, we'll send you reset instructions">
             <Head title="Forgot password" />
 
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
+            {status && <div className="mb-6 rounded-lg bg-green-50 p-4 text-center text-sm font-medium text-green-600">{status}</div>}
 
-            <div className="space-y-6">
-                <form onSubmit={submit}>
+            <form className="flex flex-col gap-8" onSubmit={submit}>
+                <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            name="email"
-                            autoComplete="off"
-                            value={data.email}
-                            autoFocus
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
-                        />
-
+                        <Label htmlFor="email" className="text-base font-medium">
+                            Email address
+                        </Label>
+                        <div className="relative">
+                            <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                            <Input
+                                id="email"
+                                type="email"
+                                name="email"
+                                autoComplete="off"
+                                value={data.email}
+                                autoFocus
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="Enter your email address"
+                                className="pl-10"
+                            />
+                        </div>
                         <InputError message={errors.email} />
                     </div>
 
-                    <div className="my-6 flex items-center justify-start">
-                        <Button className="w-full" disabled={processing}>
-                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                            Email password reset link
-                        </Button>
-                    </div>
-                </form>
-
-                <div className="text-muted-foreground space-x-1 text-center text-sm">
-                    <span>Or, return to</span>
-                    <TextLink href={route('login')}>log in</TextLink>
+                    <Button type="submit" className="h-11 w-full text-base" disabled={processing}>
+                        {processing ? (
+                            <>
+                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                Sending reset link...
+                            </>
+                        ) : (
+                            'Send reset link'
+                        )}
+                    </Button>
                 </div>
-            </div>
+
+                <div className="text-center">
+                    <p className="text-muted-foreground text-sm">
+                        Remember your password?{' '}
+                        <TextLink href={route('login')} className="text-primary hover:text-primary/90 font-medium">
+                            Back to login
+                        </TextLink>
+                    </p>
+                </div>
+            </form>
         </AuthLayout>
     );
 }

@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { StoreClientData } from '@/types/generated';
 import { Head, Link, useForm } from '@inertiajs/react';
+import clsx from 'clsx';
 import { ArrowLeft, Building2, Mail, MapPin, Phone, User } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -56,7 +57,7 @@ export default function ClientCreate() {
                         <CardTitle className="text-xl">Client Information</CardTitle>
                         <CardDescription>Enter the details of your new client. Fields marked with * are required.</CardDescription>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <CardContent className="space-y-6 pt-6">
                             <div className="grid gap-6 sm:grid-cols-2">
                                 <div className="space-y-2">
@@ -70,9 +71,16 @@ export default function ClientCreate() {
                                         onChange={(e) => form.setData('name', e.target.value)}
                                         placeholder="John Doe"
                                         required
-                                        className="transition-all duration-200 focus:ring-2"
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.name}
+                                        aria-describedby={form.errors.name ? 'name-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.name && 'border-red-500')}
                                     />
-                                    {form.errors.name && <p className="text-destructive text-sm">{form.errors.name}</p>}
+                                    {form.errors.name && (
+                                        <p id="name-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -87,9 +95,16 @@ export default function ClientCreate() {
                                         onChange={(e) => form.setData('email', e.target.value)}
                                         placeholder="john@example.com"
                                         required
-                                        className="transition-all duration-200 focus:ring-2"
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.email}
+                                        aria-describedby={form.errors.email ? 'email-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.email && 'border-red-500')}
                                     />
-                                    {form.errors.email && <p className="text-destructive text-sm">{form.errors.email}</p>}
+                                    {form.errors.email && (
+                                        <p id="email-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.email}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -102,9 +117,17 @@ export default function ClientCreate() {
                                         value={form.data.company_name}
                                         onChange={(e) => form.setData('company_name', e.target.value)}
                                         placeholder="Acme Inc."
-                                        className="transition-all duration-200 focus:ring-2"
+                                        required
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.company_name}
+                                        aria-describedby={form.errors.company_name ? 'company_name-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.company_name && 'border-red-500')}
                                     />
-                                    {form.errors.company_name && <p className="text-destructive text-sm">{form.errors.company_name}</p>}
+                                    {form.errors.company_name && (
+                                        <p id="company_name-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.company_name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -118,9 +141,18 @@ export default function ClientCreate() {
                                         value={form.data.phone}
                                         onChange={(e) => form.setData('phone', e.target.value)}
                                         placeholder="+1 (555) 000-0000"
-                                        className="transition-all duration-200 focus:ring-2"
+                                        required
+                                        maxLength={255}
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.phone}
+                                        aria-describedby={form.errors.phone ? 'phone-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.phone && 'border-red-500')}
                                     />
-                                    {form.errors.phone && <p className="text-destructive text-sm">{form.errors.phone}</p>}
+                                    {form.errors.phone && (
+                                        <p id="phone-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.phone}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -134,9 +166,21 @@ export default function ClientCreate() {
                                     value={form.data.address}
                                     onChange={(e) => form.setData('address', e.target.value)}
                                     placeholder="123 Business St, City, State, ZIP"
-                                    className="min-h-[100px] transition-all duration-200 focus:ring-2"
+                                    required
+                                    maxLength={255}
+                                    aria-required="true"
+                                    aria-invalid={!!form.errors.address}
+                                    aria-describedby={form.errors.address ? 'address-error' : undefined}
+                                    className={clsx(
+                                        'min-h-[100px] transition-all duration-200 focus:ring-2',
+                                        form.errors.address && 'border-red-500',
+                                    )}
                                 />
-                                {form.errors.address && <p className="text-destructive text-sm">{form.errors.address}</p>}
+                                {form.errors.address && (
+                                    <p id="address-error" className="text-destructive text-sm" role="alert">
+                                        {form.errors.address}
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
 

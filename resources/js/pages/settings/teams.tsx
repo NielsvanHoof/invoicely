@@ -12,6 +12,7 @@ import { type BreadcrumbItem } from '@/types';
 import { CreateTeamData, TeamInvitationData, UpdateTeamData } from '@/types/generated';
 import { Team, User } from '@/types/models';
 import { Head, router, useForm } from '@inertiajs/react';
+import clsx from 'clsx';
 import { AlertCircle, Loader2, PlusIcon, TrashIcon, UserMinusIcon, UserPlusIcon } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -408,9 +409,15 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                             onChange={(e) => setCreateTeamData('name', e.target.value)}
                                             placeholder="Enter team name"
                                             disabled={creatingTeam || isSubmitting}
-                                            className={createTeamErrors.name ? 'border-destructive' : ''}
+                                            aria-invalid={!!createTeamErrors.name}
+                                            aria-describedby={createTeamErrors.name ? 'create-team-name-error' : undefined}
+                                            className={clsx('transition-all duration-200 focus:ring-2', createTeamErrors.name && 'border-red-500')}
                                         />
-                                        {createTeamErrors.name && <p className="text-destructive text-sm">{createTeamErrors.name}</p>}
+                                        {createTeamErrors.name && (
+                                            <p id="create-team-name-error" className="text-destructive text-sm" role="alert">
+                                                {createTeamErrors.name}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -419,12 +426,16 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                         type="button"
                                         variant="outline"
                                         onClick={() => setShowCreateDialog(false)}
-                                        className="w-full sm:w-auto"
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                         disabled={creatingTeam || isSubmitting}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={creatingTeam || isSubmitting} className="w-full sm:w-auto">
+                                    <Button
+                                        type="submit"
+                                        disabled={creatingTeam || isSubmitting}
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
+                                    >
                                         {(creatingTeam || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Create Team
                                     </Button>
@@ -462,9 +473,15 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                             onChange={(e) => setTeamData('name', e.target.value)}
                                             placeholder="Enter team name"
                                             disabled={updatingTeam || isSubmitting}
-                                            className={teamErrors.name ? 'border-destructive' : ''}
+                                            aria-invalid={!!teamErrors.name}
+                                            aria-describedby={teamErrors.name ? 'team-name-error' : undefined}
+                                            className={clsx('transition-all duration-200 focus:ring-2', teamErrors.name && 'border-red-500')}
                                         />
-                                        {teamErrors.name && <p className="text-destructive text-sm">{teamErrors.name}</p>}
+                                        {teamErrors.name && (
+                                            <p id="team-name-error" className="text-destructive text-sm" role="alert">
+                                                {teamErrors.name}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -473,12 +490,16 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                         type="button"
                                         variant="outline"
                                         onClick={() => setShowEditDialog(false)}
-                                        className="w-full sm:w-auto"
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                         disabled={updatingTeam || isSubmitting}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={updatingTeam || isSubmitting} className="w-full sm:w-auto">
+                                    <Button
+                                        type="submit"
+                                        disabled={updatingTeam || isSubmitting}
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
+                                    >
                                         {(updatingTeam || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Save Changes
                                     </Button>
@@ -514,9 +535,15 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                             onChange={(e) => setInviteData('name', e.target.value)}
                                             placeholder="Enter user's name"
                                             disabled={inviting || isSubmitting}
-                                            className={inviteErrors.name ? 'border-destructive' : ''}
+                                            aria-invalid={!!inviteErrors.name}
+                                            aria-describedby={inviteErrors.name ? 'invite-name-error' : undefined}
+                                            className={clsx('transition-all duration-200 focus:ring-2', inviteErrors.name && 'border-red-500')}
                                         />
-                                        {inviteErrors.name && <p className="text-destructive text-sm">{inviteErrors.name}</p>}
+                                        {inviteErrors.name && (
+                                            <p id="invite-name-error" className="text-destructive text-sm" role="alert">
+                                                {inviteErrors.name}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="grid gap-2">
@@ -528,9 +555,15 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                             onChange={(e) => setInviteData('email', e.target.value)}
                                             placeholder="Enter user's email"
                                             disabled={inviting || isSubmitting}
-                                            className={inviteErrors.email ? 'border-destructive' : ''}
+                                            aria-invalid={!!inviteErrors.email}
+                                            aria-describedby={inviteErrors.email ? 'invite-email-error' : undefined}
+                                            className={clsx('transition-all duration-200 focus:ring-2', inviteErrors.email && 'border-red-500')}
                                         />
-                                        {inviteErrors.email && <p className="text-destructive text-sm">{inviteErrors.email}</p>}
+                                        {inviteErrors.email && (
+                                            <p id="invite-email-error" className="text-destructive text-sm" role="alert">
+                                                {inviteErrors.email}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -539,12 +572,16 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                         type="button"
                                         variant="outline"
                                         onClick={() => setShowInviteDialog(false)}
-                                        className="w-full sm:w-auto"
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                         disabled={inviting || isSubmitting}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" disabled={inviting || isSubmitting} className="w-full sm:w-auto">
+                                    <Button
+                                        type="submit"
+                                        disabled={inviting || isSubmitting}
+                                        className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
+                                    >
                                         {(inviting || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Send Invitation
                                     </Button>
@@ -591,12 +628,17 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                         setUserToRemove(null);
                                         setUserToRemoveName('');
                                     }}
-                                    className="w-full sm:w-auto"
+                                    className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                     disabled={isSubmitting}
                                 >
                                     Cancel
                                 </Button>
-                                <Button variant="destructive" onClick={confirmRemoveUser} disabled={isSubmitting}>
+                                <Button
+                                    variant="destructive"
+                                    onClick={confirmRemoveUser}
+                                    disabled={isSubmitting}
+                                    className={clsx('transition-all duration-200')}
+                                >
                                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Remove User
                                 </Button>
@@ -632,12 +674,17 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                     type="button"
                                     variant="outline"
                                     onClick={() => setShowLeaveDialog(false)}
-                                    className="w-full sm:w-auto"
+                                    className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                     disabled={isSubmitting}
                                 >
                                     Cancel
                                 </Button>
-                                <Button variant="destructive" onClick={confirmLeaveTeam} disabled={isSubmitting}>
+                                <Button
+                                    variant="destructive"
+                                    onClick={confirmLeaveTeam}
+                                    disabled={isSubmitting}
+                                    className={clsx('transition-all duration-200')}
+                                >
                                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Leave Team
                                 </Button>
@@ -673,12 +720,17 @@ export default function Teams({ team, teamMembers, isTeamOwner, can }: TeamsProp
                                     type="button"
                                     variant="outline"
                                     onClick={() => setShowDeleteDialog(false)}
-                                    className="w-full sm:w-auto"
+                                    className={clsx('w-full sm:w-auto', 'transition-all duration-200')}
                                     disabled={isSubmitting}
                                 >
                                     Cancel
                                 </Button>
-                                <Button variant="destructive" onClick={confirmDeleteTeam} disabled={isSubmitting}>
+                                <Button
+                                    variant="destructive"
+                                    onClick={confirmDeleteTeam}
+                                    disabled={isSubmitting}
+                                    className={clsx('transition-all duration-200')}
+                                >
                                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Delete Team
                                 </Button>

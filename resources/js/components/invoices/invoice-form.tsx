@@ -11,6 +11,7 @@ import { SharedData } from '@/types';
 import { StoreInvoiceData, UpdateInvoiceData } from '@/types/generated';
 import { Client } from '@/types/models';
 import { Link, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import { ArrowLeftIcon, CalendarIcon, CreditCardIcon, FileTextIcon, MailIcon, MapPinIcon, UserIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -49,7 +50,7 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
     };
 
     const handleClientChange = (clientId: string) => {
-        const selectedClient = clients.find(client => client.id.toString() === clientId);
+        const selectedClient = clients.find((client) => client.id.toString() === clientId);
         if (selectedClient) {
             onDataChange('client_id', clientId);
             onDataChange('client_name', selectedClient.name);
@@ -107,16 +108,19 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                             <FileTextIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                            <Label htmlFor="invoice_number">Invoice Number</Label>
+                                            <Label htmlFor="invoice_number">
+                                                Invoice Number <span className="text-red-500">*</span>
+                                            </Label>
                                         </div>
                                         <Input
                                             id="invoice_number"
                                             value={data.invoice_number}
                                             onChange={(e) => onDataChange('invoice_number', e.target.value)}
                                             placeholder="INV-0001"
-                                            className={errors.invoice_number ? 'border-red-300' : ''}
+                                            className={clsx('transition-all duration-200 focus:ring-2', errors.invoice_number && 'border-red-300')}
                                             aria-invalid={!!errors.invoice_number}
                                             aria-describedby={errors.invoice_number ? 'invoice_number-error' : undefined}
+                                            aria-required="true"
                                         />
                                         {errors.invoice_number && (
                                             <p id="invoice_number-error" className="text-sm text-red-600" role="alert">
@@ -126,14 +130,19 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
+                                        <Label htmlFor="status">
+                                            Status <span className="text-red-500">*</span>
+                                        </Label>
                                         <Select
                                             defaultValue={data.status}
                                             onValueChange={(value) => onDataChange('status', value)}
                                             aria-invalid={!!errors.status}
                                             aria-describedby={errors.status ? 'status-error' : undefined}
+                                            aria-required="true"
                                         >
-                                            <SelectTrigger className={errors.status ? 'border-red-300' : ''}>
+                                            <SelectTrigger
+                                                className={clsx('transition-all duration-200 focus:ring-2', errors.status && 'border-red-300')}
+                                            >
                                                 <SelectValue placeholder="Select status" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -154,18 +163,26 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                 <div className="border-sidebar-border/70 dark:border-sidebar-border border-t pt-6">
                                     <h3 className="mb-4 text-sm font-medium text-neutral-500">Client Information</h3>
                                     <div className="space-y-4">
-                                        <div className="space-y-2 w-full">
+                                        <div className="w-full space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <UserIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                                <Label htmlFor="client_id">Select Client</Label>
+                                                <Label htmlFor="client_id">
+                                                    Select Client <span className="text-red-500">*</span>
+                                                </Label>
                                             </div>
                                             <Select
                                                 value={data.client_id?.toString()}
                                                 onValueChange={handleClientChange}
                                                 aria-invalid={!!errors.client_id}
                                                 aria-describedby={errors.client_id ? 'client_id-error' : undefined}
+                                                aria-required="true"
                                             >
-                                                <SelectTrigger className={`w-full ${errors.client_id ? 'border-red-300' : ''}`}>
+                                                <SelectTrigger
+                                                    className={clsx(
+                                                        'w-full transition-all duration-200 focus:ring-2',
+                                                        errors.client_id && 'border-red-300',
+                                                    )}
+                                                >
                                                     <SelectValue placeholder="Select a client" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -195,7 +212,10 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                                     value={data.client_email || ''}
                                                     onChange={(e) => onDataChange('client_email', e.target.value)}
                                                     placeholder="client@example.com"
-                                                    className={errors.client_email ? 'border-red-300' : ''}
+                                                    className={clsx(
+                                                        'transition-all duration-200 focus:ring-2',
+                                                        errors.client_email && 'border-red-300',
+                                                    )}
                                                     aria-invalid={!!errors.client_email}
                                                     aria-describedby={errors.client_email ? 'client_email-error' : undefined}
                                                 />
@@ -209,7 +229,9 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-2">
                                                     <CreditCardIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                                    <Label htmlFor="amount">Amount</Label>
+                                                    <Label htmlFor="amount">
+                                                        Amount <span className="text-red-500">*</span>
+                                                    </Label>
                                                 </div>
                                                 <Input
                                                     id="amount"
@@ -219,9 +241,10 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                                     value={data.amount}
                                                     onChange={handleAmountChange}
                                                     placeholder="0.00"
-                                                    className={errors.amount ? 'border-red-300' : ''}
+                                                    className={clsx('transition-all duration-200 focus:ring-2', errors.amount && 'border-red-300')}
                                                     aria-invalid={!!errors.amount}
                                                     aria-describedby={errors.amount ? 'amount-error' : undefined}
+                                                    aria-required="true"
                                                 />
                                                 {errors.amount && (
                                                     <p id="amount-error" className="text-sm text-red-600" role="alert">
@@ -242,7 +265,10 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                                 onChange={(e) => onDataChange('client_address', e.target.value)}
                                                 placeholder="Client Address"
                                                 rows={3}
-                                                className={errors.client_address ? 'border-red-300' : ''}
+                                                className={clsx(
+                                                    'transition-all duration-200 focus:ring-2',
+                                                    errors.client_address && 'border-red-300',
+                                                )}
                                                 aria-invalid={!!errors.client_address}
                                                 aria-describedby={errors.client_address ? 'client_address-error' : undefined}
                                             />
@@ -262,16 +288,19 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <CalendarIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                                <Label htmlFor="issue_date">Issue Date</Label>
+                                                <Label htmlFor="issue_date">
+                                                    Issue Date <span className="text-red-500">*</span>
+                                                </Label>
                                             </div>
                                             <Input
                                                 id="issue_date"
                                                 type="date"
                                                 value={data.issue_date}
                                                 onChange={(e) => onDataChange('issue_date', e.target.value)}
-                                                className={errors.issue_date ? 'border-red-300' : ''}
+                                                className={clsx('transition-all duration-200 focus:ring-2', errors.issue_date && 'border-red-300')}
                                                 aria-invalid={!!errors.issue_date}
                                                 aria-describedby={errors.issue_date ? 'issue_date-error' : undefined}
+                                                aria-required="true"
                                             />
                                             {errors.issue_date && (
                                                 <p id="issue_date-error" className="text-sm text-red-600" role="alert">
@@ -283,16 +312,19 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <CalendarIcon className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-                                                <Label htmlFor="due_date">Due Date</Label>
+                                                <Label htmlFor="due_date">
+                                                    Due Date <span className="text-red-500">*</span>
+                                                </Label>
                                             </div>
                                             <Input
                                                 id="due_date"
                                                 type="date"
                                                 value={data.due_date}
                                                 onChange={(e) => onDataChange('due_date', e.target.value)}
-                                                className={errors.due_date ? 'border-red-300' : ''}
+                                                className={clsx('transition-all duration-200 focus:ring-2', errors.due_date && 'border-red-300')}
                                                 aria-invalid={!!errors.due_date}
                                                 aria-describedby={errors.due_date ? 'due_date-error' : undefined}
+                                                aria-required="true"
                                             />
                                             {errors.due_date && (
                                                 <p id="due_date-error" className="text-sm text-red-600" role="alert">
@@ -315,7 +347,7 @@ export function InvoiceForm<T extends StoreInvoiceData | UpdateInvoiceData>({
                                                 onChange={(e) => onDataChange('notes', e.target.value)}
                                                 placeholder="Additional notes..."
                                                 rows={3}
-                                                className={errors.notes ? 'border-red-300' : ''}
+                                                className={clsx('transition-all duration-200 focus:ring-2', errors.notes && 'border-red-300')}
                                                 aria-invalid={!!errors.notes}
                                                 aria-describedby={errors.notes ? 'notes-error' : undefined}
                                             />

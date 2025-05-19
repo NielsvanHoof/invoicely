@@ -14,7 +14,7 @@ class StoreClientData extends Data
     public function __construct(
         public string $name,
 
-        #[Email]
+        #[Email, Unique(table: 'clients', column: 'email')]
         public string $email,
 
         #[Unique(table: 'clients', column: 'company_name')]

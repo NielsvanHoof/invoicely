@@ -51,11 +51,11 @@ export default function CreateInvoice({ clients }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Invoice" />
-            <InvoiceForm 
-                data={data} 
-                errors={errors} 
-                processing={processing} 
-                onDataChange={handleDataChange} 
+            <InvoiceForm
+                data={data}
+                errors={errors}
+                processing={processing}
+                onDataChange={handleDataChange}
                 onSubmit={handleSubmit}
                 clients={clients}
             />

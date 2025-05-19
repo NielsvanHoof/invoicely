@@ -2,14 +2,15 @@ import { InvoiceForm } from '@/components/invoices';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { UpdateInvoiceData } from '@/types/generated';
-import { Invoice } from '@/types/models';
+import { Client, Invoice } from '@/types/models';
 import { Head, useForm } from '@inertiajs/react';
 
 interface EditInvoiceProps {
     invoice: Invoice;
+    clients: Client[];
 }
 
-export default function EditInvoice({ invoice }: EditInvoiceProps) {
+export default function EditInvoice({ invoice, clients }: EditInvoiceProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Invoices',
@@ -27,6 +28,7 @@ export default function EditInvoice({ invoice }: EditInvoiceProps) {
 
     const { data, setData, put, processing, errors } = useForm<UpdateInvoiceData>({
         invoice_number: invoice.invoice_number,
+        client_id: invoice.client_id,
         client_name: invoice.client_name,
         client_email: invoice.client_email || '',
         client_address: invoice.client_address || '',
@@ -58,6 +60,7 @@ export default function EditInvoice({ invoice }: EditInvoiceProps) {
                 isEditing={true}
                 onDataChange={handleDataChange}
                 onSubmit={handleSubmit}
+                clients={clients}
             />
         </AppLayout>
     );

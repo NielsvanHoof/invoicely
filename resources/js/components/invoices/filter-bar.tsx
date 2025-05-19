@@ -3,9 +3,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getActiveFilters } from '@/lib/utils';
 import { router, usePage } from '@inertiajs/react';
-import { Label } from '@radix-ui/react-dropdown-menu';
 import { FilterIcon, TrashIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Label } from '../ui/label';
 
 interface FilterBarProps {
     filters: {
@@ -63,7 +63,9 @@ export function FilterBar({ filters }: FilterBarProps) {
                 }}
             >
                 <div className="flex flex-col gap-1">
-                    <Label className="text-sm font-medium">Status</Label>
+                    <Label htmlFor="status-filter" className="text-sm font-medium">
+                        Status
+                    </Label>
                     <Select
                         value={localFilters.status || 'all'}
                         onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}
@@ -83,7 +85,9 @@ export function FilterBar({ filters }: FilterBarProps) {
                     </Select>
                 </div>
                 <div className="flex flex-col gap-1">
-                    <Label className="text-sm font-medium">Date From</Label>
+                    <Label htmlFor="date-from" className="text-sm font-medium">
+                        Date From
+                    </Label>
                     <Input
                         id="date-from"
                         type="date"
@@ -94,7 +98,9 @@ export function FilterBar({ filters }: FilterBarProps) {
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <Label className="text-sm font-medium">Date To</Label>
+                    <Label htmlFor="date-to" className="text-sm font-medium">
+                        Date To
+                    </Label>
                     <Input
                         id="date-to"
                         type="date"
@@ -105,7 +111,9 @@ export function FilterBar({ filters }: FilterBarProps) {
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <Label className="text-sm font-medium">Amount From</Label>
+                    <Label htmlFor="amount-from" className="text-sm font-medium">
+                        Amount From
+                    </Label>
                     <Input
                         id="amount-from"
                         type="number"
@@ -117,7 +125,9 @@ export function FilterBar({ filters }: FilterBarProps) {
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <Label className="text-sm font-medium">Amount To</Label>
+                    <Label htmlFor="amount-to" className="text-sm font-medium">
+                        Amount To
+                    </Label>
                     <Input
                         id="amount-to"
                         type="number"

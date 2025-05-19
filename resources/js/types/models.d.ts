@@ -13,6 +13,7 @@ export interface Invoice {
     id: number;
     user_id: number;
     invoice_number: string;
+    client_id: number;
     client_name: string;
     client_email: string | null;
     client_address: string | null;

@@ -8,6 +8,7 @@ import { BreadcrumbItem } from '@/types';
 import { UpdateClientData } from '@/types/generated';
 import { Client } from '@/types/models';
 import { Head, Link, useForm } from '@inertiajs/react';
+import clsx from 'clsx';
 import { ArrowLeft, Mail, MapPin, Phone, User } from 'lucide-react';
 
 // Define the props interface for the component
@@ -61,7 +62,7 @@ export default function ClientEdit({ client }: ClientEditProps) {
                         <CardTitle className="text-xl">Client Information</CardTitle>
                         <CardDescription>Update the details of your client. Fields marked with * are required.</CardDescription>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <CardContent className="space-y-6 pt-6">
                             <div className="grid gap-6 sm:grid-cols-2">
                                 <div className="space-y-2">
@@ -75,9 +76,16 @@ export default function ClientEdit({ client }: ClientEditProps) {
                                         onChange={(e) => form.setData('name', e.target.value)}
                                         placeholder="John Doe"
                                         required
-                                        className="transition-all duration-200 focus:ring-2"
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.name}
+                                        aria-describedby={form.errors.name ? 'name-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.name && 'border-red-500')}
                                     />
-                                    {form.errors.name && <p className="text-destructive text-sm">{form.errors.name}</p>}
+                                    {form.errors.name && (
+                                        <p id="name-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -92,9 +100,16 @@ export default function ClientEdit({ client }: ClientEditProps) {
                                         onChange={(e) => form.setData('email', e.target.value)}
                                         placeholder="john@example.com"
                                         required
-                                        className="transition-all duration-200 focus:ring-2"
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.email}
+                                        aria-describedby={form.errors.email ? 'email-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.email && 'border-red-500')}
                                     />
-                                    {form.errors.email && <p className="text-destructive text-sm">{form.errors.email}</p>}
+                                    {form.errors.email && (
+                                        <p id="email-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.email}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -108,9 +123,18 @@ export default function ClientEdit({ client }: ClientEditProps) {
                                         value={form.data.phone ?? ''}
                                         onChange={(e) => form.setData('phone', e.target.value)}
                                         placeholder="+1 (555) 000-0000"
-                                        className="transition-all duration-200 focus:ring-2"
+                                        required
+                                        maxLength={255}
+                                        aria-required="true"
+                                        aria-invalid={!!form.errors.phone}
+                                        aria-describedby={form.errors.phone ? 'phone-error' : undefined}
+                                        className={clsx('transition-all duration-200 focus:ring-2', form.errors.phone && 'border-red-500')}
                                     />
-                                    {form.errors.phone && <p className="text-destructive text-sm">{form.errors.phone}</p>}
+                                    {form.errors.phone && (
+                                        <p id="phone-error" className="text-destructive text-sm" role="alert">
+                                            {form.errors.phone}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -124,17 +148,29 @@ export default function ClientEdit({ client }: ClientEditProps) {
                                     value={form.data.address ?? ''}
                                     onChange={(e) => form.setData('address', e.target.value)}
                                     placeholder="123 Business St, City, State, ZIP"
-                                    className="min-h-[100px] transition-all duration-200 focus:ring-2"
+                                    required
+                                    maxLength={255}
+                                    aria-required="true"
+                                    aria-invalid={!!form.errors.address}
+                                    aria-describedby={form.errors.address ? 'address-error' : undefined}
+                                    className={clsx(
+                                        'min-h-[100px] transition-all duration-200 focus:ring-2',
+                                        form.errors.address && 'border-red-500',
+                                    )}
                                 />
-                                {form.errors.address && <p className="text-destructive text-sm">{form.errors.address}</p>}
+                                {form.errors.address && (
+                                    <p id="address-error" className="text-destructive text-sm" role="alert">
+                                        {form.errors.address}
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
 
                         <CardFooter className="flex justify-end gap-4 border-t pt-6">
-                            <Button type="button" variant="outline" asChild className="hover:bg-muted transition-all duration-200">
+                            <Button type="button" variant="outline" asChild className={clsx('hover:bg-muted transition-all duration-200')}>
                                 <Link href={route('clients.index')}>Cancel</Link>
                             </Button>
-                            <Button type="submit" disabled={form.processing} className="transition-all duration-200 hover:shadow-md">
+                            <Button type="submit" disabled={form.processing} className={clsx('transition-all duration-200 hover:shadow-md')}>
                                 {form.processing ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </CardFooter>

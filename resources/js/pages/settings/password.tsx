@@ -1,9 +1,9 @@
-import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
+import clsx from 'clsx';
 import { FormEventHandler, useRef } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
@@ -56,7 +56,7 @@ export default function Password() {
                 <div className="space-y-6">
                     <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
 
-                    <form onSubmit={updatePassword} className="space-y-6">
+                    <form onSubmit={updatePassword} className="space-y-6" noValidate>
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">Current password</Label>
 
@@ -66,12 +66,18 @@ export default function Password() {
                                 value={data.current_password}
                                 onChange={(e) => setData('current_password', e.target.value)}
                                 type="password"
-                                className="mt-1 block w-full"
+                                className={clsx('transition-all duration-200 focus:ring-2', errors.current_password && 'border-red-500')}
                                 autoComplete="current-password"
                                 placeholder="Current password"
+                                aria-invalid={!!errors.current_password}
+                                aria-describedby={errors.current_password ? 'current-password-error' : undefined}
                             />
 
-                            <InputError message={errors.current_password} />
+                            {errors.current_password && (
+                                <p id="current-password-error" className="text-destructive text-sm" role="alert">
+                                    {errors.current_password}
+                                </p>
+                            )}
                         </div>
 
                         <div className="grid gap-2">
@@ -83,12 +89,18 @@ export default function Password() {
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                                 type="password"
-                                className="mt-1 block w-full"
+                                className={clsx('transition-all duration-200 focus:ring-2', errors.password && 'border-red-500')}
                                 autoComplete="new-password"
                                 placeholder="New password"
+                                aria-invalid={!!errors.password}
+                                aria-describedby={errors.password ? 'password-error' : undefined}
                             />
 
-                            <InputError message={errors.password} />
+                            {errors.password && (
+                                <p id="password-error" className="text-destructive text-sm" role="alert">
+                                    {errors.password}
+                                </p>
+                            )}
                         </div>
 
                         <div className="grid gap-2">
@@ -99,16 +111,24 @@ export default function Password() {
                                 value={data.password_confirmation}
                                 onChange={(e) => setData('password_confirmation', e.target.value)}
                                 type="password"
-                                className="mt-1 block w-full"
+                                className={clsx('transition-all duration-200 focus:ring-2', errors.password_confirmation && 'border-red-500')}
                                 autoComplete="new-password"
                                 placeholder="Confirm password"
+                                aria-invalid={!!errors.password_confirmation}
+                                aria-describedby={errors.password_confirmation ? 'password-confirmation-error' : undefined}
                             />
 
-                            <InputError message={errors.password_confirmation} />
+                            {errors.password_confirmation && (
+                                <p id="password-confirmation-error" className="text-destructive text-sm" role="alert">
+                                    {errors.password_confirmation}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save password</Button>
+                            <Button disabled={processing} className={clsx('transition-all duration-200')}>
+                                {processing ? 'Saving...' : 'Save password'}
+                            </Button>
 
                             <Transition
                                 show={recentlySuccessful}
