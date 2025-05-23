@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Invoice as InvoiceModel } from '@/types/models';
 import { Link } from '@inertiajs/react';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, Row, Table } from '@tanstack/react-table';
 import { BellIcon, CircleEllipsisIcon, EyeIcon, FileEditIcon, FileText, MoreHorizontalIcon, PaperclipIcon, TrashIcon } from 'lucide-react';
 import React from 'react';
 
@@ -69,45 +69,55 @@ function InvoiceNumberCell({ invoice }: { invoice: Invoice }) {
     );
 }
 
+// Component for the select all checkbox in the table header
+function SelectAllHeader({ table }: { table: Table<InvoiceColumn> }) {
+    const ref = React.useRef<HTMLButtonElement>(null);
+    React.useEffect(() => {
+        if (ref.current) {
+            const input = ref.current.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
+            // Set indeterminate state for the checkbox
+            if (input) input.indeterminate = table.getIsSomePageRowsSelected();
+        }
+    }, [table, table.getIsSomePageRowsSelected]); // Added table to dependency array
+
+    return (
+        <Checkbox
+            ref={ref}
+            checked={table.getIsAllPageRowsSelected()}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+        />
+    );
+}
+
+// Component for the select row checkbox in the table cell
+function SelectRowCell({ row }: { row: Row<InvoiceColumn> }) {
+    const ref = React.useRef<HTMLButtonElement>(null);
+    React.useEffect(() => {
+        if (ref.current) {
+            const input = ref.current.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
+            // Set indeterminate state for the checkbox
+            if (input) input.indeterminate = row.getIsSomeSelected();
+        }
+    }, [row, row.getIsSomeSelected]); // Added row to dependency array
+
+    return (
+        <Checkbox
+            ref={ref}
+            checked={row.getIsSelected()}
+            onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+            aria-label={`Select invoice ${(row.original as Invoice).invoice_number}`}
+        />
+    );
+}
+
 export function columns(userCurrency: string): ColumnDef<InvoiceColumn>[] {
     return [
         {
             id: 'select',
             /** Checkbox for selecting all/individual invoices */
-            header: ({ table }) => {
-                const ref = React.useRef<HTMLButtonElement>(null);
-                React.useEffect(() => {
-                    if (ref.current) {
-                        const input = ref.current.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
-                        if (input) input.indeterminate = table.getIsSomePageRowsSelected();
-                    }
-                }, [table.getIsSomePageRowsSelected()]);
-                return (
-                    <Checkbox
-                        ref={ref}
-                        checked={table.getIsAllPageRowsSelected()}
-                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                        aria-label="Select all"
-                    />
-                );
-            },
-            cell: ({ row }) => {
-                const ref = React.useRef<HTMLButtonElement>(null);
-                React.useEffect(() => {
-                    if (ref.current) {
-                        const input = ref.current.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
-                        if (input) input.indeterminate = row.getIsSomeSelected();
-                    }
-                }, [row.getIsSomeSelected()]);
-                return (
-                    <Checkbox
-                        ref={ref}
-                        checked={row.getIsSelected()}
-                        onCheckedChange={(checked) => row.toggleSelected(!!checked)}
-                        aria-label={`Select invoice ${(row.original as Invoice).invoice_number}`}
-                    />
-                );
-            },
+            header: ({ table }) => <SelectAllHeader table={table} />,
+            cell: ({ row }) => <SelectRowCell row={row} />,
             enableSorting: false,
             enableHiding: false,
         },
