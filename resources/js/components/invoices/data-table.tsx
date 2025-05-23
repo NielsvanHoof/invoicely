@@ -1,18 +1,18 @@
 'use client';
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
     getSortedRowModel,
-    SortingState,
     Header,
     RowSelectionState,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Invoice, InvoiceColumn } from './columns';
 
 /**
