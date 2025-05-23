@@ -15,8 +15,8 @@ class TransferInvoicesToUserJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        private User $user,
-        private Team $team,
+        public User $user,
+        public Team $team,
     ) {}
 
     /**

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Controllers\Invoices;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Client;
 use App\Models\Team;
 use App\Models\User;
 use App\Policies\InvoicePolicy;
@@ -22,14 +23,13 @@ test('A user can create an invoice', function () {
     });
 
     $team = Team::factory()->create();
+    $client = Client::factory()->create();
     $this->user->team()->associate($team);
     $this->user->save();
 
     $data = [
         'invoice_number' => 'INV-123',
-        'client_name' => 'John Doe',
-        'client_email' => 'john@doe.com',
-        'client_address' => '123 Main St, Anytown, USA',
+        'client_id' => $client->id,
         'amount' => 100,
         'issue_date' => '2021-01-01',
         'due_date' => '2021-01-15',
@@ -53,14 +53,13 @@ test('A user can create an invoice with a file', function () {
     });
 
     $team = Team::factory()->create();
+    $client = Client::factory()->create();
     $this->user->team()->associate($team);
     $this->user->save();
 
     $data = [
         'invoice_number' => 'INV-123',
-        'client_name' => 'John Doe',
-        'client_email' => 'john@doe.com',
-        'client_address' => '123 Main St, Anytown, USA',
+        'client_id' => $client->id,
         'amount' => 100,
         'issue_date' => '2021-01-01',
         'due_date' => '2021-01-15',

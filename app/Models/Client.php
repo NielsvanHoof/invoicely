@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Scopes\ClientByTeamOrUserScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,7 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 #[ScopedBy(ClientByTeamOrUserScope::class)]
 class Client extends Authenticatable
 {
-    use HasRoles, Notifiable;
+    /** @use HasFactory<\Database\Factories\ClientFactory> */
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.

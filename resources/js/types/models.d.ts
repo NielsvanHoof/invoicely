@@ -7,6 +7,12 @@ export interface User {
     currency: string;
     created_at: string;
     updated_at: string;
+    roles?: Role[];
+}
+
+export interface Role {
+    id: number;
+    name: string;
 }
 
 export interface Invoice {

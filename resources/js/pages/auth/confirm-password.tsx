@@ -1,6 +1,6 @@
 // Components
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, Lock } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
@@ -29,30 +29,39 @@ export default function ConfirmPassword() {
         >
             <Head title="Confirm password" />
 
-            <form onSubmit={submit}>
-                <div className="space-y-6">
+            <form className="flex flex-col gap-8" onSubmit={submit}>
+                <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            name="password"
-                            placeholder="Password"
-                            autoComplete="current-password"
-                            value={data.password}
-                            autoFocus
-                            onChange={(e) => setData('password', e.target.value)}
-                        />
-
+                        <Label htmlFor="password" className="text-base font-medium">
+                            Password
+                        </Label>
+                        <div className="relative">
+                            <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                            <Input
+                                id="password"
+                                type="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autoComplete="current-password"
+                                value={data.password}
+                                autoFocus
+                                className="pl-10"
+                                onChange={(e) => setData('password', e.target.value)}
+                            />
+                        </div>
                         <InputError message={errors.password} />
                     </div>
 
-                    <div className="flex items-center">
-                        <Button className="w-full" disabled={processing}>
-                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                            Confirm password
-                        </Button>
-                    </div>
+                    <Button type="submit" className="h-11 w-full text-base" disabled={processing}>
+                        {processing ? (
+                            <>
+                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                Confirming...
+                            </>
+                        ) : (
+                            'Confirm password'
+                        )}
+                    </Button>
                 </div>
             </form>
         </AuthLayout>

@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         url: route('clients.index'),
         icon: Users,
     },
+    {
+        title: 'Users',
+        url: route('users.index'),
+        icon: Users,
+    },
 ];
 
 export function AppSidebar() {

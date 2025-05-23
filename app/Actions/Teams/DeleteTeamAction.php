@@ -5,6 +5,7 @@ namespace App\Actions\Teams;
 use App\Jobs\Teams\TransferClientsToUserJob;
 use App\Jobs\Teams\TransferInvoicesToUserJob;
 use App\Models\Team;
+use Illuminate\Support\Facades\Auth;
 
 class DeleteTeamAction
 {
@@ -23,9 +24,10 @@ class DeleteTeamAction
             $member->save();
         }
 
-        // Delete the team
-        TransferClientsToUserJob::dispatch($team->owner, $team);
-        TransferInvoicesToUserJob::dispatch($team->owner, $team);
+        $user = Auth::user();
+
+        TransferClientsToUserJob::dispatch($user, $team);
+        TransferInvoicesToUserJob::dispatch($user, $team);
 
         return $team->delete();
     }

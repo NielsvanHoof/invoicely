@@ -3,9 +3,12 @@
 namespace Tests\Feature\Controllers\Teams;
 
 use App\Actions\Teams\DeleteTeamAction;
+use App\Jobs\Teams\TransferClientsToUserJob;
+use App\Jobs\Teams\TransferInvoicesToUserJob;
 use App\Models\Team;
 use App\Models\User;
 use App\Policies\TeamPolicy;
+use Illuminate\Support\Facades\Queue;
 use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
@@ -17,8 +20,11 @@ test('it can delete team', function () {
     });
 
     // Arrange
+    Queue::fake();
+
     $user = User::factory()->create();
     $team = Team::factory()->create(['owner_id' => $user->id]);
+    $originalOwner = $team->owner;
     $user->team()->associate($team);
     $user->save();
 
@@ -31,6 +37,13 @@ test('it can delete team', function () {
     $response->assertSessionHas('success', 'Team deleted successfully.');
 
     $this->assertDatabaseMissing('teams', ['id' => $team->id]);
+
+    Queue::assertPushed(TransferClientsToUserJob::class, function (TransferClientsToUserJob $job) use ($originalOwner, $team) {
+        return $job->user->is($originalOwner) && $job->team->is($team);
+    });
+    Queue::assertPushed(TransferInvoicesToUserJob::class, function (TransferInvoicesToUserJob $job) use ($originalOwner, $team) {
+        return $job->user->is($originalOwner) && $job->team->is($team);
+    });
 });
 
 test('it handles errors gracefully', function () {
